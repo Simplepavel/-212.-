@@ -5,6 +5,8 @@
 #include <QSizePolicy>
 #include <QDebug>
 #include <QStackedLayout>
+#include <QApplication>
+
 class Window : public QWidget
 {
 private:
@@ -32,16 +34,15 @@ private:
     // Главное меню
 
     // Регистрация
-     QWidget *reg_Widget;
-     QVBoxLayout *reg_Layout;
+    QWidget *reg_Widget;
+    QVBoxLayout *reg_Layout;
 
-
-     QLineEdit *reg_Username;
-     QLineEdit *reg_Email;
-     QLineEdit *reg_Password;
-     QLineEdit *reg_ConfirmPassword;
-     QPushButton *reg_SubmitBttn;
-     QPushButton* reg_BackBttn;
+    QLineEdit *reg_Username;
+    QLineEdit *reg_Email;
+    QLineEdit *reg_Password;
+    QLineEdit *reg_ConfirmPassword;
+    QPushButton *reg_SubmitBttn;
+    QPushButton *reg_BackBttn;
     // Регистрация
 
 public:
@@ -50,4 +51,12 @@ public:
     void main();
     void connect();
     void registration();
+
+    // Констатнтный доступ к элементам формы регистрации
+    const QLineEdit &get_reg_Username() { return *reg_Username; }
+    const QLineEdit &get_reg_Email() { return *reg_Email; }
+    const QLineEdit &get_reg_Password() { return *reg_Password; }
+    const QLineEdit &get_reg_ConfirmPassword() { return *reg_ConfirmPassword; }
+    const QPushButton &get_reg_SubmitBttn() { return *reg_SubmitBttn; } // Чтобы привязать к ней действие
+    // Констатнтный доступ к элементам формы регистрации
 };

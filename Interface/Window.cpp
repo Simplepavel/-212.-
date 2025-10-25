@@ -135,3 +135,5 @@ void Window::connect()
     QObject::connect(login_RegBttn, &QPushButton::clicked, this, registration);
     QObject::connect(reg_BackBttn, &QPushButton::clicked, this, login);
 }
+
+

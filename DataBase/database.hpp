@@ -1,7 +1,6 @@
-#include <QString>
 #include <pqxx/pqxx>
 #include <iostream>
+#include <string>
 
-pqxx::connection *make_session(const QString &);
+pqxx::connection *make_session(const std::string &);
 bool delete_session(pqxx::connection *);
-bool execute(pqxx::connection *cx, const QString &query, pqxx::result &r);
