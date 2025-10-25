@@ -1,5 +1,6 @@
 #include "database.hpp"
 
+
 pqxx::connection *make_session(const QString &url)
 {
     pqxx::connection *cx = nullptr;
