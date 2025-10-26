@@ -1,7 +1,8 @@
 #include "DataBase/database.hpp"
 #include "Interface/Window.hpp"
-#include "string"
-
+#include "CurrentUser/CurrentUser.hpp"
+#include <string>
+#include <iostream>
 
 class DurakOnline : public QObject
 {
@@ -9,9 +10,12 @@ class DurakOnline : public QObject
 private:
     QApplication app;
     Window window;
+    CurrentUser current_user;
     void connect();
 private slots:
     bool registration();
+    bool login();
+    void logout();
 
 public:
     DurakOnline(int argc, char *argv[]);

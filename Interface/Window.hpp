@@ -59,4 +59,19 @@ public:
     const QLineEdit &get_reg_ConfirmPassword() { return *reg_ConfirmPassword; }
     const QPushButton &get_reg_SubmitBttn() { return *reg_SubmitBttn; } // Чтобы привязать к ней действие
     // Констатнтный доступ к элементам формы регистрации
+
+
+    // Константный доступ к элементам форма входа
+    const QLineEdit& get_login_Email() {return *login_Email;}
+    const QLineEdit& get_login_Password() { return *login_Password;}
+    const QPushButton& get_login_LoginBttn() { return *login_LoginBttn;}
+    // Константный доступ к элементам форма входа
+
+    // Константный доступ к элементам формы главного окна
+    const QLineEdit& get_main_SearchRoom(){return *main_SearchRoom;}
+    const QPushButton& get_main_FindRoomBttn(){return *main_FindRoomBttn;}
+    const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
+    const QPushButton& get_main_LogoutBttn(){return *main_LogoutBttn;}
+    // Константный доступ к элементам формы главного окна
 };
+

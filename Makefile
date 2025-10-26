@@ -11,8 +11,12 @@ all: moc
 	cd Interface && make && cd ..
 
 	cd DataBase && make && cd ..
+
+	cd CurrentUser && make && cd ..
 	
-	g++ main.cpp DurakOnline.cpp moc_DurakOnline.cpp interface.o database.o $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
+	g++ main.cpp DurakOnline.cpp moc_DurakOnline.cpp interface.o database.o currentuser.o $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
+
+	rm *.o -f
 
 
 moc:

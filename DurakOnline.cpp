@@ -29,9 +29,41 @@ bool DurakOnline::registration()
     return true;
 }
 
+bool DurakOnline::login()
+{
+    std::string email = window.get_login_Email().text().toStdString();
+    std::string password = window.get_login_Password().text().toStdString();
+    // Валидация
+    pqxx::connection *session = make_session(url_base);
+    pqxx::work tx(*session);
+    pqxx::result r = tx.exec("select id, username, email from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
+    if (!r.empty())
+    {
+        pqxx::row user = r[0];
+        CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>());
+        current_user = std::move(NewUser);
+        window.main();
+    }
+    else
+    {
+        std::cout << "Anavaliable email or password\n";
+        return false;
+    }
+    return true;
+}
+
+void DurakOnline::logout()
+{
+    current_user.to_null();
+    std::cout << "hello!\n";
+    window.login();
+}
+
 void DurakOnline::connect()
 {
     QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
+    QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
+    QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
 }
 
 int DurakOnline::start()

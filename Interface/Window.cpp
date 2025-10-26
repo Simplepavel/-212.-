@@ -129,8 +129,8 @@ void Window::registration()
 
 void Window::connect()
 {
-    QObject::connect(login_LoginBttn, &QPushButton::clicked, this, main);
-    QObject::connect(main_LogoutBttn, &QPushButton::clicked, this, login);
+    // QObject::connect(login_LoginBttn, &QPushButton::clicked, this, main);
+    // QObject::connect(main_LogoutBttn, &QPushButton::clicked, this, login);
     QObject::connect(login_RegBttn, &QPushButton::clicked, this, registration);
     QObject::connect(reg_BackBttn, &QPushButton::clicked, this, login);
 }
