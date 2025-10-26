@@ -124,7 +124,6 @@ void Window::main()
 
 void Window::registration()
 {
-    qDebug() << "Hello!";
     listOfLayout->setCurrentWidget(reg_Widget);
 }
 
