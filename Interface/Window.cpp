@@ -41,22 +41,10 @@ Window::Window(QWidget *parent)
 
     main_Layout = new QVBoxLayout;
 
-    main_SearchRoom = new QLineEdit;
-    main_SearchRoom->setPlaceholderText("ID");
-    main_SearchRoom->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    main_FindRoomBttn = new QPushButton("Search");
-    main_FindRoomBttn->setBaseSize(main_SearchRoom->sizeHint());
-
-    main_CreateRoomBttn = new QPushButton("Create own room");
-    main_CreateRoomBttn->setBaseSize(main_SearchRoom->sizeHint());
-
     main_LogoutBttn = new QPushButton("Logout");
-    main_LogoutBttn->setBaseSize(main_SearchRoom->sizeHint());
 
-    main_Layout->addWidget(main_SearchRoom);
-    main_Layout->addWidget(main_FindRoomBttn);
-    main_Layout->addWidget(main_CreateRoomBttn);
+    main_PlayBttn = new QPushButton("Play");
+    main_Layout->addWidget(main_PlayBttn);
     main_Layout->addWidget(main_LogoutBttn);
 
     main_Layout->setAlignment(Qt::AlignCenter);
@@ -106,10 +94,56 @@ Window::Window(QWidget *parent)
     reg_Widget->setLayout(reg_Layout);
     // Регистрация
 
+    // Игровое полотно
+    play_Widget = new QWidget(this);
+    play_Layout = new QGridLayout;
+
+    play_EnemyLabel = new QLabel("Enemy: User");
+    play_EnemyLabel->setStyleSheet("font-size: 32px; font-family: Calibli;");
+
+    play_DeckInfoLayout = new QVBoxLayout; // та часть, что слева от игорного стола
+
+    play_TrumpLabel = new QLabel("Trump: ♠️"); // козырь
+    play_TrumpLabel->setStyleSheet("font-size: 32px; font-family: Calibli;");
+
+    play_TakeCard = new QPushButton("Take one card"); // взять карты
+    play_TakeCard->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    play_TakeCard->setStyleSheet("font-size: 32px; font-family: Calibli;");
+
+    play_GameField = new QWidget;
+
+    play_MyCards = new QLabel("My cards:");
+    play_MyCards->setStyleSheet("font-size: 32px; font-family: Calibli;");
+    play_TurnInfo = new QLabel("Your turn"); // Ваш ход, ход соперника
+    play_TurnInfo->setStyleSheet("font-size: 32px; font-family: Calibli;");
+
+    play_DeckWidget = new QWidget;
+    play_DeckWidget->setStyleSheet("background-color: red;");
+    play_DeckLayout = new QHBoxLayout;
+    play_DeckWidget->setLayout(play_DeckLayout);
+    play_DeckInfoLayout->addWidget(play_TrumpLabel);
+    play_DeckInfoLayout->addWidget(play_TakeCard);
+
+    play_Layout->addWidget(play_EnemyLabel, 0, 0, 1, 6, Qt::AlignCenter);
+    play_Layout->addLayout(play_DeckInfoLayout, 1, 0, 1, 1);
+    play_Layout->addWidget(play_GameField, 1, 1, 1, 5, Qt::AlignCenter);
+    play_Layout->addWidget(play_MyCards, 2, 0, 1, 3, Qt::AlignCenter);
+    play_Layout->addWidget(play_TurnInfo, 2, 3, 1, 3, Qt::AlignLeft);
+    play_Layout->addWidget(play_DeckWidget, 3, 0, 1, 6, Qt::AlignCenter);
+
+    play_Layout->setRowStretch(0, 2);
+    play_Layout->setRowStretch(1, 3);
+    play_Layout->setRowStretch(2, 2);
+    play_Layout->setRowStretch(3, 2);
+
+    play_Widget->setLayout(play_Layout);
+
     listOfLayout->addWidget(login_Widget);
     listOfLayout->addWidget(main_Widget);
     listOfLayout->addWidget(reg_Widget);
+    listOfLayout->addWidget(play_Widget);
     listOfLayout->setAlignment(Qt::AlignCenter);
+    // Игровое полотно
 }
 
 void Window::login()
@@ -127,12 +161,17 @@ void Window::registration()
     listOfLayout->setCurrentWidget(reg_Widget);
 }
 
+void Window::play()
+{
+    listOfLayout->setCurrentWidget(play_Widget);
+    qDebug() << play_Layout->rowCount() << play_Layout->columnCount();
+}
+
 void Window::connect()
 {
     // QObject::connect(login_LoginBttn, &QPushButton::clicked, this, main);
     // QObject::connect(main_LogoutBttn, &QPushButton::clicked, this, login);
     QObject::connect(login_RegBttn, &QPushButton::clicked, this, registration);
     QObject::connect(reg_BackBttn, &QPushButton::clicked, this, login);
+    QObject::connect(main_PlayBttn, &QPushButton::clicked, this, play);
 }
-
-

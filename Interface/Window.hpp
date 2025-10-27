@@ -1,11 +1,14 @@
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSizePolicy>
 #include <QDebug>
 #include <QStackedLayout>
 #include <QApplication>
+#include <QLabel>
 
 class Window : public QWidget
 {
@@ -27,9 +30,7 @@ private:
     QWidget *main_Widget;
     QVBoxLayout *main_Layout;
 
-    QLineEdit *main_SearchRoom;
-    QPushButton *main_FindRoomBttn;
-    QPushButton *main_CreateRoomBttn;
+    QPushButton *main_PlayBttn;
     QPushButton *main_LogoutBttn;
     // Главное меню
 
@@ -45,12 +46,32 @@ private:
     QPushButton *reg_BackBttn;
     // Регистрация
 
+    // Игровое полотно
+    QWidget *play_Widget;
+    QGridLayout *play_Layout;
+
+    QLabel *play_EnemyLabel;
+
+    QVBoxLayout *play_DeckInfoLayout; // та часть, что слева от игорного стола
+    QLabel *play_TrumpLabel;          // козырь
+    QPushButton *play_TakeCard;       // взять карты
+    QWidget *play_GameField;
+
+    QLabel *play_MyCards;
+    QLabel *play_TurnInfo; // Ваш ход, ход соперника
+
+    QWidget *play_DeckWidget;
+    QHBoxLayout *play_DeckLayout;
+
+    // Игровое полотно
+
 public:
     Window(QWidget *parent = nullptr);
     void login();
     void main();
     void connect();
     void registration();
+    void play();
 
     // Констатнтный доступ к элементам формы регистрации
     const QLineEdit &get_reg_Username() { return *reg_Username; }
@@ -60,18 +81,16 @@ public:
     const QPushButton &get_reg_SubmitBttn() { return *reg_SubmitBttn; } // Чтобы привязать к ней действие
     // Констатнтный доступ к элементам формы регистрации
 
-
     // Константный доступ к элементам форма входа
-    const QLineEdit& get_login_Email() {return *login_Email;}
-    const QLineEdit& get_login_Password() { return *login_Password;}
-    const QPushButton& get_login_LoginBttn() { return *login_LoginBttn;}
+    const QLineEdit &get_login_Email() { return *login_Email; }
+    const QLineEdit &get_login_Password() { return *login_Password; }
+    const QPushButton &get_login_LoginBttn() { return *login_LoginBttn; }
     // Константный доступ к элементам форма входа
 
     // Константный доступ к элементам формы главного окна
-    const QLineEdit& get_main_SearchRoom(){return *main_SearchRoom;}
-    const QPushButton& get_main_FindRoomBttn(){return *main_FindRoomBttn;}
-    const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
-    const QPushButton& get_main_LogoutBttn(){return *main_LogoutBttn;}
+    // const QLineEdit& get_main_SearchRoom(){return *main_SearchRoom;}
+    // const QPushButton& get_main_FindRoomBttn(){return *main_FindRoomBttn;}
+    // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
+    const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     // Константный доступ к элементам формы главного окна
 };
-

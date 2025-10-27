@@ -12,7 +12,7 @@ bool DurakOnline::registration()
     std::string email = window.get_reg_Email().text().toStdString();
     std::string password = window.get_reg_Password().text().toStdString();
     std::string confirmPassword = window.get_reg_ConfirmPassword().text().toStdString();
-    // Добавить больше валидации чтобы не вызывать базу данных протсот так
+    // Добавить больше валидации чтобы не вызывать базу данных просто так
     try
     {
         tx.exec("insert into users (username, email, password) values ($1, $2, $3)", pqxx::params{name, email, password});
@@ -46,7 +46,7 @@ bool DurakOnline::login()
     }
     else
     {
-        std::cout << "Anavaliable email or password\n";
+        std::cout << "Unavailable email or password\n";
         return false;
     }
     return true;
@@ -71,7 +71,8 @@ int DurakOnline::start()
     connect();
     window.setWindowTitle("Дурак онлайн");
     window.connect();
-    window.show();
+    window.showMaximized();
+    window.play();
     int answer = app.exec();
     return answer;
 }
