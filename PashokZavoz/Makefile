@@ -7,9 +7,14 @@ QT_LIBS = -framework QtWidgets -framework QtGui -framework QtCore
 PQXX_INCLUDE = -I/opt/homebrew/include
 PQXX_LIBS1 = -L/opt/homebrew/lib -lpqxx
 PQXX_LIBS2 = -L/opt/homebrew/opt/libpq/lib/ -lpq
-all: moc
+all: moc delete_o
+	cd currentuser && make && cd ..
+	cd database && make && cd ..
+	cd interface && make && cd ..
 	g++ DurakOnline.cpp main.cpp moc_DurakOnline.cpp interface.o currentuser.o database.o --std=c++17 $(QT_INCLUDE) $(QT_LIBS) $(QT_FRAMEWORKS) $(PQXX_INCLUDE) $(PQXX_LIBS1) $(PQXX_LIBS2) -o main.exe
 
+delete_o:
+	rm -f *.o
 
 moc:
 	rm -f moc_*.cpp
