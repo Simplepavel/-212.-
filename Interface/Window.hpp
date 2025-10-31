@@ -9,10 +9,18 @@
 #include <QStackedLayout>
 #include <QApplication>
 #include <QLabel>
+#include <QScrollArea>
+#include <QScreen>
+#include <QRect>
 
 class Window : public QWidget
 {
 private:
+    // Неигровые параметры
+    QScreen* screen_Objc;
+    int screen_Width; // Ширина
+    int screen_Height; // Высота
+    // Неигровые параметры
     // Вспомогательные элементы
     QStackedLayout *listOfLayout;
     // Вспомогательные элементы
@@ -62,6 +70,9 @@ private:
 
     QWidget *play_DeckWidget;
     QHBoxLayout *play_DeckLayout;
+
+    QScrollArea *play_ScrollArea;
+
 
     // Игровое полотно
 

@@ -72,7 +72,6 @@ int DurakOnline::start()
     window.setWindowTitle("Дурак онлайн");
     window.connect();
     window.showMaximized();
-    window.play();
     int answer = app.exec();
     return answer;
 }

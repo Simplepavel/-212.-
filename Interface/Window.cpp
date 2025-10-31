@@ -2,6 +2,14 @@
 
 Window::Window(QWidget *parent)
 {
+
+    // Неигровые параметры
+    screen_Objc = QApplication::primaryScreen();
+    QRect screen_Rect = screen_Objc->geometry();
+    screen_Height = screen_Rect.height() * screen_Objc->devicePixelRatio();
+    screen_Width = screen_Rect.width() * screen_Objc->devicePixelRatio();
+    // Неигровые параметры
+
     // Вспомогательные компоненты
     listOfLayout = new QStackedLayout(this);
     setLayout(listOfLayout);
@@ -118,32 +126,39 @@ Window::Window(QWidget *parent)
     play_TurnInfo->setStyleSheet("font-size: 32px; font-family: Calibli;");
 
     play_DeckWidget = new QWidget;
-    play_DeckWidget->setStyleSheet("background-color: red;");
     play_DeckLayout = new QHBoxLayout;
+    play_DeckLayout->setSpacing(0);
+    play_DeckLayout->setAlignment(Qt::AlignLeft);
     play_DeckWidget->setLayout(play_DeckLayout);
+
     play_DeckInfoLayout->addWidget(play_TrumpLabel);
     play_DeckInfoLayout->addWidget(play_TakeCard);
+
+    play_ScrollArea = new QScrollArea;
+    play_ScrollArea->setWidgetResizable(true);
+    play_ScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    play_ScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Если нужна только горизонтальная прокрутка
+    play_ScrollArea->setWidget(play_DeckWidget);
 
     play_Layout->addWidget(play_EnemyLabel, 0, 0, 1, 6, Qt::AlignCenter);
     play_Layout->addLayout(play_DeckInfoLayout, 1, 0, 1, 1);
     play_Layout->addWidget(play_GameField, 1, 1, 1, 5, Qt::AlignCenter);
-    play_Layout->addWidget(play_MyCards, 2, 0, 1, 3, Qt::AlignCenter);
+    play_Layout->addWidget(play_MyCards, 2, 0, 1, 3, Qt::AlignCenter | Qt::AlignBottom);
     play_Layout->addWidget(play_TurnInfo, 2, 3, 1, 3, Qt::AlignLeft);
-    play_Layout->addWidget(play_DeckWidget, 3, 0, 1, 6, Qt::AlignCenter);
+    play_Layout->addWidget(play_ScrollArea, 3, 0, 1, 6);
 
-    play_Layout->setRowStretch(0, 2);
-    play_Layout->setRowStretch(1, 3);
-    play_Layout->setRowStretch(2, 2);
-    play_Layout->setRowStretch(3, 2);
-
+    play_Layout->setRowStretch(0, 3);
+    play_Layout->setRowStretch(1, 6);
+    play_Layout->setRowStretch(2, 3);
+    play_Layout->setRowStretch(3, 4);
     play_Widget->setLayout(play_Layout);
+    // Игровое полотно
 
     listOfLayout->addWidget(login_Widget);
     listOfLayout->addWidget(main_Widget);
     listOfLayout->addWidget(reg_Widget);
     listOfLayout->addWidget(play_Widget);
     listOfLayout->setAlignment(Qt::AlignCenter);
-    // Игровое полотно
 }
 
 void Window::login()
@@ -163,8 +178,16 @@ void Window::registration()
 
 void Window::play()
 {
+    for (int i = 0; i < 6; ++i)
+    {
+        QPushButton *bttn = new QPushButton(QString::fromStdString(std::to_string(i)));
+        int width = screen_Width / 15;
+        int height = width / 0.7;
+        bttn->setFixedSize(width, height);
+        bttn->resize(width, height);
+        play_DeckLayout->addWidget(bttn);
+    }
     listOfLayout->setCurrentWidget(play_Widget);
-    qDebug() << play_Layout->rowCount() << play_Layout->columnCount();
 }
 
 void Window::connect()
