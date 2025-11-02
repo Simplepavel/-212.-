@@ -12,6 +12,7 @@ void Game::startGame() {
   player2.clear();
   attackCards.clear();
   defenseCards.clear();
+  turnCards.clear();
 
   trumpCard = deck.drawCard();
 
@@ -61,10 +62,13 @@ void Game::displayGameState() {
   std::cout << std::endl;
 
   if (state == GameState::ATTACK) {
-    std::cout << "<ХОД " << (player1turn ? "ИГРОКА 1" : "ИГРОКА 2") << ">"
+    std::cout << "<АТАКА " << (player1turn ? "ИГРОКА 1" : "ИГРОКА 2") << ">"
               << std::endl;
-  } else {
-    std::cout << "<ХОД " << (!player1turn ? "ИГРОКА 1" : "ИГРОКА 2") << ">"
+  } else if (state == GameState::DEFEND) {
+    std::cout << "<ЗАЩИТА " << (!player1turn ? "ИГРОКА 1" : "ИГРОКА 2") << ">"
+              << std::endl;
+  } else if (state == GameState::ADD_ATTACK) {
+     std::cout << "<ПОДКИДЫВАНИЕ " << (player1turn ? "ИГРОКА 1" : "ИГРОКА 2") << ">"
               << std::endl;
   }
 
@@ -72,12 +76,18 @@ void Game::displayGameState() {
 
   if (!attackCards.empty() || !defenseCards.empty()) {
     displayCards(attackCards, "АТАКУЮЩИЕ КАРТЫ");
-    displayCards(defenseCards, "КАРТЫ ОТБИТЬСЯ");
   }
 
   std::cout << "КАРД В КОЛОДЕ: " << deck.cardsLeft() << std::endl;
   std::cout << "КОЗЫРЬ: " << trumpCard.toString() << std::endl;
   std::cout << "========================\n" << std::endl;
+}
+
+bool Game::canToss(const Card& card) {
+    for(Card& cardOnTurn : turnCards) {
+        if(cardOnTurn.getRank() == card.getRank()) return true;
+    }
+    return false;
 }
 
 void Game::playTurn() {
@@ -89,130 +99,133 @@ void Game::playTurn() {
   displayGameState();
 
   if (state == GameState::ATTACK) {
-    if (player1turn) {
-      // атака игрока 1
-      std::cout << "Игрок 1 атакует!" << std::endl;
-      std::vector<Card> cards = player1.getCards();
-      if (cards.empty()) {
-        std::cout << "У игрока 1 нет карт!" << std::endl;
-        return;
-      }
+    Player& attacker = (player1turn ? player1 : player2);
+    std::cout << "Игрок " << (player1turn ? "1" : "2") << " атакует!" << std::endl;
 
-      int cardIndex;
-      while (true) {
-        // выбираем карту которую будем крыть
-        std::cout << "Выберите карту для атаки (1-" << cards.size() << "): ";
-        std::cin >> cardIndex;
-        if (cardIndex < 1 || cardIndex > static_cast<int>(cards.size())) {
-          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-          std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
-        } else {
-          break;
+    while(true) {
+        std::vector<Card> cards = attacker.getCards();
+        if (cards.empty()) {
+            std::cout << "У игрока " << (player1turn ? "1" : "2") << " нет карт!" << std::endl;
+            if(attackCards.empty()) endTurn();
+            break;
         }
-      }
 
-      attack(cardIndex - 1);
-    } else {
-      // атака игрока 2
-      std::cout << "Игрок 2 атакует!" << std::endl;
-      std::vector<Card> cards = player2.getCards();
-      if (cards.empty()) {
-        std::cout << "У игрока 2 нет карт!" << std::endl;
-        return;
-      }
+        displayPlayerHand(attacker, "ИГРОК " + std::string(player1turn ? "1" : "2"));
 
-      int cardIndex;
-      while (true) {
-        // выбираем карту которую будем крыть
-        std::cout << "Выберите карту для атаки (1-" << cards.size() << "): ";
+        std::cout << "Выберите карту для атаки (1-" << cards.size() << ") или 0, чтобы закончить: ";
+        int cardIndex;
         std::cin >> cardIndex;
-        if (cardIndex < 1 || cardIndex > static_cast<int>(cards.size())) {
-          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-          std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
-        } else {
-          break;
-        }
-      }
 
-      attack(cardIndex - 1);
+        if (cardIndex == 0) {
+            if (attackCards.empty()) {
+                std::cout << "Вы должны сыграть хотя бы одну карту." << std::endl;
+                continue;
+            }
+            std::cout << "Атака завершена." << std::endl;
+            state = GameState::DEFEND;
+            break; 
+        }
+
+        if (cardIndex < 1 || cardIndex > static_cast<int>(cards.size())) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
+        } else {
+            Card selectedCard = cards[cardIndex - 1];
+            if (attackCards.empty() || canToss(selectedCard)) {
+                attack(cardIndex - 1); 
+            } else {
+                 std::cout << "Нельзя атаковать этой картой!" << std::endl;
+            }
+        }
     }
   } else if (state == GameState::DEFEND) {
-    if (!player1turn) {
-      // защита игрока 1
-      std::cout << "Игрок 1 защищается!" << std::endl;
-      std::vector<Card> defenderCards = player1.getCards();
-      if (defenderCards.empty()) {
-        std::cout << "У игрока 1 нет карт для защиты!" << std::endl;
+    Player& defender = (!player1turn ? player1 : player2);
+    std::cout << "Игрок " << (!player1turn ? "1" : "2") << " защищается!" << std::endl;
+
+    std::vector<Card> defenderCards = defender.getCards();
+    if (defenderCards.empty()) {
+        std::cout << "У игрока " << (!player1turn ? "1" : "2") << " нет карт для защиты!" << std::endl;
         takeCards();
         return;
-      }
+    }
 
-      if (attackCards.empty()) {
-        std::cout << "Нет карт для отбития!" << std::endl;
-        return;
-      }
+    displayPlayerHand(defender, "ИГРОК " + std::string(!player1turn ? "1" : "2"));
 
-      int attackIndex, defenseIndex;
-      while (true) {
+    int attackIndex, defenseIndex;
+    while (true) {
         std::cout << "Выберите атакующую карту (1-" << attackCards.size()
-                  << "): ";
+                  << ") или 0, чтобы взять карты ";
         std::cin >> attackIndex;
+
+        if (attackIndex == 0) {
+            takeCards();
+            return;
+        }
+        if (attackIndex < 1 ||
+            attackIndex > static_cast<int>(attackCards.size())) {
+              std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+              std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
+            }
+
         std::cout << "Выберите свою карту для защиты (1-"
-                  << defenderCards.size() << "): ";
+                    << defenderCards.size() << "): ";
         std::cin >> defenseIndex;
 
-        if (attackIndex < 1 ||
-            attackIndex > static_cast<int>(attackCards.size()) ||
-            defenseIndex < 1 ||
+        if (defenseIndex < 1 ||
             defenseIndex > static_cast<int>(defenderCards.size())) {
-          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-          std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
         } else {
-          break;
+            break;
         }
-      }
+    }
+    defend(attackIndex - 1, defenseIndex - 1);
+  } else if (state == GameState::ADD_ATTACK) {
+    Player& attacker = (player1turn ? player1 : player2);
+    Player& defender = (!player1turn ? player1 : player2);
 
-      defend(attackIndex - 1, defenseIndex - 1);
-    } else {
-      // защита игрока 2
-      std::cout << "Игрок 2 защищается!" << std::endl;
-      std::vector<Card> defenderCards = player2.getCards();
-      if (defenderCards.empty()) {
-        std::cout << "У игрока 2 нет карт для защиты!" << std::endl;
-        takeCards();
-        return;
-      }
+    std::cout << "Игрок " << (player1turn ? "1" : "2") << " может подкинуть!" << std::endl;
 
-      if (attackCards.empty()) {
-        std::cout << "Нет карт для отбития!" << std::endl;
-        return;
-      }
-
-      int attackIndex, defenseIndex;
-      while (true) {
-        std::cout << "Выберите атакующую карту (1-" << attackCards.size()
-                  << "): ";
-        std::cin >> attackIndex;
-        if (attackIndex != 0) {
-          std::cout << "Выберите свою карту для защиты (1-"
-                    << defenderCards.size() << "): ";
-          std::cin >> defenseIndex;
-        } else {
-          defenseIndex = 1;
+     while(true) {
+        std::vector<Card> cards = attacker.getCards();
+        if (cards.empty()) {
+            std::cout << "У атакующего нет карт, чтобы подкинуть." << std::endl;
+            endTurn();
+            break;
         }
 
-        if ((attackIndex < 1 && attackIndex != 0) ||
-            attackIndex > static_cast<int>(attackCards.size()) ||
-            defenseIndex < 1 ||
-            defenseIndex > static_cast<int>(defenderCards.size())) {
-          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-          std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
-        } else {
-          break;
+        int defenderCardCount = defender.cardCount();
+        if (attackCards.size() >= 6 || attackCards.size() >= (6 - defenderCardCount + defenseCards.size())) {
+             std::cout << "Достигнут лимит карт (6) или у защитника не хватит карт. Бито." << std::endl;
+             endTurn();
+             break;
         }
-      }
 
-      defend(attackIndex - 1, defenseIndex - 1);
+        displayPlayerHand(attacker, "ИГРОК " + std::string(player1turn ? "1" : "2"));
+
+        std::cout << "Выберите карту для подкидывания (1-" << cards.size() << ") или 0, чтобы сказать бито: ";
+        int cardIndex;
+        std::cin >> cardIndex;
+
+        if (cardIndex == 0) {
+            std::cout << "Бито. Ход завершен." << std::endl;
+            endTurn();
+            break; 
+        }
+
+        if (cardIndex < 1 || cardIndex > static_cast<int>(cards.size())) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Неверный ввод! Попробуйте снова." << std::endl;
+        } else {
+            Card selectedCard = cards[cardIndex - 1];
+            if (canToss(selectedCard)) {
+                attack(cardIndex - 1); 
+                state = GameState::DEFEND;
+                break;
+            } else {
+                 std::cout << "Нельзя подкинуть эту карту!" << std::endl;
+            }
+        }
     }
   }
 }
@@ -231,6 +244,7 @@ void Game::attack(int cardIndex) {
   if ((player1turn && player1.hasCard(selectedCard)) ||
       (!player1turn && player2.hasCard(selectedCard))) {
     attackCards.push_back(selectedCard);
+    turnCards.push_back(selectedCard);
 
     if (player1turn) {
       player1.removeCard(selectedCard);
@@ -239,29 +253,14 @@ void Game::attack(int cardIndex) {
     }
 
     state = GameState::DEFEND;
-    std::cout << "Атаковано картой: " << selectedCard.toString() << std::endl;
+    displayCards(attackCards, "Карты для атаки");
   } else {
     std::cout << "У игрока нет этой карты!" << std::endl;
   }
 }
 
 void Game::defend(int attackCardIndex, int defenseCardIndex) {
-  if (attackCardIndex == -1) {
-    takeCards();
-    return;
-  } else if (attackCardIndex < 0 ||
-             attackCardIndex >= static_cast<int>(attackCards.size())) {
-    std::cout << "Неверный индекс атакующей карты!" << std::endl;
-    return;
-  }
-
-  std::vector<Card> defenderCards =
-      (!player1turn ? player1.getCards() : player2.getCards());
-  if (defenseCardIndex < 0 ||
-      defenseCardIndex >= static_cast<int>(defenderCards.size())) {
-    std::cout << "Неверный индекс защитной карты!" << std::endl;
-    return;
-  }
+  std::vector<Card> defenderCards = (!player1turn ? player1.getCards() : player2.getCards());
 
   Card attackCard = attackCards[attackCardIndex];
   Card defenseCard = defenderCards[defenseCardIndex];
@@ -273,6 +272,8 @@ void Game::defend(int attackCardIndex, int defenseCardIndex) {
 
   if (canDefend) {
     defenseCards.push_back(defenseCard);
+    turnCards.push_back(defenseCard);
+    attackCards.erase(attackCards.begin() + attackCardIndex);
 
     if (!player1turn) {
       player1.removeCard(defenseCard);
@@ -280,14 +281,14 @@ void Game::defend(int attackCardIndex, int defenseCardIndex) {
       player2.removeCard(defenseCard);
     }
 
-    std::cout << "Отбито картой: " << defenseCard.toString() << std::endl;
+    std::cout << "Отбито: " << attackCard.toString() << " покрыта " << defenseCard.toString() << std::endl;
 
-    if (attackCards.size() == defenseCards.size()) {
-      std::cout << "Все карты отбиты! Ход завершен." << std::endl;
-      endTurn();
+    if (attackCards.size() == 0) {
+      std::cout << "Все карты на столе отбиты! Атакующий может подкинуть." << std::endl;
+      state = GameState::ADD_ATTACK;
     }
   } else {
-    std::cout << "Невозможно отбить этой картой!" << std::endl;
+    std::cout << "Невозможно отбить этой картой (" << defenseCard.toString() << ") карту " << attackCard.toString() << "!" << std::endl;
   }
 }
 
@@ -312,6 +313,7 @@ void Game::takeCards() {
 void Game::endTurn() {
   attackCards.clear();
   defenseCards.clear();
+  turnCards.clear();
   state = GameState::ATTACK;
   player1turn = !player1turn;
 

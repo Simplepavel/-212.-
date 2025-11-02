@@ -7,7 +7,7 @@
 #include "general/deck.h"
 #include "general/player.h"
 
-enum GameState { ATTACK, DEFEND, GAME_OVER };
+enum GameState { ATTACK, DEFEND, ADD_ATTACK, GAME_OVER };
 
 class Game {
  private:
@@ -16,6 +16,7 @@ class Game {
   void displayGameState();
   void displayCards(const std::vector<Card>& cards, const std::string& title);
   void displayPlayerHand(const Player& player, const std::string& name);
+  bool canToss(const Card& card);
 
   Deck deck;
   Player player1;
@@ -24,6 +25,7 @@ class Game {
   Card trumpCard;
   std::vector<Card> attackCards;
   std::vector<Card> defenseCards;
+  std::vector<Card> turnCards;
   bool player1turn;
 
  public:
