@@ -11,6 +11,4 @@ public:
     Durak_Client();
     bool Client_Connect(char *IP, char *PORT);
     bool Client_Disconnect();
-    int Client_Send(char *data);
-    int Client_Recv();
 };

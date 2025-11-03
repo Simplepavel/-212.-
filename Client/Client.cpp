@@ -72,17 +72,3 @@ void Durak_Client::print(sockaddr *addr)
     }
     std::cout << result << ":" << port;
 }
-
-int Durak_Client::Client_Send(char *data)
-{
-    std::cout << "Send: " << data << '\n';
-    return send(client_socket, data, strlen(data), 0);
-}
-
-int Durak_Client::Client_Recv()
-{
-    char data[4096]{};
-    int read_bytes = recv(client_socket, data, sizeof(data), 0);
-    std::cout << "Recived: " << data << '\n';
-    return read_bytes;
-}
