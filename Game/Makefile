@@ -1,2 +1,2 @@
 all:
-	g++ main.cpp Deck.cpp -o main -g
+	g++ main.cpp Deck.cpp Card.cpp -o main -g

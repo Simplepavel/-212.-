@@ -1,5 +1,7 @@
 #include <iostream>
-enum Ranks
+#include <winsock2.h>
+#include <cstdint>
+enum Ranks : uint8_t
 {
     SIX = 6,
     SEVEN,
@@ -11,7 +13,7 @@ enum Ranks
     KING,
     ACE
 };
-enum Suits
+enum Suits : uint8_t
 {
     HEARTS,
     DIAMONDS,
@@ -25,44 +27,8 @@ struct Card
     Ranks rank;
     Card() {};
     Card(Suits s, Ranks r) : suit(s), rank(r) {}
+    void serialize(char *buffer);
+    static Card deserialize(char *buffer);
 };
 
-#ifdef OPERATOR
-std::ostream &operator<<(std::ostream &cout, const Card &card)
-{
-    switch (card.suit)
-    {
-    case (HEARTS):
-        cout << "♥";
-        break;
-    case (DIAMONDS):
-        cout << "♦";
-        break;
-    case (CLUBS):
-        cout << "♣";
-        break;
-    case (SPADES):
-        cout << "♠";
-        break;
-    }
-
-    switch (card.rank)
-    {
-    case (JACK):
-        std::cout << 'J';
-        break;
-    case (QUEEN):
-        std::cout << 'Q';
-        break;
-    case (KING):
-        std::cout << 'K';
-        break;
-    case (ACE):
-        std::cout << 'A';
-        break;
-    default:
-        std::cout << card.rank;
-    }
-    return cout;
-}
-#endif
+std::ostream &operator<<(std::ostream &cout, const Card &card);

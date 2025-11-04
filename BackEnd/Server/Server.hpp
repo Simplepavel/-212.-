@@ -1,10 +1,12 @@
 #include <list>
+#include <queue>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <thread>
 #include <iostream>
 #include <mutex>
 #include <chrono>
+#include "../Protocol/Protocol.hpp"
 #define BACKLOG 128
 
 class Durak_Server // основной поток слушает подключения и добавление в очередь
@@ -12,6 +14,7 @@ class Durak_Server // основной поток слушает подключ�
 private:
     SOCKET server_socket;
     std::list<SOCKET> clients;
+    std::queue<SOCKET> line;
     void print(sockaddr *);
     void Server_Accept();
     std::mutex mtx;

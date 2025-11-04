@@ -145,11 +145,18 @@ void Durak_Server::Server_Go()
             {
                 if (FD_ISSET(*i, &master))
                 {
-                    char data[4096]{0};
+                    char data[512]{0};
                     int bytes = recv(*i, data, sizeof(data), 0);
                     if (bytes > 0)
                     {
-                        send(*i, data, strlen(data), 0);
+                        SetConsoleOutputCP(65001);
+                        SetConsoleCP(65001);
+                        Protocol result = Protocol::deserialize(data);
+                        std::cout << "Recived next info:\n";
+                        std::cout << "From: " << result.id << '\n';
+                        std::cout << "Opp_ID: " << result.opp_id << '\n';
+                        std::cout << "Move: " << (int)result.move << '\n';
+                        std::cout << "Card:" << result.card << '\n';
                     } // все хорошо, отправляем назад прочитанные данные
                     else if (bytes == 0)
                     {
@@ -164,11 +171,14 @@ void Durak_Server::Server_Go()
                     } // клиент отключился
                     else
                     {
-                        std::cout << "Something went wrong with client";
+                        std::cout << "Something went wrong with client ";
                         sockaddr_storage their_addr;
                         socklen_t their_len = sizeof(their_addr);
                         getpeername(*i, (sockaddr *)&their_addr, &their_len);
                         print((sockaddr *)&their_addr);
+                        std::cout << '\n';
+                        closesocket(*i);
+                        delete_clients.push_back(*i);
                     } // что то пошло не так
                 }
             }
