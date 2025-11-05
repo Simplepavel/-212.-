@@ -1,10 +1,6 @@
-#include "Deck.hpp"
-
-#include <windows.h>
+#include "Session/Session.hpp"
 int main()
 {
-    SetConsoleOutputCP(65001);
-    SetConsoleCP(65001);
-    Deck deck1;
-
+    Session s1;
+    return 0;
 }

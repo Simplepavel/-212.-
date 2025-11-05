@@ -149,14 +149,15 @@ void Durak_Server::Server_Go()
                     int bytes = recv(*i, data, sizeof(data), 0);
                     if (bytes > 0)
                     {
-                        SetConsoleOutputCP(65001);
-                        SetConsoleCP(65001);
-                        Protocol result = Protocol::deserialize(data);
-                        std::cout << "Recived next info:\n";
-                        std::cout << "From: " << result.id << '\n';
-                        std::cout << "Opp_ID: " << result.opp_id << '\n';
-                        std::cout << "Move: " << (int)result.move << '\n';
-                        std::cout << "Card:" << result.card << '\n';
+                        // SetConsoleOutputCP(65001);
+                        // SetConsoleCP(65001);
+                        // Protocol result = Protocol::deserialize(data);
+                        // std::cout << "Recived next info:\n";
+                        // std::cout << "From: " << result.id << '\n';
+                        // std::cout << "Opp_ID: " << result.opp_id << '\n';
+                        // std::cout << "Move: " << (int)result.move << '\n';
+                        // std::cout << "Card:" << result.card << '\n';
+                        
                     } // все хорошо, отправляем назад прочитанные данные
                     else if (bytes == 0)
                     {

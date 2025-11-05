@@ -3,6 +3,7 @@
 #include <cstdint>
 enum Ranks : uint8_t
 {
+    RANK,
     SIX = 6,
     SEVEN,
     EIGHT,
@@ -11,24 +12,29 @@ enum Ranks : uint8_t
     JACK,
     QUEEN,
     KING,
-    ACE
+    ACE,
 };
 enum Suits : uint8_t
 {
+    SUIT,
     HEARTS,
     DIAMONDS,
     CLUBS,
-    SPADES
+    SPADES,
 }; // Червы, Бубны, Трефы, Пики
 
 struct Card
 {
     Suits suit;
     Ranks rank;
-    Card() {};
+    bool is_trump = false;
+    Card() : suit(SUIT), rank(RANK) {};
     Card(Suits s, Ranks r) : suit(s), rank(r) {}
     void serialize(char *buffer);
+    bool is_valid();
     static Card deserialize(char *buffer);
+    bool operator==(const Card &argv);
+    bool operator<(const Card &argv);
 };
 
 std::ostream &operator<<(std::ostream &cout, const Card &card);

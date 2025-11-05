@@ -1,6 +1,7 @@
 #include "DataBase/database.hpp"
 #include "Interface/Window.hpp"
 #include "CurrentUser/CurrentUser.hpp"
+#include "Game/Player/"
 #include <string>
 #include <iostream>
 
@@ -11,6 +12,7 @@ private:
     QApplication app;
     Window window;
     CurrentUser current_user;
+
     void connect();
 private slots:
     bool registration();

@@ -13,6 +13,8 @@ all: moc
 	cd DataBase && make && cd ..
 
 	cd CurrentUser && make && cd ..
+
+	cd Game/
 	
 	g++ main.cpp DurakOnline.cpp moc_DurakOnline.cpp interface.o database.o currentuser.o $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
 

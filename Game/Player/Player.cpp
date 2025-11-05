@@ -1,11 +1,28 @@
 #include "Player.hpp"
 
-PlayerClient::PlayerClient() : Durak_Client::Durak_Client(), opp_id(-1)
+Player::Player(Shop &shop)
 {
-    Client_Connect("127.0.0.1", "6666");
+    for (int i = 0; i < 6; ++i)
+    {
+        add_card(shop.get_top());
+    }
 }
-
-void PlayerClient::connect(int _opp_id)
+const Card &Player::GetLowestTrump()
 {
-    opp_id = _opp_id;
+    Card min_trump;
+    for (int i = 0; i < count; ++i)
+    {
+        if (deck[i].is_trump && !min_trump.is_valid())
+        {
+            min_trump = deck[i];
+        }
+        if (deck[i].is_trump && min_trump.is_valid())
+        {
+            if (deck[i] < min_trump)
+            {
+                min_trump = deck[i];
+            }
+        }
+    }
+    return min_trump;
 }
