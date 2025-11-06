@@ -25,4 +25,11 @@ Session::Session() : pl1(shop), pl2(shop), stol()
     {
         pl1_attack = (rand() % 2 == 0);
     }
+
+    std::cout << "==============Start Game==================\n";
+    std::cout << pl1 << '\n';
+    std::cout << pl2 << '\n';
+    std::cout << "Trump: " << trump << '\n';
+    std::cout << "Shop: " << shop << '\n';
+    std::cout << ((pl1_attack) ? ("Player1 is attaker") : ("Player2 is attacker")) << '\n';
 }

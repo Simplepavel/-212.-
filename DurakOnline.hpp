@@ -1,7 +1,7 @@
 #include "DataBase/database.hpp"
 #include "Interface/Window.hpp"
 #include "CurrentUser/CurrentUser.hpp"
-#include "Game/Player/"
+#include "Game/Player/Player.hpp"
 #include <string>
 #include <iostream>
 

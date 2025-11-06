@@ -7,7 +7,7 @@ Player::Player(Shop &shop)
         add_card(shop.get_top());
     }
 }
-const Card &Player::GetLowestTrump()
+Card Player::GetLowestTrump()
 {
     Card min_trump;
     for (int i = 0; i < count; ++i)

@@ -33,6 +33,14 @@ void Deck::shuffle()
     }
 }
 
+void Deck::set_trumps(Suits trump_suit)
+{
+    for (int i = 0; i < count; ++i)
+    {
+        deck[i].is_trump = (deck[i].suit == trump_suit);
+    }
+}
+
 std::ostream &operator<<(std::ostream &cout, const Deck &deck)
 {
     for (int i = 0; i < deck.get_count(); ++i)
@@ -40,12 +48,4 @@ std::ostream &operator<<(std::ostream &cout, const Deck &deck)
         cout << deck.get_card(i) << ' ';
     }
     return cout;
-}
-
-void Deck::set_trumps(Suits trump_suit)
-{
-    for (int i = 0; i < count; ++i)
-    {
-        deck[i].is_trump = (deck[i].suit == trump_suit);
-    }
 }

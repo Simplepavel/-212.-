@@ -2,7 +2,7 @@
 
 Shop::Shop() : Deck()
 {
-    for (uint8_t i = 0; i < 4; ++i)
+    for (uint8_t i = 1; i < 5; ++i)
     {
         for (uint8_t j = 6; j < 15; ++j)
         {
@@ -26,8 +26,3 @@ Card Shop::get_trump()
     return result;
 }
 
-// std::ostream &operator<<(std::ostream &cout, const Shop &shop)
-// {
-//     cout << shop;
-//     return cout;
-// }
