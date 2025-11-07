@@ -26,4 +26,7 @@ Card Shop::get_trump()
     return result;
 }
 
-
+Deck *Shop::create_empty()
+{
+    return new Shop();
+}

@@ -50,39 +50,42 @@ char *Deck::serialize()
     for (auto i = deck.begin(); i != deck.end(); ++i)
     {
         char *a = i->serialize();
-        uint32_t card_serialize;
-        memcpy(&card_serialize, a, 4);
-        uint32_t net_card_serialize = htonl(card_serialize); // сериализация карты на 3 байта
-        memcpy(buffer + idx * 4, &net_card_serialize, 4);
+        memcpy(buffer + idx * 4, a, 4);
         delete[] a;
         ++idx;
     }
     return buffer;
 }
 
-Deck Deck::deserialize(char *buffer)
+Deck *Deck::deserialize(char *buffer)
 {
     uint32_t net_count_card;
     memcpy(&net_count_card, buffer, 4);
     uint32_t count_card = ntohl(net_count_card);
 
-    Deck result;
+    Deck temp;
+    Deck *result = temp.create_empty();
 
     for (int i = 1; i <= count_card; ++i)
     {
-        uint32_t net;
-        memcpy(&net, buffer + 4 * i, 4);
+        // uint32_t net;
+        // memcpy(&net, buffer + 4 * i, 4);
 
-        uint32_t host = ntohl(net);
+        // uint32_t host = ntohl(net);
 
-        char *new_card = new char[4];
+        // char *new_card = new char[4];
 
-        memcpy(new_card, &host, 4);
-        result.add_card(Card::deserialize(new_card));
+        // memcpy(new_card, &host, 4);
+        result->add_card(Card::deserialize(buffer + 4 * i));
 
-        delete[] new_card;
+        // delete[] new_card;
     }
     return result;
+}
+
+Deck *Deck::create_empty()
+{
+    return new Deck();
 }
 
 std::ostream &operator<<(std::ostream &cout, const Deck &deck)

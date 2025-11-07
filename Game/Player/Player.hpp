@@ -1,8 +1,19 @@
 #include "../Shop/Shop.hpp"
 
-class Player : public Deck
+class Player
 {
+private:
+    Deck deck;
+    std::string username;
+
 public:
-    Player(Shop &);
+    Player(Shop &, const std::string &);
+    Player(const Deck &d, const std::string &n);
     Card GetLowestTrump();
+    void add_card(const Card &);
+    char *serialize();
+    static Player deserialize(char *);
+    friend std::ostream &operator<<(std::ostream &cout, const Player &pl);
 };
+
+std::ostream &operator<<(std::ostream &cout, const Player &pl);
