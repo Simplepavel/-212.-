@@ -16,6 +16,8 @@ public:
     unsigned int get_count() const { return count; }
     void shuffle();
     void set_trumps(Suits trump_suit);
+    char* serialize();
+    static Deck deserialize(char *buffer); 
 };
 
 std::ostream &operator<<(std::ostream &cout, const Deck &deck);

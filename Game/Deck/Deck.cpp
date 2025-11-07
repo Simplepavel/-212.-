@@ -41,6 +41,50 @@ void Deck::set_trumps(Suits trump_suit)
     }
 }
 
+char *Deck::serialize()
+{
+    char *buffer = new char[(count + 1) * 4];
+    uint32_t count_cards = htonl(static_cast<uint32_t>(count));
+    memcpy(buffer, &count_cards, 4);
+    int idx = 1;
+    for (auto i = deck.begin(); i != deck.end(); ++i)
+    {
+        char *a = i->serialize();
+        uint32_t card_serialize;
+        memcpy(&card_serialize, a, 4);
+        uint32_t net_card_serialize = htonl(card_serialize); // сериализация карты на 3 байта
+        memcpy(buffer + idx * 4, &net_card_serialize, 4);
+        delete[] a;
+        ++idx;
+    }
+    return buffer;
+}
+
+Deck Deck::deserialize(char *buffer)
+{
+    uint32_t net_count_card;
+    memcpy(&net_count_card, buffer, 4);
+    uint32_t count_card = ntohl(net_count_card);
+
+    Deck result;
+
+    for (int i = 1; i <= count_card; ++i)
+    {
+        uint32_t net;
+        memcpy(&net, buffer + 4 * i, 4);
+
+        uint32_t host = ntohl(net);
+
+        char *new_card = new char[4];
+
+        memcpy(new_card, &host, 4);
+        result.add_card(Card::deserialize(new_card));
+
+        delete[] new_card;
+    }
+    return result;
+}
+
 std::ostream &operator<<(std::ostream &cout, const Deck &deck)
 {
     for (int i = 0; i < deck.get_count(); ++i)

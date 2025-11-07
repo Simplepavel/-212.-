@@ -2,10 +2,11 @@
 
 char *Card::serialize()
 {
-    char *buffer = new char[3];
+    char *buffer = new char[4];
     memcpy(buffer, &suit, 1);
     memcpy(buffer + 1, &rank, 1);
     buffer[2] = is_trump ? 1 : 0;
+    buffer[3] = '\0';
     return buffer;
 }
 
@@ -87,5 +88,6 @@ std::ostream &operator<<(std::ostream &cout, const Card &card)
     default:
         cout << static_cast<uint32_t>(card.rank);
     }
+    cout << '-' << card.is_trump;
     return cout;
 }

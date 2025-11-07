@@ -26,3 +26,4 @@ Card Shop::get_trump()
     return result;
 }
 
+
