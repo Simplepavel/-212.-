@@ -5,10 +5,10 @@ private:
     Shop shop;
     Player pl1;
     Player pl2;
-    Card stol;  // карта на столе в текущий момент времени
-    Card trump; //  козырь
+    Card stol; // карта на столе в текущий момент времени
     bool pl1_attack;
 
 public:
-    Session();
+    Session(const std::string &, const std::string &);
+    // char* serialize();
 };

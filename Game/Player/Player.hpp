@@ -13,6 +13,7 @@ public:
     void add_card(const Card &);
     char *serialize();
     static Player deserialize(char *);
+    // void set_trumps(Suits);
     friend std::ostream &operator<<(std::ostream &cout, const Player &pl);
 };
 

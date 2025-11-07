@@ -88,6 +88,6 @@ std::ostream &operator<<(std::ostream &cout, const Card &card)
     default:
         cout << static_cast<uint32_t>(card.rank);
     }
-    // cout << '-' << card.is_trump;
+    cout << '-' << card.is_trump;
     return cout;
 }

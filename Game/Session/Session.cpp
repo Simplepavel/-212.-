@@ -1,12 +1,7 @@
 #include "Session.hpp"
 
-Session::Session() : pl1(shop), pl2(shop), stol()
+Session::Session(const std::string &n1, const std::string &n2) : pl1(shop, n1), pl2(shop, n2)
 {
-    trump = shop.get_trump();
-    pl1.set_trumps(trump.suit);
-    pl2.set_trumps(trump.suit);
-    shop.set_trumps(trump.suit);
-
     Card lowest1 = pl1.GetLowestTrump();
     Card lowest2 = pl2.GetLowestTrump();
     if (lowest1.is_valid() && lowest2.is_valid())
@@ -29,7 +24,6 @@ Session::Session() : pl1(shop), pl2(shop), stol()
     std::cout << "==============Start Game==================\n";
     std::cout << pl1 << '\n';
     std::cout << pl2 << '\n';
-    std::cout << "Trump: " << trump << '\n';
     std::cout << "Shop: " << shop << '\n';
     std::cout << ((pl1_attack) ? ("Player1 is attaker") : ("Player2 is attacker")) << '\n';
 }

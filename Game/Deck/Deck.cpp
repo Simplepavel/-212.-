@@ -33,13 +33,6 @@ void Deck::shuffle()
     }
 }
 
-void Deck::set_trumps(Suits trump_suit)
-{
-    for (int i = 0; i < count; ++i)
-    {
-        deck[i].is_trump = (deck[i].suit == trump_suit);
-    }
-}
 
 char *Deck::serialize()
 {

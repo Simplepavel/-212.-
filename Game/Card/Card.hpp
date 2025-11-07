@@ -29,10 +29,10 @@ struct Card
     Ranks rank;
     bool is_trump = false;
     Card() : suit(SUIT), rank(RANK) {};
-    Card(Suits s, Ranks r) : suit(s), rank(r) {}
+    Card(Suits s, Ranks r, bool it) : suit(s), rank(r), is_trump(it) {}
     char *serialize();
-    bool is_valid();
     static Card deserialize(char *buffer);
+    bool is_valid();
     bool operator==(const Card &argv);
     bool operator<(const Card &argv);
 };
