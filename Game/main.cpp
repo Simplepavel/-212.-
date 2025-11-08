@@ -14,6 +14,6 @@ int main()
     Session s1("User1", "User2");
     char * p = s1.serialize();
     std::cout << "\n\n";
-    Session::deserialize(p);
+    Session s1_copy = Session::deserialize(p);
     return 0;
 }

@@ -10,6 +10,7 @@ private:
 
 public:
     Session(const std::string &, const std::string &);
+    Session(const Shop&, const Player&, const Player&, const Card&, bool);
     char *serialize();
     static Session deserialize(char *buffer); // Дописать десериализацию
 };

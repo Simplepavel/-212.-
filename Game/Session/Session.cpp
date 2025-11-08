@@ -28,6 +28,15 @@ Session::Session(const std::string &n1, const std::string &n2) : pl1(shop, n1), 
     std::cout << ((pl1_attack) ? ("Player1 is attaker") : ("Player2 is attacker")) << '\n';
 }
 
+Session::Session(const Shop &sh, const Player &p1, const Player &p2, const Card &card, bool ip1a) : shop(sh), pl1(p1), pl2(p2), stol(card), pl1_attack(ip1a)
+{
+    std::cout << "==============Start Game==================\n";
+    std::cout << pl1 << '\n';
+    std::cout << pl2 << '\n';
+    std::cout << "Shop: " << shop << '\n';
+    std::cout << ((pl1_attack) ? ("Player1 is attaker") : ("Player2 is attacker")) << '\n';
+}
+
 char *Session::serialize()
 {
 
@@ -99,7 +108,6 @@ Session Session::deserialize(char *buffer)
     memcpy(&pl1_size, buffer + idx, 1);
     idx += 1;
     Player new_pl1 = Player::deserialize(buffer + idx);
-    std::cout << new_pl1 << '\n';
     idx += pl1_size;
     // десерелизация pl1
 
@@ -107,7 +115,6 @@ Session Session::deserialize(char *buffer)
     memcpy(&pl2_size, buffer + idx, 1);
     idx += 1;
     Player new_pl2 = Player::deserialize(buffer + idx);
-    std::cout << new_pl2 << '\n';
     idx += pl2_size;
     // десерелизация pl2
 
@@ -119,8 +126,7 @@ Session Session::deserialize(char *buffer)
     // десерелизация stol
 
     bool new_pl1_attack = buffer[idx] == 1;
-    std::cout << "Shop: " << *new_shop << '\n';
-    std::cout << ((new_pl1_attack) ? ("Player1 is attaker") : ("Player2 is attacker")) << '\n';
+    // десереализация pl1_attacker
 
-    std::cout << "end\n";
+    return Session(*new_shop, new_pl1, new_pl2, new_stol, new_pl1_attack);
 }
