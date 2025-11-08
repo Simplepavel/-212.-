@@ -72,6 +72,13 @@ void Player::add_card(const Card &card)
     deck.add_card(card);
 }
 
+uint8_t Player::GetTotalByteSize() // масксиму (36+1) * 4 + 100 + 4 < 255
+{
+    uint8_t s1 = deck.get_count();
+    uint8_t s2 = username.length();
+    return (s1 + 1) * 4 + s2 + 4;
+}
+
 std::ostream &operator<<(std::ostream &cout, const Player &pl)
 {
     std::cout << pl.username << ": " << pl.deck;

@@ -48,6 +48,8 @@ bool Card::operator<(const Card &argv)
     return false;
 }
 
+uint8_t Card::GetTotalByteSize() { return 4; }
+
 bool Card::is_valid()
 {
     return suit != SUIT && rank != RANK;

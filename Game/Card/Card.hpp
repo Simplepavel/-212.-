@@ -35,6 +35,7 @@ struct Card
     bool is_valid();
     bool operator==(const Card &argv);
     bool operator<(const Card &argv);
+    uint8_t GetTotalByteSize();
 };
 
 std::ostream &operator<<(std::ostream &cout, const Card &card);

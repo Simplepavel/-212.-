@@ -10,5 +10,6 @@ private:
 
 public:
     Session(const std::string &, const std::string &);
-    // char* serialize();
+    char *serialize();
+    static Session deserialize(char *buffer); // Дописать десериализацию
 };

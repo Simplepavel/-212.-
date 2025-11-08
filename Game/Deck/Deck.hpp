@@ -20,6 +20,7 @@ public:
     void shuffle();
     char *serialize();
     static Deck *deserialize(char *buffer);
+    uint8_t GetTotalByteSize(); // сколько места надо для сериализации
 };
 
 std::ostream &operator<<(std::ostream &cout, const Deck &deck);

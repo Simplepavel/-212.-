@@ -33,7 +33,6 @@ void Deck::shuffle()
     }
 }
 
-
 char *Deck::serialize()
 {
     char *buffer = new char[(count + 1) * 4];
@@ -61,17 +60,7 @@ Deck *Deck::deserialize(char *buffer)
 
     for (int i = 1; i <= count_card; ++i)
     {
-        // uint32_t net;
-        // memcpy(&net, buffer + 4 * i, 4);
-
-        // uint32_t host = ntohl(net);
-
-        // char *new_card = new char[4];
-
-        // memcpy(new_card, &host, 4);
         result->add_card(Card::deserialize(buffer + 4 * i));
-
-        // delete[] new_card;
     }
     return result;
 }
@@ -79,6 +68,11 @@ Deck *Deck::deserialize(char *buffer)
 Deck *Deck::create_empty()
 {
     return new Deck();
+}
+
+uint8_t Deck::GetTotalByteSize() // максимум 37 * 4 < 255
+{
+    return (count + 1) * 4;
 }
 
 std::ostream &operator<<(std::ostream &cout, const Deck &deck)
