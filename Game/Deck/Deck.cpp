@@ -2,6 +2,38 @@
 
 Deck::Deck() : count(0) {}
 
+Deck::Deck(const Deck &argv)
+{
+    count = argv.count;
+    deck = argv.deck;
+}
+
+Deck &Deck::operator=(const Deck &argv)
+{
+    if (this != &argv)
+    {
+        count = argv.count;
+        deck = argv.deck;
+    }
+    return *this;
+}
+
+Deck::Deck(const Deck &&argv)
+{
+    count = argv.count;
+    deck = std::move(argv.deck);
+}
+
+Deck &Deck::operator=(const Deck &&argv)
+{
+    if (this != &argv)
+    {
+        count = argv.count;
+        deck = std::move(argv.deck);
+    }
+    return *this;
+}
+
 void Deck::add_card(const Card &new_vl_)
 {
     deck.push_back(new_vl_);
@@ -24,7 +56,7 @@ void Deck::remove_card(unsigned int idx)
 
 void Deck::shuffle()
 {
-    srand(time(nullptr));
+
     for (int i = 0; i < 100; ++i)
     {
         int idx1 = rand() % count;
@@ -63,6 +95,11 @@ Deck *Deck::deserialize(char *buffer)
         result->add_card(Card::deserialize(buffer + 4 * i));
     }
     return result;
+}
+
+void Deck::self_deserialize(char *buffer)
+{
+    *this = std::move(*deserialize(buffer));
 }
 
 Deck *Deck::create_empty()

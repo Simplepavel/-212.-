@@ -32,6 +32,7 @@ struct Card
     Card(Suits s, Ranks r, bool it) : suit(s), rank(r), is_trump(it) {}
     char *serialize();
     static Card deserialize(char *buffer);
+    void self_deserialize(char *buffer);
     bool is_valid();
     bool operator==(const Card &argv);
     bool operator<(const Card &argv);

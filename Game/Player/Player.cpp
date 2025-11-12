@@ -1,5 +1,35 @@
 #include "Player.hpp"
 
+Player::Player() : deck(), username("") {}
+
+Player::Player(const Player &argv) : deck(argv.deck), username(argv.username) {}
+
+Player::Player(const Player &&argv)
+{
+    deck = std::move(deck);
+    username = std::move(username);
+}
+
+Player &Player::operator=(const Player &argv)
+{
+    if (this != &argv)
+    {
+        deck = argv.deck;
+        username = argv.username;
+    }
+    return *this;
+}
+
+Player &Player::operator=(const Player &&argv)
+{
+    if (this != &argv)
+    {
+        deck = std::move(argv.deck);
+        username = std::move(argv.username);
+    }
+    return *this;
+}
+
 Player::Player(Shop &shop, const std::string &name) : username(name)
 {
     for (int i = 0; i < 6; ++i)
@@ -65,6 +95,11 @@ Player Player::deserialize(char *buffer)
     new_deck = Deck::deserialize(buffer + 4 + new_name_size);
 
     return Player(*new_deck, new_name);
+}
+
+void Player::self_deserialize(char *buffer)
+{
+    *this = deserialize(buffer);
 }
 
 void Player::add_card(const Card &card)

@@ -19,6 +19,11 @@ Card Card::deserialize(char *buffer)
     return result;
 }
 
+void Card::self_deserialize(char *buffer)
+{
+    *this = deserialize(buffer);
+}
+
 bool Card::operator==(const Card &argv)
 {
     return (suit == argv.suit) && (rank == argv.rank);

@@ -1,19 +1,21 @@
 // #include "Shop/Shop.hpp"
+
 #include "Session/Session.hpp"
-// #include "Player/Player.hpp"
 int main()
 {
-    // Shop sh1;
-    // Player pl1(sh1, "Name1");
-
-    // char* pl1_serialize = pl1.serialize();
-
-    // Player pl1_copy = Player::deserialize(pl1_serialize);
-    // std::cout << pl1_copy;
-
-    Session s1("User1", "User2");
-    char * p = s1.serialize();
+    Session s1("Markus", "Sven");
+    s1.show_state();
+    Session s2;
     std::cout << "\n\n";
-    Session s1_copy = Session::deserialize(p);
+    s2.show_state();
+
+    std::cout << "\n\n";
+    char *s1_buffer = s1.serialize();
+
+    s2.self_deserialize(s1_buffer);
+
+    s1.show_state();
+    std::cout << "\n\n";
+    s2.show_state();
     return 0;
 }

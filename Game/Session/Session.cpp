@@ -1,5 +1,51 @@
 #include "Session.hpp"
 
+Session::Session() : shop(), pl1(), pl2(), stol(), pl1_attack(false) {}
+
+Session::Session(const Session &argv)
+{
+    shop = argv.shop;
+    pl1 = argv.pl1;
+    pl2 = argv.pl2;
+    stol = argv.stol;
+    pl1_attack = argv.pl1_attack;
+}
+
+Session::Session(const Session &&argv)
+{
+    shop = std::move(argv.shop);
+    pl1 = std::move(argv.pl1);
+    pl2 = std::move(argv.pl2);
+    stol = argv.stol;
+    pl1_attack = argv.pl1_attack;
+}
+
+Session &Session::operator=(const Session &argv)
+{
+    if (this != &argv)
+    {
+        shop = argv.shop;
+        pl1 = argv.pl1;
+        pl2 = argv.pl2;
+        stol = argv.stol;
+        pl1_attack = argv.pl1_attack;
+    }
+    return *this;
+}
+
+Session &Session::operator=(const Session &&argv)
+{
+    if (this != &argv)
+    {
+        shop = std::move(argv.shop);
+        pl1 = std::move(argv.pl1);
+        pl2 = std::move(argv.pl2);
+        stol = argv.stol;
+        pl1_attack = argv.pl1_attack;
+    }
+    return *this;
+}
+
 Session::Session(const std::string &n1, const std::string &n2) : pl1(shop, n1), pl2(shop, n2)
 {
     Card lowest1 = pl1.GetLowestTrump();
@@ -20,17 +66,13 @@ Session::Session(const std::string &n1, const std::string &n2) : pl1(shop, n1), 
     {
         pl1_attack = (rand() % 2 == 0);
     }
-
-    std::cout << "==============Start Game==================\n";
-    std::cout << pl1 << '\n';
-    std::cout << pl2 << '\n';
-    std::cout << "Shop: " << shop << '\n';
-    std::cout << ((pl1_attack) ? ("Player1 is attaker") : ("Player2 is attacker")) << '\n';
 }
 
-Session::Session(const Shop &sh, const Player &p1, const Player &p2, const Card &card, bool ip1a) : shop(sh), pl1(p1), pl2(p2), stol(card), pl1_attack(ip1a)
+Session::Session(const Shop &sh, const Player &p1, const Player &p2, const Card &card, bool ip1a) : shop(sh), pl1(p1), pl2(p2), stol(card), pl1_attack(ip1a) {}
+
+void Session::show_state()
 {
-    std::cout << "==============Start Game==================\n";
+    std::cout << "==============Game==================\n";
     std::cout << pl1 << '\n';
     std::cout << pl2 << '\n';
     std::cout << "Shop: " << shop << '\n';
@@ -129,4 +171,9 @@ Session Session::deserialize(char *buffer)
     // десереализация pl1_attacker
 
     return Session(*new_shop, new_pl1, new_pl2, new_stol, new_pl1_attack);
+}
+
+void Session::self_deserialize(char *buffer)
+{
+    *this = deserialize(buffer);
 }
