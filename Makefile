@@ -14,9 +14,9 @@ all: moc
 
 	cd CurrentUser && make && cd ..
 
-	cd Game/
+	cd BackEnd/Client && make && cd ../..
 	
-	g++ main.cpp DurakOnline.cpp moc_DurakOnline.cpp interface.o database.o currentuser.o $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
+	g++ main.cpp DurakOnline.cpp moc_DurakOnline.cpp interface.o database.o currentuser.o durakclient.o $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
 
 	rm *.o -f
 

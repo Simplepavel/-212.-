@@ -1,19 +1,17 @@
 #include <cstdint>
-#include "../../Game/Card.hpp"
-enum MOVES : uint8_t
+#include <winsock2.h>
+enum DataType : uint8_t // что передали какой тип данный содержится в данных
 {
-    ATTACK,  // Атаковать картой
-    DEFEND,  // Защититься картой
-    TAKE,    // Взять карты (сдаться) или добрать карту
-    END_TURN // Закончить ход/атаку
+    Int,
+    Text,
+    Player
 };
 
-struct Protocol
+struct Mark1
 {
-    uint32_t id;
-    uint32_t opp_id;
-    MOVES move;
-    Card card; // с какой картой происходит действие move
-    void serialize(char *buffer);
-    static Protocol deserialize(char *buffer);
+    DataType type;
+    char *data;
+    uint32_t length;
+    char *serialize();
+    static Mark1 deserialize(char *buffer);
 };

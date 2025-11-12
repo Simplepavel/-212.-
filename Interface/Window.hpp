@@ -17,8 +17,8 @@ class Window : public QWidget
 {
 private:
     // Неигровые параметры
-    QScreen* screen_Objc;
-    int screen_Width; // Ширина
+    QScreen *screen_Objc;
+    int screen_Width;  // Ширина
     int screen_Height; // Высота
     // Неигровые параметры
     // Вспомогательные элементы
@@ -73,7 +73,6 @@ private:
 
     QScrollArea *play_ScrollArea;
 
-
     // Игровое полотно
 
 public:
@@ -103,5 +102,6 @@ public:
     // const QPushButton& get_main_FindRoomBttn(){return *main_FindRoomBttn;}
     // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
+    const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
     // Константный доступ к элементам формы главного окна
 };

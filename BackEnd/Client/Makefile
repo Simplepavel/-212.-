@@ -1,4 +1,4 @@
-sources = Client.cpp main.cpp ../Protocol/Protocol.cpp ../../Game/Card.cpp
+sources = Client.cpp
 libs = -lws2_32
 all:
-	g++ $(sources) -o main -g $(libs)
+	g++ $(sources) $(libs) -g -c -o ../../durakclient.o

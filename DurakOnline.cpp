@@ -1,6 +1,8 @@
 #include "DurakOnline.hpp"
 
 std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhost:5432/durak";
+char SERVER_IP[] = "127.0.0.1";
+char SERVER_PORT[] = "6666";
 
 DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv) {}
 
@@ -55,8 +57,13 @@ bool DurakOnline::login()
 void DurakOnline::logout()
 {
     current_user.to_null();
-    std::cout << "hello!\n";
     window.login();
+}
+
+void DurakOnline::play()
+{
+    client.Client_Connect(SERVER_IP, SERVER_PORT);
+    Player player;
 }
 
 void DurakOnline::connect()
@@ -64,6 +71,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
     QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
     QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
+    QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::play);
 }
 
 int DurakOnline::start()

@@ -72,11 +72,3 @@ void Durak_Client::print(sockaddr *addr)
     }
     std::cout << result << ":" << port;
 }
-
-int Durak_Client::Client_Send(Protocol data)
-{
-    char buffer[12];
-    data.serialize(buffer);
-    int res = send(client_socket, buffer, sizeof(buffer), 0);
-    return res;
-}

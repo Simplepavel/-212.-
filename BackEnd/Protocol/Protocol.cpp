@@ -1,28 +1,29 @@
 #include "Protocol.hpp"
 
-void Protocol::serialize(char *buffer)
+char *Mark1::serialize()
 {
-    uint32_t net_id = htonl(id);
-    uint32_t net_opp_id = htonl(opp_id);
-    memcpy(buffer, &net_id, 4);
-    memcpy(buffer + 4, &net_opp_id, 4);
-    memcpy(buffer + 8, &move, 1);
+    uint32_t capacity = length + 5;
+    char *result = new char[capacity];
 
-    card.serialize(buffer + 9);
+    uint32_t net_length = htonl(length);
+
+    memcpy(result, &type, 1);           // запоминаем тип данных
+    memcpy(result + 1, &net_length, 4); // запоминаем длину данных
+    memcpy(result + 5, data, length);   // запонимаем сами данные, которые в последстивии буду передаваться в методы self_deserialize
+    return result;
 }
 
-Protocol Protocol::deserialize(char *buffer)
+Mark1 Mark1::deserialize(char *buffer)
 {
-    Protocol result;
-    uint32_t net_id;
-    uint32_t net_opp_id;
+    Mark1 result;
+    memcpy(&result.type, buffer, 1);
 
-    memcpy(&net_id, buffer, 4);
-    memcpy(&net_opp_id, buffer + 4, 4);
-    memcpy(&result.move, buffer + 8, 1);
-    result.id = ntohl(net_id);
-    result.opp_id = ntohl(net_opp_id);
+    uint32_t net_length;
+    memcpy(&net_length, buffer + 1, 4);
+    result.length = ntohl(net_length);
 
-    result.card = Card::deserialize(buffer + 9);
+    char *data = new char[result.length];
+    memcpy(data, buffer + 5, result.length);
+    result.data = data;
     return result;
 }
