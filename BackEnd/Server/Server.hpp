@@ -7,6 +7,7 @@
 #include <mutex>
 #include <chrono>
 #include "../Protocol/Protocol.hpp"
+#include "Session.hpp"
 #define BACKLOG 128
 
 class Durak_Server // основной поток слушает подключения и добавление в очередь
@@ -14,7 +15,7 @@ class Durak_Server // основной поток слушает подключ�
 private:
     SOCKET server_socket;
     std::list<SOCKET> clients;
-    std::queue<SOCKET> line;
+    std::queue<Player> line;
     void print(sockaddr *);
     void Server_Accept();
     std::mutex mtx;

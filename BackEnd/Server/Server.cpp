@@ -150,10 +150,15 @@ void Durak_Server::Server_Go()
                     if (bytes > 0)
                     {
                         Mark1 recv_data = Mark1::deserialize(data);
-                        std::cout << ((recv_data.type == DataType::Text) ? "Text\n" : "Something went wrong\n");
-                        std::cout << "Data:" << strlen(recv_data.data) << '\n';
-                        std::cout << (recv_data.data[5] == '\0') << '\n';
-                        std::cout << "Length: " << recv_data.length << '\n';
+                        if (recv_data.type == FIND_ENEMY)
+                        {
+                            Player pl;
+                            uint32_t net_id;
+                            memcpy(&net_id, recv_data.data, 4);
+                            pl.id = ntohl(net_id);
+                            pl.fd = *i;
+                            // ToDo Добавление клиента в очередь(Если она уже не пуста, значит соединение и начало игры)
+                        }
                     }
                     else if (bytes == 0)
                     {

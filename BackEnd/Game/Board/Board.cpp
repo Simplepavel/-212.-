@@ -80,11 +80,3 @@ void Board::show() const
         }
     }
 }
-
-void Board::clear()
-{
-    for (int i = 0; i < 64; ++i)
-    {
-        self[i] = Figure();
-    }
-}

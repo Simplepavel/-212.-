@@ -1,5 +1,5 @@
 #include <vector>
-#include "Figure.hpp"
+#include "../Figure/Figure.hpp"
 class Board
 {
 private:
