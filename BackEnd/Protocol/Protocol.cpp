@@ -1,9 +1,10 @@
 #include "Protocol.hpp"
 
-char *Mark1::serialize()
+uint32_t Mark1::capacity() const { return length + 5; }
+
+char *Mark1::serialize() const
 {
-    uint32_t capacity = length + 5;
-    char *result = new char[capacity];
+    char *result = new char[capacity()];
 
     uint32_t net_length = htonl(length);
 

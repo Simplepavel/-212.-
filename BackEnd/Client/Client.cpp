@@ -72,3 +72,11 @@ void Durak_Client::print(sockaddr *addr)
     }
     std::cout << result << ":" << port;
 }
+
+int Durak_Client::Clinet_Send(const Mark1 &data)
+{
+    char *mark1_serialize = data.serialize();
+    int result = send(client_socket, mark1_serialize, data.capacity(), 0);
+    delete[] mark1_serialize;
+    return result;
+}

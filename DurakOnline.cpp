@@ -62,8 +62,16 @@ void DurakOnline::logout()
 
 void DurakOnline::play()
 {
-    client.Client_Connect(SERVER_IP, SERVER_PORT);
-    Player player;
+    bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT);
+    if (flag) // удачное подключение, пока только один поток
+    {
+        Mark1 to_send;
+        to_send.data = const_cast<char *>(current_user.get_username().c_str());
+        to_send.length = current_user.get_username().size() + 1;
+        to_send.type = DataType::Text;
+        int result = client.Clinet_Send(to_send);
+        // теперь нужно отправть информацию об игроке для создания комнаты, сервер создаст игрока на основе этой информации и положит его в очередь(наверное)
+    }
 }
 
 void DurakOnline::connect()

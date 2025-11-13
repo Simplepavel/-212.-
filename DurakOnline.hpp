@@ -1,12 +1,10 @@
 #include "DataBase/database.hpp"
 #include "Interface/Window.hpp"
 #include "CurrentUser/CurrentUser.hpp"
+
 #include "BackEnd/Client/Client.hpp"
-#include "Game/Player/Player.hpp"
 #include <string>
 #include <iostream>
-
-
 
 class DurakOnline : public QObject
 {

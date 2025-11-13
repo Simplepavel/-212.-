@@ -1,2 +1,2 @@
 all:
-	g++ main.cpp Protocol.cpp -lws2_32 -o main -g
+	g++ Protocol.cpp -lws2_32 -c -o ../../protocol.o

@@ -1,6 +1,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iostream>
+#include "../Protocol/Protocol.hpp"
 class Durak_Client
 {
 private:
@@ -11,4 +12,5 @@ public:
     Durak_Client();
     bool Client_Connect(char *IP, char *PORT);
     bool Client_Disconnect();
+    int Clinet_Send(const Mark1&);
 };

@@ -145,20 +145,16 @@ void Durak_Server::Server_Go()
             {
                 if (FD_ISSET(*i, &master))
                 {
-                    char data[512]{0};
+                    char data[105]{0};
                     int bytes = recv(*i, data, sizeof(data), 0);
                     if (bytes > 0)
                     {
-                        // SetConsoleOutputCP(65001);
-                        // SetConsoleCP(65001);
-                        // Protocol result = Protocol::deserialize(data);
-                        // std::cout << "Recived next info:\n";
-                        // std::cout << "From: " << result.id << '\n';
-                        // std::cout << "Opp_ID: " << result.opp_id << '\n';
-                        // std::cout << "Move: " << (int)result.move << '\n';
-                        // std::cout << "Card:" << result.card << '\n';
-                        
-                    } // все хорошо, отправляем назад прочитанные данные
+                        Mark1 recv_data = Mark1::deserialize(data);
+                        std::cout << ((recv_data.type == DataType::Text) ? "Text\n" : "Something went wrong\n");
+                        std::cout << "Data:" << strlen(recv_data.data) << '\n';
+                        std::cout << (recv_data.data[5] == '\0') << '\n';
+                        std::cout << "Length: " << recv_data.length << '\n';
+                    }
                     else if (bytes == 0)
                     {
                         std::cout << "Client ";
