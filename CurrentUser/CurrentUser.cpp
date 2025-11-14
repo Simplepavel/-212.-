@@ -1,7 +1,7 @@
 #include "CurrentUser.hpp"
 
 CurrentUser::CurrentUser() : id(-1), username(""), email(""), null(true) {}
-CurrentUser::CurrentUser(unsigned long _id, const std::string &_username, const std::string &_email) : id(_id), username(_username), email(_email), null(false) {}
+CurrentUser::CurrentUser(uint32_t _id, const std::string &_username, const std::string &_email) : id(_id), username(_username), email(_email), null(false) {}
 CurrentUser &CurrentUser::operator=(CurrentUser &&value)
 {
     id = value.id;
@@ -11,7 +11,7 @@ CurrentUser &CurrentUser::operator=(CurrentUser &&value)
     return *this;
 }
 
-unsigned long CurrentUser::get_id() const { return id; }
+uint32_t CurrentUser::get_id() const { return id; }
 const std::string &CurrentUser::get_email() const { return email; }
 const std::string &CurrentUser::get_username() const { return username; }
 bool CurrentUser::is_null() { return null; }

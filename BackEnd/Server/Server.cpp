@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhost:5432/durak";
+
 Durak_Server::Durak_Server() : server_socket(INVALID_SOCKET)
 {
     WORD version = MAKEWORD(2, 2);
@@ -152,11 +154,62 @@ void Durak_Server::Server_Go()
                         Mark1 recv_data = Mark1::deserialize(data);
                         if (recv_data.type == FIND_ENEMY)
                         {
-                            Player pl;
+                            Player pl1;
                             uint32_t net_id;
                             memcpy(&net_id, recv_data.data, 4);
-                            pl.id = ntohl(net_id);
-                            pl.fd = *i;
+                            pl1.id = ntohl(net_id);
+                            pl1.fd = *i;
+                            if (!line.empty()) // первый типок из очереди будет твои соперником
+                            {
+                                Player pl2 = line.front();
+                                line.pop();
+
+                                Session *new_session = new Session(pl1, pl2);
+                                play_sessions[new_session->id] = new_session;
+
+                                pqxx::connection *database_session = make_session(url_base);
+                                pqxx::work tx(*database_session);
+
+                                pqxx::result username1 = tx.exec("select username from users where id=$1", pqxx::params{pl1.id});
+                                pqxx::result username2 = tx.exec("select username from users where id=$1", pqxx::params{pl2.id});
+
+                                std::string u1 = username1[0][0].as<std::string>();
+                                std::string u2 = username2[0][0].as<std::string>();
+
+                                char *packet1 = new char[u1.size() + 5];
+                                char *packet2 = new char[u2.size() + 5];
+
+                                uint32_t net_session_id = htonl(new_session->id);
+
+                                memcpy(packet1, &net_session_id, 4);
+                                memcpy(packet1 + 4, &u1[0], u1.size() + 1);
+
+                                memcpy(packet2, &net_session_id, 4);
+                                memcpy(packet2 + 4, &u2[0], u2.size() + 1);
+
+                                std::cout << "Send START to user " << u1 << '\n';
+                                Mark1 to_send1;
+                                to_send1.type = DataType::START;
+                                to_send1.data = packet2;
+                                to_send1.length = u2.size() + 5;
+                                Server_Send(to_send1, pl1.fd);
+
+                                std::cout << "Send START to user " << u2 << '\n';
+
+                                Mark1 to_send2;
+                                to_send2.type = DataType::START;
+                                to_send2.data = packet1;
+                                to_send2.length = u1.size() + 5;
+                                Server_Send(to_send2, pl2.fd);
+
+                                delete[] packet1;
+                                delete[] packet2;
+                            }
+                            else
+                            {
+                                line.push(pl1);
+                                std::cout << pl1.id << '\n';
+                            }
                             // ToDo Добавление клиента в очередь(Если она уже не пуста, значит соединение и начало игры)
                         }
                     }
@@ -201,4 +254,12 @@ void Durak_Server::Server_Go()
         }
     }
     thr1.join();
+}
+
+int Durak_Server::Server_Send(const Mark1 &data, int fd)
+{
+    char *mark1_serialize = data.serialize();
+    int result = send(fd, mark1_serialize, data.capacity(), 0);
+    delete[] mark1_serialize;
+    return result;
 }

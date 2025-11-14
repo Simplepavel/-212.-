@@ -6,18 +6,21 @@ libs_qt = -L C:\msys64\ucrt64\lib -l Qt6Widgets -l Qt6Core -l Qt6Gui
 
 
 
-object_file = card.o currentuser.o database.o deck.o durakclient.o interface.o player.o session.o shop.o protocol.o
+
+object_file = currentuser.o database.o durakclient.o interface.o protocol.o figure.o board.o
 
 .PHONY:all backendTarget gameTarget mocTarget
 
 backendTarget:
-
-gameTarget:
+	cd BackEnd/Client && make && cd ../..
+	cd BackEnd/Game/Board && make && cd ../../..
+	cd BackEnd/Game/Figure && make && cd ../../..
+	cd BackEnd/Protocol && make && cd ../..
 
 mocTarget:
 	C:\msys64\ucrt64\share\qt6\bin\moc.exe DurakOnline.hpp -o moc_DurakOnline.cpp
 
-all: mocTarget backendTarget gameTarget
+all: mocTarget backendTarget
 	cd Interface && make && cd ..
 	cd DataBase && make && cd ..
 	cd CurrentUser && make && cd ..

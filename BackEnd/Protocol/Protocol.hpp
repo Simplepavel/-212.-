@@ -2,7 +2,9 @@
 #include <winsock2.h>
 enum DataType : uint8_t // что передали какой тип данный содержится в данных
 {
-    
+    FIND_ENEMY,
+    MOVE,
+    START,
 };
 
 struct Mark1

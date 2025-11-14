@@ -8,8 +8,10 @@ DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv) {}
 
 bool DurakOnline::registration()
 {
-    auto session = make_session(url_base);
+    pqxx::connection *session = make_session(url_base);
     pqxx::work tx(*session);
+
+    
     std::string name = window.get_reg_Username().text().toStdString();
     std::string email = window.get_reg_Email().text().toStdString();
     std::string password = window.get_reg_Password().text().toStdString();
@@ -66,10 +68,13 @@ void DurakOnline::play()
     if (flag) // удачное подключение, пока только один поток
     {
         Mark1 to_send;
-        to_send.data = const_cast<char *>(current_user.get_username().c_str());
-        to_send.length = current_user.get_username().size() + 1;
-        to_send.type = DataType::Text;
-        int result = client.Clinet_Send(to_send);
+        to_send.data = new char[4];
+        uint32_t net_id = htonl(current_user.get_id());
+        memcpy(to_send.data, &net_id, 4);
+        to_send.length = 4;
+        to_send.type = DataType::FIND_ENEMY;
+        int bytes = client.Clinet_Send(to_send);
+        delete[] to_send.data;
         // теперь нужно отправть информацию об игроке для создания комнаты, сервер создаст игрока на основе этой информации и положит его в очередь(наверное)
     }
 }

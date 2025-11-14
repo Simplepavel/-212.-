@@ -1,18 +1,19 @@
 #include <string>
 #include <iostream>
+#include <cstdint>
 class CurrentUser
 {
 private:
-    unsigned long id;
+    uint32_t id;
     std::string username;
     std::string email;
     bool null;
 
 public:
     CurrentUser();
-    CurrentUser(unsigned long _id, const std::string &_username, const std::string &_email);
+    CurrentUser(uint32_t _id, const std::string &_username, const std::string &_email);
     CurrentUser &operator=(CurrentUser &&);
-    unsigned long get_id() const;
+    uint32_t get_id() const;
     const std::string &get_username() const;
     const std::string &get_email() const;
     bool is_null();
