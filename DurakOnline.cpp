@@ -77,6 +77,7 @@ void DurakOnline::play()
         client.set_ready(true);
         std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client));
         listen_thread.detach();
+        window.play();
     }
 }
 

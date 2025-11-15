@@ -56,23 +56,11 @@ private:
 
     // Игровое полотно
     QWidget *play_Widget;
-    QGridLayout *play_Layout;
-
-    QLabel *play_EnemyLabel;
-
-    QVBoxLayout *play_DeckInfoLayout; // та часть, что слева от игорного стола
-    QLabel *play_TrumpLabel;          // козырь
-    QPushButton *play_TakeCard;       // взять карты
-    QWidget *play_GameField;
-
-    QLabel *play_MyCards;
-    QLabel *play_TurnInfo; // Ваш ход, ход соперника
-
-    QWidget *play_DeckWidget;
-    QHBoxLayout *play_DeckLayout;
-
-    QScrollArea *play_ScrollArea;
-
+    QVBoxLayout *play_Layout;
+    QLabel *play_EnemyName;
+    QGridLayout *play_BoardLayot;
+    QPushButton *play_NextBttn;
+    QPushButton *play_StopBttn;
     // Игровое полотно
 
 public:
@@ -104,4 +92,5 @@ public:
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
     // Константный доступ к элементам формы главного окна
+
 };
