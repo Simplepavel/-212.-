@@ -176,22 +176,22 @@ void Durak_Server::Server_Go()
                                 std::string u1 = username1[0][0].as<std::string>();
                                 std::string u2 = username2[0][0].as<std::string>();
 
-                                char *packet1 = new char[u1.size() + 5];
-                                char *packet2 = new char[u2.size() + 5];
+                                char *packet1 = new char[u1.size() + 4];
+                                char *packet2 = new char[u2.size() + 4];
 
                                 uint32_t net_session_id = htonl(new_session->id);
 
                                 memcpy(packet1, &net_session_id, 4);
-                                memcpy(packet1 + 4, &u1[0], u1.size() + 1);
+                                memcpy(packet1 + 4, &u1[0], u1.size());
 
                                 memcpy(packet2, &net_session_id, 4);
-                                memcpy(packet2 + 4, &u2[0], u2.size() + 1);
+                                memcpy(packet2 + 4, &u2[0], u2.size());
 
                                 std::cout << "Send START to user " << u1 << '\n';
                                 Mark1 to_send1;
+                                to_send1.length = u2.size() + 4;
                                 to_send1.type = DataType::START;
                                 to_send1.data = packet2;
-                                to_send1.length = u2.size() + 5;
                                 Server_Send(to_send1, pl1.fd);
 
                                 std::cout << "Send START to user " << u2 << '\n';
@@ -199,7 +199,7 @@ void Durak_Server::Server_Go()
                                 Mark1 to_send2;
                                 to_send2.type = DataType::START;
                                 to_send2.data = packet1;
-                                to_send2.length = u1.size() + 5;
+                                to_send2.length = u1.size() + 4;
                                 Server_Send(to_send2, pl2.fd);
 
                                 delete[] packet1;

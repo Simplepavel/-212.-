@@ -5,6 +5,7 @@
 #include "BackEnd/Client/Client.hpp"
 #include <string>
 #include <iostream>
+#include <thread>
 
 class DurakOnline : public QObject
 {

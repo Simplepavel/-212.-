@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Durak_Client::Durak_Client()
+Durak_Client::Durak_Client() : ready(false)
 {
     WORD version = MAKEWORD(2, 2);
     WSAData specific_data;
@@ -73,10 +73,33 @@ void Durak_Client::print(sockaddr *addr)
     std::cout << result << ":" << port;
 }
 
-int Durak_Client::Clinet_Send(const Mark1 &data)
+int Durak_Client::Client_Send(const Mark1 &data)
 {
     char *mark1_serialize = data.serialize();
     int result = send(client_socket, mark1_serialize, data.capacity(), 0);
     delete[] mark1_serialize;
     return result;
+}
+
+void Durak_Client::Client_Listen()
+{
+    char buffer[256];
+    while (ready)
+    {
+        int bytes = recv(client_socket, buffer, sizeof(buffer), 0);
+        if (bytes > 0)
+        {
+            Mark1 result = Mark1::deserialize(buffer);
+            uint32_t net_session_id;
+            memcpy(&net_session_id, result.data, 4);
+            uint32_t session_id = ntohl(net_session_id);
+            std::cout << "============Start info========\n";
+            std::cout << "Session id " << session_id << '\n';
+
+            std::string enemy_name;
+            enemy_name.resize(result.length - 4);
+            memcpy(&enemy_name[0], result.data + 4, result.length - 4);
+            std::cout << "Enemy name " << enemy_name << '\n';
+        }
+    }
 }

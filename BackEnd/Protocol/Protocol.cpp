@@ -20,7 +20,7 @@ Mark1 Mark1::deserialize(char *buffer)
     memcpy(&result.type, buffer, 1);
 
     uint32_t net_length;
-    memcpy(&net_length, buffer + 1, 4);
+    memcpy(&net_length, buffer + 1,  4);
     result.length = ntohl(net_length);
 
     char *data = new char[result.length];

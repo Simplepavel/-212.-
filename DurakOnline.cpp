@@ -11,7 +11,6 @@ bool DurakOnline::registration()
     pqxx::connection *session = make_session(url_base);
     pqxx::work tx(*session);
 
-    
     std::string name = window.get_reg_Username().text().toStdString();
     std::string email = window.get_reg_Email().text().toStdString();
     std::string password = window.get_reg_Password().text().toStdString();
@@ -73,9 +72,11 @@ void DurakOnline::play()
         memcpy(to_send.data, &net_id, 4);
         to_send.length = 4;
         to_send.type = DataType::FIND_ENEMY;
-        int bytes = client.Clinet_Send(to_send);
+        int bytes = client.Client_Send(to_send);
         delete[] to_send.data;
-        // теперь нужно отправть информацию об игроке для создания комнаты, сервер создаст игрока на основе этой информации и положит его в очередь(наверное)
+        client.set_ready(true);
+        std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client));
+        listen_thread.detach();
     }
 }
 
