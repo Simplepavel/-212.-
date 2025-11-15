@@ -91,23 +91,6 @@ void Durak_Server::Server_Accept()
     }
 }
 
-void Durak_Server::print(sockaddr *addr)
-{
-    char result[INET6_ADDRSTRLEN]{0};
-    unsigned short port;
-    if (addr->sa_family == AF_INET)
-    {
-        inet_ntop(AF_INET, &((sockaddr_in *)addr)->sin_addr, result, sizeof(result));
-        port = ntohs(((sockaddr_in *)addr)->sin_port);
-    }
-    else
-    {
-        inet_ntop(AF_INET6, &((sockaddr_in6 *)addr)->sin6_addr, result, sizeof(result));
-        port = ntohs(((sockaddr_in *)addr)->sin_port);
-    }
-    std::cout << result << ":" << port;
-}
-
 void Durak_Server::Server_Go()
 {
     std::thread thr1(&Durak_Server::Server_Accept, std::ref(*this));
@@ -154,63 +137,20 @@ void Durak_Server::Server_Go()
                         Mark1 recv_data = Mark1::deserialize(data);
                         if (recv_data.type == FIND_ENEMY)
                         {
-                            Player pl1;
                             uint32_t net_id;
                             memcpy(&net_id, recv_data.data, 4);
-                            pl1.id = ntohl(net_id);
-                            pl1.fd = *i;
-                            if (!line.empty()) // первый типок из очереди будет твои соперником
+                            Player pl1(ntohl(net_id), *i);
+                            if (!line.empty())
                             {
                                 Player pl2 = line.front();
                                 line.pop();
-
-                                Session *new_session = new Session(pl1, pl2);
-                                play_sessions[new_session->id] = new_session;
-
-                                pqxx::connection *database_session = make_session(url_base);
-                                pqxx::work tx(*database_session);
-
-                                pqxx::result username1 = tx.exec("select username from users where id=$1", pqxx::params{pl1.id});
-                                pqxx::result username2 = tx.exec("select username from users where id=$1", pqxx::params{pl2.id});
-
-                                std::string u1 = username1[0][0].as<std::string>();
-                                std::string u2 = username2[0][0].as<std::string>();
-
-                                char *packet1 = new char[u1.size() + 4];
-                                char *packet2 = new char[u2.size() + 4];
-
-                                uint32_t net_session_id = htonl(new_session->id);
-
-                                memcpy(packet1, &net_session_id, 4);
-                                memcpy(packet1 + 4, &u1[0], u1.size());
-
-                                memcpy(packet2, &net_session_id, 4);
-                                memcpy(packet2 + 4, &u2[0], u2.size());
-
-                                std::cout << "Send START to user " << u1 << '\n';
-                                Mark1 to_send1;
-                                to_send1.length = u2.size() + 4;
-                                to_send1.type = DataType::START;
-                                to_send1.data = packet2;
-                                Server_Send(to_send1, pl1.fd);
-
-                                std::cout << "Send START to user " << u2 << '\n';
-
-                                Mark1 to_send2;
-                                to_send2.type = DataType::START;
-                                to_send2.data = packet1;
-                                to_send2.length = u1.size() + 4;
-                                Server_Send(to_send2, pl2.fd);
-
-                                delete[] packet1;
-                                delete[] packet2;
+                                Make_Session(pl2, pl1);
                             }
                             else
                             {
                                 line.push(pl1);
-                                std::cout << pl1.id << '\n';
+                                // статус ожидайте!
                             }
-                            // ToDo Добавление клиента в очередь(Если она уже не пуста, значит соединение и начало игры)
                         }
                     }
                     else if (bytes == 0)
@@ -262,4 +202,60 @@ int Durak_Server::Server_Send(const Mark1 &data, int fd)
     int result = send(fd, mark1_serialize, data.capacity(), 0);
     delete[] mark1_serialize;
     return result;
+}
+
+void Durak_Server::Make_Session(const Player &pl1, const Player &pl2)
+{
+    Session *new_session = new Session(pl1, pl2);
+    play_sessions[new_session->id] = new_session;
+    pqxx::connection *database_session = make_session(url_base);
+    pqxx::work tx(*database_session);
+
+    bool Player1White = rand() % 2 == 0;
+    Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
+
+    bool Player2White = !Player1White;
+    Mark1 ToPlayer2 = MakeStartPacket(tx, pl1, new_session->id, Player2White);
+
+    Server_Send(ToPlayer1, pl1.fd);
+    Server_Send(ToPlayer2, pl2.fd);
+}
+
+void Durak_Server::print(sockaddr *addr)
+{
+    char result[INET6_ADDRSTRLEN]{0};
+    unsigned short port;
+    if (addr->sa_family == AF_INET)
+    {
+        inet_ntop(AF_INET, &((sockaddr_in *)addr)->sin_addr, result, sizeof(result));
+        port = ntohs(((sockaddr_in *)addr)->sin_port);
+    }
+    else
+    {
+        inet_ntop(AF_INET6, &((sockaddr_in6 *)addr)->sin6_addr, result, sizeof(result));
+        port = ntohs(((sockaddr_in *)addr)->sin_port);
+    }
+    std::cout << result << ":" << port;
+}
+
+Mark1 Durak_Server::MakeStartPacket(pqxx::work &tx, const Player &pl, uint32_t session_id, bool flag)
+{
+    Mark1 to_send;
+    pqxx::result username = tx.exec("select username from users where id=$1", pqxx::params{pl.id});
+    std::string username_value = username[0][0].as<std::string>();
+
+    uint32_t net_session_id = htonl(session_id); // 4 байта
+
+    char *data = new char[username_value.size() + 5];
+
+    memcpy(data, &net_session_id, 4);
+    data[4] = (flag) ? 1 : 0;
+    memcpy(data + 5, &username_value[0], username_value.size());
+
+    to_send.type = DataType::START;
+    to_send.length = username_value.size() + 5;
+    to_send.data = data;
+
+    delete[] data;
+    return to_send;
 }

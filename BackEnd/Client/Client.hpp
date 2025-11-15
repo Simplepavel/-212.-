@@ -1,9 +1,12 @@
+// #pragma once
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iostream>
+#include <QObject>
 #include "../Protocol/Protocol.hpp"
-class Durak_Client
+class Durak_Client : public QObject
 {
+    Q_OBJECT
 private:
     SOCKET client_socket;
     void print(sockaddr *);

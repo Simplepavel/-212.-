@@ -12,6 +12,8 @@
 #include "../../DataBase/database.hpp"
 #define BACKLOG 128
 
+// Убрать все нижние подчеркивания
+
 class Durak_Server // основной поток слушает подключения и добавление в очередь
 {
 private:
@@ -21,6 +23,8 @@ private:
     std::map<uint32_t, Session *> play_sessions;
     void print(sockaddr *);
     void Server_Accept();
+    void Make_Session(const Player &, const Player &);
+    Mark1 MakeStartPacket(pqxx::work &tx, const Player &pl, uint32_t session_id, bool);
     std::mutex mtx;
 
 public:

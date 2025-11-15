@@ -117,17 +117,7 @@ Window::Window(QWidget *parent)
 
     play_StopBttn = new QPushButton("Stop");
     play_StopBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
-
-    int bttn_size = screen_Height / 15;
-    for (int i = 0; i < 8; ++i)
-    {
-        for (int j = 0; j < 8; ++j)
-        {
-            QPushButton *bttn = new QPushButton("AA");
-            bttn->setFixedSize(bttn_size, bttn_size);
-            play_BoardLayot->addWidget(bttn, i, j, Qt::AlignCenter);
-        }
-    }
+    
     play_Layout->addWidget(play_EnemyName);
     play_Layout->addItem(play_BoardLayot);
     play_BoardLayot->setSpacing(0);
