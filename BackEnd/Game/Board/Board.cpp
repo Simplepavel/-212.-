@@ -69,7 +69,8 @@ void Board::show() const
 {
     for (int i = 0; i < 64; ++i)
     {
-        std::cout << self[i];
+        Figure alfa = self[i];
+        std::cout << alfa.to_string();
         if (i % 8 == 7)
         {
             std::cout << '\n';
@@ -79,4 +80,9 @@ void Board::show() const
             std::cout << ' ';
         }
     }
+}
+
+const Figure &Board::operator[](int idx) const
+{
+    return self[idx];
 }

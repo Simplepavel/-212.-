@@ -162,7 +162,9 @@ void Window::UpdateBoard(const Board &NewBoard) // заполнили согла
     {
         for (int j = 0; j < 8; ++j)
         {
-            QPushButton *new_bttn = new QPushButton;
+            Figure alfa = NewBoard[i * 8 + j];
+            QPushButton *new_bttn = new QPushButton(QString::fromStdString(alfa.to_string()));
+            // Покрасить кнопку в нужный цвет. Поменять размер шрифта и цвет кнопки
             new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
             if (i % 2 == 0)
             {

@@ -11,4 +11,5 @@ public:
     void deserialize(char *);
     uint16_t capacity() { return 128; }
     void show() const;
+    const Figure& operator[](int idx) const;
 };

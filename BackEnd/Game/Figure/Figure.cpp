@@ -18,41 +18,46 @@ void Figure::deserialize(char *buffer)
     white = (buffer[1] == 1);
 }
 
-std::ostream &operator<<(std::ostream &cout, const Figure &fig)
+std::string Figure::to_string() const
 {
-    if (fig.is_valid())
+    if (is_valid())
     {
-        char ans[3]{};
-        switch (fig.get_name())
+        if (is_white())
         {
-        case KING:
-            ans[0] = 'K';
-            break;
-        case QUEEN:
-            ans[0] = 'Q';
-            break;
-        case ROOK:
-            ans[0] = 'R';
-            break;
-        case BISHOP:
-            ans[0] = 'B';
-            break;
-        case KNIGHT:
-            ans[0] = 'N';
-            break;
-        case PAWN:
-            ans[0] = 'P';
-            break;
-        default:
-            ans[0] = ' ';
-            break;
+            switch (get_name())
+            {
+            case (KING):
+                return "K";
+            case (QUEEN):
+                return "Q";
+            case (ROOK):
+                return "R";
+            case (BISHOP):
+                return "B";
+            case (KNIGHT):
+                return "N";
+            case (PAWN):
+                return "P";
+            }
         }
-        ans[1] = fig.is_white() ? '0' : '1';
-        cout << ans;
+        else
+        {
+            switch (get_name())
+            {
+            case (KING):
+                return "k";
+            case (QUEEN):
+                return "q";
+            case (ROOK):
+                return "r";
+            case (BISHOP):
+                return "b";
+            case (KNIGHT):
+                return "n";
+            case (PAWN):
+                return "p";
+            }
+        }
     }
-    else
-    {
-        cout << "XX";
-    }
-    return cout;
+    return "";
 }

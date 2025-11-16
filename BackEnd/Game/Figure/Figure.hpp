@@ -27,6 +27,5 @@ public:
     uint8_t capacity() { return 2; }
     char *serialize();
     void deserialize(char *buffer);
+    std::string to_string() const;
 };
-
-std::ostream &operator<<(std::ostream &cout, const Figure &fig);
