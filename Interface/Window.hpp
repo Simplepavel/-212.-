@@ -12,6 +12,11 @@
 #include <QScrollArea>
 #include <QScreen>
 #include <QRect>
+
+#include <QFont>
+#include <QPalette>
+#include <QCOlor>
+
 #include "../BackEnd/Game/Board/Board.hpp"
 
 class Window : public QWidget

@@ -165,29 +165,40 @@ void Window::UpdateBoard(const Board &NewBoard) // заполнили согла
             Figure alfa = NewBoard[i * 8 + j];
             QPushButton *new_bttn = new QPushButton(QString::fromStdString(alfa.to_string()));
             // Покрасить кнопку в нужный цвет. Поменять размер шрифта и цвет кнопки
-            new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
+
+            bool color; // 1 - белый, 0 - черный
             if (i % 2 == 0)
             {
                 if ((i * 8 + j) % 2 == 0)
                 {
-                    new_bttn->setStyleSheet("background-color: white;");
+                    color = true;
                 }
                 else
                 {
-                    new_bttn->setStyleSheet("background-color: black;");
+                    color = false;
                 }
             }
             else
             {
-                if ((i * 8 + j) % 2 != 0)
+                if ((i * 8 + j) % 2 == 0)
                 {
-                    new_bttn->setStyleSheet("background-color: white;");
+                    color = false;
                 }
                 else
                 {
-                    new_bttn->setStyleSheet("background-color: black;");
+                    color = true;
                 }
             }
+            QFont new_bttn_Font("Calibri", 32);
+            new_bttn->setFont(new_bttn_Font);
+
+            QPalette palette = new_bttn->palette();
+            palette.setColor(QPalette::Button, (color ? QColor(255, 255, 255) : QColor(0, 0, 0)));
+            palette.setColor(QPalette::ButtonText, QColor(181, 136, 9));
+
+            new_bttn->setPalette(palette);
+
+            new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
             play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
         }
     }
