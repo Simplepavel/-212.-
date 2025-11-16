@@ -3,7 +3,6 @@ includes = -I C:\msys64\ucrt64\include\qt6 -I C:\msys64\ucrt64\include\qt6\QtWid
 			-I C:\msys64\ucrt64\include\qt6\QtCore -I C:\msys64\ucrt64\include\qt6\QtGui
 
 all:
-	g++ QBoard.cpp $(includes) $(libs) -o ../qboard.o -c
 	g++ Window.cpp $(includes) $(libs) -o ../interface.o -c
 
 # moc:

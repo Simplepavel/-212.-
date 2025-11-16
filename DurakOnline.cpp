@@ -104,7 +104,9 @@ void DurakOnline::play()
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
-        window.play();
+        board = new Board;
+        window.UpdateBoard(*board); // сюда передадим ссылку на Board
+        window.play();              // передать указатель на Board
     }
     // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
 }

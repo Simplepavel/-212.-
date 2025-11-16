@@ -12,7 +12,7 @@
 #include <QScrollArea>
 #include <QScreen>
 #include <QRect>
-#include "QBoard.hpp"
+#include "../BackEnd/Game/Board/Board.hpp"
 
 class Window : public QWidget
 {
@@ -60,7 +60,6 @@ private:
     QVBoxLayout *play_Layout;
     QLabel *play_EnemyName;
     QGridLayout *play_BoardLayot;
-    QBoard *qboard;
     QPushButton *play_NextBttn;
     QPushButton *play_StopBttn;
     // Игровое полотно
@@ -94,4 +93,8 @@ public:
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
     // Константный доступ к элементам формы главного окна
+
+    // Метод относящиеся к игровому полю
+    void UpdateBoard(const Board &NewBoard);
+    // Метод отсоящиеся к игровому полю
 };

@@ -117,7 +117,6 @@ Window::Window(QWidget *parent)
     play_StopBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
 
     play_BoardLayot = new QGridLayout;
-    qboard = new QBoard(play_BoardLayot, screen_Height);
     play_BoardLayot->setSpacing(0);
 
     play_Layout->addWidget(play_EnemyName);
@@ -153,8 +152,43 @@ void Window::registration()
 
 void Window::play() // скорее всего мы должны передать сюда какие-то параметры
 {
-    qboard->update(); // обновит текущее графическое представление
     listOfLayout->setCurrentWidget(play_Widget);
+}
+
+void Window::UpdateBoard(const Board &NewBoard) // заполнили согласно новой расстоновке
+{
+    int new_bttn_size = screen_Height / 15;
+    for (int i = 0; i < 8; ++i)
+    {
+        for (int j = 0; j < 8; ++j)
+        {
+            QPushButton *new_bttn = new QPushButton;
+            new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
+            if (i % 2 == 0)
+            {
+                if ((i * 8 + j) % 2 == 0)
+                {
+                    new_bttn->setStyleSheet("background-color: white;");
+                }
+                else
+                {
+                    new_bttn->setStyleSheet("background-color: black;");
+                }
+            }
+            else
+            {
+                if ((i * 8 + j) % 2 != 0)
+                {
+                    new_bttn->setStyleSheet("background-color: white;");
+                }
+                else
+                {
+                    new_bttn->setStyleSheet("background-color: black;");
+                }
+            }
+            play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
+        }
+    }
 }
 
 void Window::connect()

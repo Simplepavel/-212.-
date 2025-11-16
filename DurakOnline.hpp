@@ -15,6 +15,8 @@ private:
     Window window;
     Durak_Client client;
     CurrentUser current_user;
+    Board* board;
+
 
     void connect();
 private slots:
