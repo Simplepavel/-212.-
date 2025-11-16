@@ -211,8 +211,11 @@ void Durak_Server::Make_Session(const Player &pl1, const Player &pl2)
     pqxx::connection *database_session = make_session(url_base);
     pqxx::work tx(*database_session);
 
-    bool Player1White = rand() % 2 == 0;
+    bool Player1White = (rand() % 2 == 0);
     Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
+
+    uint32_t alfa;
+    char *ToPlayer1Serialize = ToPlayer1.serialize();
 
     bool Player2White = !Player1White;
     Mark1 ToPlayer2 = MakeStartPacket(tx, pl1, new_session->id, Player2White);
@@ -243,9 +246,7 @@ Mark1 Durak_Server::MakeStartPacket(pqxx::work &tx, const Player &pl, uint32_t s
     Mark1 to_send;
     pqxx::result username = tx.exec("select username from users where id=$1", pqxx::params{pl.id});
     std::string username_value = username[0][0].as<std::string>();
-
     uint32_t net_session_id = htonl(session_id); // 4 байта
-
     char *data = new char[username_value.size() + 5];
 
     memcpy(data, &net_session_id, 4);
@@ -256,6 +257,5 @@ Mark1 Durak_Server::MakeStartPacket(pqxx::work &tx, const Player &pl, uint32_t s
     to_send.length = username_value.size() + 5;
     to_send.data = data;
 
-    delete[] data;
     return to_send;
 }

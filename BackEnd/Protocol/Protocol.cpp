@@ -1,5 +1,56 @@
 #include "Protocol.hpp"
 
+Mark1::Mark1() : type(DataType::NONE), length(0), data(nullptr)
+{
+}
+
+Mark1::Mark1(const Mark1 &argv)
+{
+    type = argv.type;
+    length = argv.length;
+    data = new char[length];
+    memcpy(data, argv.data, length);
+}
+
+Mark1 &Mark1::operator=(const Mark1 &argv)
+{
+    if (this != &argv)
+    {
+        type = argv.type;
+        length = argv.length;
+        data = new char[length];
+        memcpy(data, argv.data, length);
+    }
+    return *this;
+}
+
+Mark1::Mark1(Mark1 &&argv)
+{
+    type = argv.type;
+    length = argv.length;
+    data = argv.data;
+    argv.length = 0;
+    argv.data = nullptr;
+}
+
+Mark1 &Mark1::operator=(Mark1 &&argv)
+{
+    if (this != &argv)
+    {
+        type = argv.type;
+        length = argv.length;
+        data = argv.data;
+        argv.length = 0;
+        argv.data = nullptr;
+    }
+    return *this;
+}
+
+Mark1::~Mark1()
+{
+    delete[] data;
+}
+
 uint32_t Mark1::capacity() const { return length + 5; }
 
 char *Mark1::serialize() const
@@ -20,11 +71,10 @@ Mark1 Mark1::deserialize(char *buffer)
     memcpy(&result.type, buffer, 1);
 
     uint32_t net_length;
-    memcpy(&net_length, buffer + 1,  4);
+    memcpy(&net_length, buffer + 1, 4);
     result.length = ntohl(net_length);
 
-    char *data = new char[result.length];
-    memcpy(data, buffer + 5, result.length);
-    result.data = data;
+    result.data = new char[result.length];
+    memcpy(result.data, buffer + 5, result.length);
     return result;
 }

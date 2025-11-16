@@ -83,30 +83,17 @@ int Durak_Client::Client_Send(const Mark1 &data)
 
 void Durak_Client::Client_Listen()
 {
-    char buffer[256];
     while (ready)
     {
         int bytes = ::recv(client_socket, buffer, sizeof(buffer), 0);
         if (bytes > 0)
         {
-            Mark1 result = Mark1::deserialize(buffer);
-
-            uint32_t net_session_id;
-            memcpy(&net_session_id, result.data, 4);
-            uint32_t session_id = ntohl(net_session_id);
-            std::cout << "============Start info========\n";
-            std::cout << "Session id " << session_id << '\n';
-
-            bool AmIWhite = result.data[4] == 1;
-            std::cout << "I move first: " << AmIWhite << '\n';
-
-            std::string enemy_name;
-            enemy_name.resize(result.length - 5);
-            memcpy(&enemy_name[0], result.data + 5, result.length - 5);
-            std::cout << "Enemy name " << enemy_name << '\n';
-
-            // Получить доску и кто ходит первый
-            // Породить сигнал и обработав этот сигнал в DurakOnline изобрать игровое поле со всеми данными
+            emit ServerSentData();
         }
     }
+}
+
+char* Durak_Client::GetData()
+{
+    return buffer;
 }

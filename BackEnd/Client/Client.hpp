@@ -11,6 +11,9 @@ private:
     SOCKET client_socket;
     void print(sockaddr *);
     bool ready;
+    char buffer[256]{};
+signals:
+    void ServerSentData();
 
 public:
     Durak_Client();
@@ -18,5 +21,6 @@ public:
     bool Client_Disconnect();
     int Client_Send(const Mark1 &);
     void Client_Listen();
-    void set_ready(bool new_value) { ready = new_value; }
+    void set_ready(bool new_value) { ready = new_value; };
+    char *GetData();
 };

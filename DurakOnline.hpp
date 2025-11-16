@@ -21,6 +21,7 @@ private slots:
     bool registration();
     bool login();
     void logout();
+    void FindEnemy();
     void play();
 
 public:

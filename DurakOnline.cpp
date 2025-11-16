@@ -61,7 +61,7 @@ void DurakOnline::logout()
     window.login();
 }
 
-void DurakOnline::play()
+void DurakOnline::FindEnemy()
 {
     bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT);
     if (flag) // удачное подключение, пока только один поток
@@ -73,21 +73,10 @@ void DurakOnline::play()
         to_send.length = 4;
         to_send.type = DataType::FIND_ENEMY;
         int bytes = client.Client_Send(to_send);
-        delete[] to_send.data;
         client.set_ready(true);
         std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client));
         listen_thread.detach();
-
-        
     }
-}
-
-void DurakOnline::connect()
-{
-    QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
-    QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
-    QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
-    QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::play);
 }
 
 int DurakOnline::start()
@@ -98,4 +87,27 @@ int DurakOnline::start()
     window.showMaximized();
     int answer = app.exec();
     return answer;
+}
+
+void DurakOnline::connect()
+{
+    QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
+    QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
+    QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
+    QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
+    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
+}
+
+void DurakOnline::play()
+{
+    std::cout << "Read from buffer and draw the board depence of the data type\n";
+    Mark1 recv_data = Mark1::deserialize(client.GetData());
+    if (recv_data.type == DataType::START)
+    {
+        uint32_t net_session_id;
+        memcpy(&net_session_id, recv_data.data, 4);
+        uint32_t session_id = ::ntohl(net_session_id);
+        std::cout << session_id << '\n';
+    }
+    // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
 }
