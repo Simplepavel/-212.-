@@ -110,20 +110,20 @@ Window::Window(QWidget *parent)
     play_EnemyName->setStyleSheet("font-size: 32px; font-family: Calibri;");
     play_EnemyName->setAlignment(Qt::AlignCenter);
 
-    play_BoardLayot = new QGridLayout;
-
     play_NextBttn = new QPushButton("Next");
     play_NextBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
 
     play_StopBttn = new QPushButton("Stop");
     play_StopBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
-    
-    play_Layout->addWidget(play_EnemyName);
-    play_Layout->addItem(play_BoardLayot);
-    play_BoardLayot->setSpacing(0);
-    play_Layout->addWidget(play_NextBttn, Qt::AlignBottom);
-    play_Layout->addWidget(play_StopBttn, Qt::AlignBottom);
 
+    play_BoardLayot = new QGridLayout;
+    qboard = new QBoard(play_BoardLayot, screen_Height);
+    play_BoardLayot->setSpacing(0);
+
+    play_Layout->addWidget(play_EnemyName);
+    play_Layout->addLayout(play_BoardLayot);
+    play_Layout->addWidget(play_StopBttn, Qt::AlignBottom);
+    play_Layout->addWidget(play_NextBttn, Qt::AlignBottom);
     play_Layout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
     play_Widget->setLayout(play_Layout);
 
@@ -151,8 +151,9 @@ void Window::registration()
     listOfLayout->setCurrentWidget(reg_Widget);
 }
 
-void Window::play()
+void Window::play() // скорее всего мы должны передать сюда какие-то параметры
 {
+    qboard->update(); // обновит текущее графическое представление
     listOfLayout->setCurrentWidget(play_Widget);
 }
 

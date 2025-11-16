@@ -104,10 +104,7 @@ void DurakOnline::play()
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
-        uint32_t net_session_id;
-        memcpy(&net_session_id, recv_data.data, 4);
-        uint32_t session_id = ::ntohl(net_session_id);
-        std::cout << session_id << '\n';
+        window.play();
     }
     // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
 }
