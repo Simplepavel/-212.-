@@ -7,8 +7,9 @@ libs_qt = -L C:\msys64\ucrt64\lib -l Qt6Widgets -l Qt6Core -l Qt6Gui
 
 
 
-object_file = currentuser.o database.o durakclient.o interface.o protocol.o figure.o board.o
-sources = main.cpp DurakOnline.cpp moc_DurakOnline.cpp moc_Client.cpp
+object_file = currentuser.o database.o durakclient.o interface.o protocol.o figure.o board.o mypushbutton.o
+sources = main.cpp DurakOnline.cpp
+moc_sources =  moc_DurakOnline.cpp moc_Client.cpp moc_MyPushButton.cpp
 
 .PHONY:all backendTarget gameTarget mocTarget
 
@@ -21,15 +22,16 @@ backendTarget:
 mocTarget:
 	C:\msys64\ucrt64\share\qt6\bin\moc.exe DurakOnline.hpp -o moc_DurakOnline.cpp
 	C:\msys64\ucrt64\share\qt6\bin\moc.exe BackEnd/Client/Client.hpp -o moc_Client.cpp
+	C:\msys64\ucrt64\share\qt6\bin\moc.exe Interface/MyPushButton/MyPushButton.hpp -o moc_MyPushButton.cpp
 
 all: mocTarget backendTarget
 	cd Interface && make && cd ..
 	cd DataBase && make && cd ..
 	cd CurrentUser && make && cd ..
 	
-	g++ $(sources) $(object_file) $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
+	g++ $(sources) $(moc_sources) $(object_file) $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
 
 	rm *.o -f
-	rm *_moc -f
+	rm moc_* -f
 
 

@@ -4,7 +4,7 @@ std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhos
 char SERVER_IP[] = "127.0.0.1";
 char SERVER_PORT[] = "6666";
 
-DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv) {}
+DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0) {}
 
 bool DurakOnline::registration()
 {
@@ -104,9 +104,23 @@ void DurakOnline::play()
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
+        uint32_t net_session_id;
+
+        memcpy(&net_session_id, recv_data.data, 4);
+        session_id = ntohl(net_session_id);
+
+        bool is_white;
+        memcpy(&is_white, recv_data.data + 4, 1);
+
+        std::string opp_name;
+        opp_name.resize(recv_data.length - 5);
+        memcpy(&opp_name[0], recv_data.data + 5, recv_data.length - 5);
+
+        window.get_play_EnemyName().setText(QString::fromStdString(opp_name));
+
         board = new Board;
-        window.UpdateBoard(*board); // сюда передадим ссылку на Board
-        window.play();              // передать указатель на Board
+        window.UpdateBoard(*board, is_white); // сюда передадим ссылку на Board
+        window.play();                        // передать указатель на Board
     }
     // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
 }

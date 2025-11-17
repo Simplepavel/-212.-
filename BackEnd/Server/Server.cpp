@@ -211,7 +211,7 @@ void Durak_Server::Make_Session(const Player &pl1, const Player &pl2)
     pqxx::connection *database_session = make_session(url_base);
     pqxx::work tx(*database_session);
 
-    bool Player1White = (rand() % 2 == 0);
+    bool Player1White = (rand() % 2 == 0); // будет ли игрок1 белым
     Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
 
     uint32_t alfa;

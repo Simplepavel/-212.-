@@ -15,9 +15,10 @@
 
 #include <QFont>
 #include <QPalette>
-#include <QCOlor>
+#include <QColor>
 
 #include "../BackEnd/Game/Board/Board.hpp"
+#include "MyPushButton/MyPushButton.hpp"
 
 class Window : public QWidget
 {
@@ -100,6 +101,7 @@ public:
     // Константный доступ к элементам формы главного окна
 
     // Метод относящиеся к игровому полю
-    void UpdateBoard(const Board &NewBoard);
+    void UpdateBoard(const Board &NewBoard, bool);
+    QLabel &get_play_EnemyName() { return *play_EnemyName; }
     // Метод отсоящиеся к игровому полю
 };

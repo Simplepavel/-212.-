@@ -1,6 +1,8 @@
+#pragma once
 #include <cstdint>
 #include <memory>
 #include <iostream>
+
 enum FigureName : uint8_t
 {
     EMPTY,

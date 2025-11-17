@@ -15,8 +15,8 @@ private:
     Window window;
     Durak_Client client;
     CurrentUser current_user;
-    Board* board;
-
+    Board *board;
+    uint32_t session_id; // по умолчанию равно 0. Это значит что игрок не в игровой сессии
 
     void connect();
 private slots:

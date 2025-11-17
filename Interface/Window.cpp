@@ -155,47 +155,26 @@ void Window::play() // скорее всего мы должны передат�
     listOfLayout->setCurrentWidget(play_Widget);
 }
 
-void Window::UpdateBoard(const Board &NewBoard) // заполнили согласно новой расстоновке
+// flag = True - клиент играет за белых
+void Window::UpdateBoard(const Board &NewBoard, bool flag) // заполнили согласно новой расстоновке
 {
     int new_bttn_size = screen_Height / 15;
+    int idx;
     for (int i = 0; i < 8; ++i)
     {
         for (int j = 0; j < 8; ++j)
         {
-            Figure alfa = NewBoard[i * 8 + j];
-            QPushButton *new_bttn = new QPushButton(QString::fromStdString(alfa.to_string()));
-            // Покрасить кнопку в нужный цвет. Поменять размер шрифта и цвет кнопки
-
-            bool color; // 1 - белый, 0 - черный
-            if (i % 2 == 0)
+            const Figure &alfa = NewBoard[i * 8 + j];
+            MyPushButton *new_bttn = new MyPushButton(i, j, &alfa);
+            QPalette palette = new_bttn->palette();
+            if (alfa.is_white())
             {
-                if ((i * 8 + j) % 2 == 0)
-                {
-                    color = true;
-                }
-                else
-                {
-                    color = false;
-                }
+                palette.setColor(QPalette::ButtonText, QColor(200, 200, 200));
             }
             else
             {
-                if ((i * 8 + j) % 2 == 0)
-                {
-                    color = false;
-                }
-                else
-                {
-                    color = true;
-                }
+                palette.setColor(QPalette::ButtonText, QColor(40, 40, 40));
             }
-            QFont new_bttn_Font("Calibri", 32);
-            new_bttn->setFont(new_bttn_Font);
-
-            QPalette palette = new_bttn->palette();
-            palette.setColor(QPalette::Button, (color ? QColor(255, 255, 255) : QColor(0, 0, 0)));
-            palette.setColor(QPalette::ButtonText, QColor(181, 136, 9));
-
             new_bttn->setPalette(palette);
 
             new_bttn->setFixedSize(new_bttn_size, new_bttn_size);

@@ -22,41 +22,20 @@ std::string Figure::to_string() const
 {
     if (is_valid())
     {
-        if (is_white())
+        switch (get_name())
         {
-            switch (get_name())
-            {
-            case (KING):
-                return "K";
-            case (QUEEN):
-                return "Q";
-            case (ROOK):
-                return "R";
-            case (BISHOP):
-                return "B";
-            case (KNIGHT):
-                return "N";
-            case (PAWN):
-                return "P";
-            }
-        }
-        else
-        {
-            switch (get_name())
-            {
-            case (KING):
-                return "k";
-            case (QUEEN):
-                return "q";
-            case (ROOK):
-                return "r";
-            case (BISHOP):
-                return "b";
-            case (KNIGHT):
-                return "n";
-            case (PAWN):
-                return "p";
-            }
+        case (KING):
+            return "K";
+        case (QUEEN):
+            return "Q";
+        case (ROOK):
+            return "R";
+        case (BISHOP):
+            return "B";
+        case (KNIGHT):
+            return "N";
+        case (PAWN):
+            return "P";
         }
     }
     return "";
