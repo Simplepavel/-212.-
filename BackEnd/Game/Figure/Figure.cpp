@@ -1,21 +1,21 @@
 #include "Figure.hpp"
 
-Figure::Figure() : name(FigureName::EMPTY), white(false) {}
+Figure::Figure() : name(FigureName::EMPTY), color(FigureColor::NO_COLOR) {}
 
-Figure::Figure(FigureName _name, bool _is_white) : name(_name), white(_is_white) {}
+Figure::Figure(FigureName _name, FigureColor _color) : name(_name), color(_color) {}
 
 char *Figure::serialize()
 {
     char *result = new char[capacity()];
     memcpy(result, &name, 1);
-    result[1] = (white) ? 1 : 0;
+    memcpy(result + 1, &color, 1);
     return result;
 }
 
 void Figure::deserialize(char *buffer)
 {
     memcpy(&name, buffer, 1);
-    white = (buffer[1] == 1);
+    memcpy(&color, buffer + 1, 1);
 }
 
 std::string Figure::to_string() const
@@ -39,4 +39,9 @@ std::string Figure::to_string() const
         }
     }
     return "";
+}
+
+bool Figure::IsValidMove(int current_row, int current_column, int last_row, int last_column) const
+{
+    return true; // попросить кого то реализовать
 }

@@ -121,8 +121,8 @@ Window::Window(QWidget *parent)
 
     play_Layout->addWidget(play_EnemyName);
     play_Layout->addLayout(play_BoardLayot);
-    play_Layout->addWidget(play_StopBttn, Qt::AlignBottom);
     play_Layout->addWidget(play_NextBttn, Qt::AlignBottom);
+    play_Layout->addWidget(play_StopBttn, Qt::AlignBottom);
     play_Layout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
     play_Widget->setLayout(play_Layout);
 
@@ -155,8 +155,7 @@ void Window::play() // скорее всего мы должны передат�
     listOfLayout->setCurrentWidget(play_Widget);
 }
 
-// flag = True - клиент играет за белых
-void Window::UpdateBoard(const Board &NewBoard, bool flag) // заполнили согласно новой расстоновке
+void Window::UpdateBoard(Board &NewBoard) // заполнили согласно новой расстоновке
 {
     int new_bttn_size = screen_Height / 15;
     int idx;
@@ -164,10 +163,10 @@ void Window::UpdateBoard(const Board &NewBoard, bool flag) // заполнили
     {
         for (int j = 0; j < 8; ++j)
         {
-            const Figure &alfa = NewBoard[i * 8 + j];
-            MyPushButton *new_bttn = new MyPushButton(i, j, &alfa);
+            Figure alfa = NewBoard[i * 8 + j];
+            MyPushButton *new_bttn = new MyPushButton(i, j, &alfa); // к каждой кнопике добавить как то фунцию MakeMove DurakOnline
             QPalette palette = new_bttn->palette();
-            if (alfa.is_white())
+            if (alfa.get_color() == FigureColor::WHITE)
             {
                 palette.setColor(QPalette::ButtonText, QColor(200, 200, 200));
             }
@@ -176,8 +175,14 @@ void Window::UpdateBoard(const Board &NewBoard, bool flag) // заполнили
                 palette.setColor(QPalette::ButtonText, QColor(40, 40, 40));
             }
             new_bttn->setPalette(palette);
-
             new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
+
+            QLayoutItem *OldBttn = play_BoardLayot->itemAtPosition(i, j);
+            if (OldBttn)
+            {
+                QWidget *old = OldBttn->widget();
+                delete old;
+            }
             play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
         }
     }

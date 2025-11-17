@@ -4,7 +4,7 @@ std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhos
 char SERVER_IP[] = "127.0.0.1";
 char SERVER_PORT[] = "6666";
 
-DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0) {}
+DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr) {}
 
 bool DurakOnline::registration()
 {
@@ -109,8 +109,8 @@ void DurakOnline::play()
         memcpy(&net_session_id, recv_data.data, 4);
         session_id = ntohl(net_session_id);
 
-        bool is_white;
-        memcpy(&is_white, recv_data.data + 4, 1);
+        memcpy(&IsMyTurn, recv_data.data + 4, 1);
+        MyColor = IsMyTurn ? FigureColor::WHITE : FigureColor::BLACK;
 
         std::string opp_name;
         opp_name.resize(recv_data.length - 5);
@@ -119,8 +119,47 @@ void DurakOnline::play()
         window.get_play_EnemyName().setText(QString::fromStdString(opp_name));
 
         board = new Board;
-        window.UpdateBoard(*board, is_white); // сюда передадим ссылку на Board
-        window.play();                        // передать указатель на Board
+        window.UpdateBoard(*board); // сюда передадим ссылку на Board
+        window.play();              // передать указатель на Board
     }
     // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
+}
+
+void DurakOnline::MakeMove()
+{
+    if (IsMyTurn)
+    {
+        if (FirstPosition == nullptr)
+        {
+            FirstPosition = static_cast<MyPushButton *>(sender());
+            if (FirstPosition->get_figure()->get_color() != MyColor) // Если пустая клетка или если фигура не так, цвета различаются
+            {
+                FirstPosition = nullptr;
+            }
+        }
+        else
+        {
+            SecondPosition = static_cast<MyPushButton *>(sender());
+
+            int current_row = FirstPosition->get_row();
+            int current_column = FirstPosition->get_column();
+
+            int last_row = SecondPosition->get_row();
+            int last_column = SecondPosition->get_column();
+
+            const Figure *CurrentFigure = FirstPosition->get_figure();
+            const Figure *NextFigure = SecondPosition->get_figure();
+
+            if (!CurrentFigure->IsValidMove(current_row, current_column, last_row, last_column))
+            {
+                FirstPosition = nullptr;
+                SecondPosition = nullptr;
+                return;
+            }
+
+            (*board)[last_row * 8 + last_column] = *CurrentFigure;
+            (*board)[current_row * 8 + current_column] = Figure();
+            window.UpdateBoard(*board);
+        }
+    }
 }

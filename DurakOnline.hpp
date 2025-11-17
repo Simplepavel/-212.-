@@ -17,6 +17,11 @@ private:
     CurrentUser current_user;
     Board *board;
     uint32_t session_id; // по умолчанию равно 0. Это значит что игрок не в игровой сессии
+    bool IsMyTurn;
+    FigureColor MyColor; // white - белый, black - черный
+
+    MyPushButton *FirstPosition;
+    MyPushButton *SecondPosition;
 
     void connect();
 private slots:
@@ -25,6 +30,7 @@ private slots:
     void logout();
     void FindEnemy();
     void play();
+    void MakeMove();
 
 public:
     DurakOnline(int argc, char *argv[]);

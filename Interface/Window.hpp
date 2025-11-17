@@ -101,7 +101,7 @@ public:
     // Константный доступ к элементам формы главного окна
 
     // Метод относящиеся к игровому полю
-    void UpdateBoard(const Board &NewBoard, bool);
+    void UpdateBoard(Board &NewBoard);
     QLabel &get_play_EnemyName() { return *play_EnemyName; }
     // Метод отсоящиеся к игровому полю
 };
