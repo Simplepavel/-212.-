@@ -11,7 +11,8 @@ class MyPushButton : public QPushButton
     const Figure *figure;
 
 public:
-    MyPushButton(int r, int c, const Figure *f);
+    MyPushButton(int r, int c);
+    void SetFigure(const Figure *);
     void mousePressEvent(QMouseEvent *) override;
     void mouseReleaseEvent(QMouseEvent *) override;
     void setBackGroundColor();

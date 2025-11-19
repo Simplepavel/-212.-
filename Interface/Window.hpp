@@ -103,5 +103,6 @@ public:
     // Метод относящиеся к игровому полю
     void UpdateBoard(Board &NewBoard);
     QLabel &get_play_EnemyName() { return *play_EnemyName; }
+    std::vector<MyPushButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
     // Метод отсоящиеся к игровому полю
 };

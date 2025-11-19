@@ -1,11 +1,26 @@
 #include "MyPushButton.hpp"
 
-MyPushButton::MyPushButton(int r, int c, const Figure *f) : row(r), column(c), figure(f)
+MyPushButton::MyPushButton(int r, int c) : row(r), column(c), figure(nullptr)
 {
-    setText(QString::fromStdString(figure->to_string()));
     setAutoFillBackground(true);
     setBackGroundColor();
     setFont(QFont("Calibri", 32));
+}
+
+void MyPushButton::SetFigure(const Figure *f)
+{
+    QPalette current_palette = palette();
+    figure = f;
+    setText(QString::fromStdString(figure->to_string()));
+    if (figure->get_color() == FigureColor::WHITE)
+    {
+        current_palette.setColor(QPalette::ButtonText, QColor(200, 200, 200));
+    }
+    else
+    {
+        current_palette.setColor(QPalette::ButtonText, QColor(40, 40, 40));
+    }
+    setPalette(current_palette);
 }
 
 void MyPushButton::mousePressEvent(QMouseEvent *event)

@@ -155,35 +155,19 @@ void Window::play() // скорее всего мы должны передат�
     listOfLayout->setCurrentWidget(play_Widget);
 }
 
-void Window::UpdateBoard(Board &NewBoard) // заполнили согласно новой расстоновке
+void Window::UpdateBoard(Board &NewBoard) // заполнили согласно новой расстановке
 {
     int new_bttn_size = screen_Height / 15;
-    int idx;
     for (int i = 0; i < 8; ++i)
     {
         for (int j = 0; j < 8; ++j)
         {
             Figure alfa = NewBoard[i * 8 + j];
-            MyPushButton *new_bttn = new MyPushButton(i, j, &alfa); // к каждой кнопике добавить как то фунцию MakeMove DurakOnline
-            QPalette palette = new_bttn->palette();
-            if (alfa.get_color() == FigureColor::WHITE)
-            {
-                palette.setColor(QPalette::ButtonText, QColor(200, 200, 200));
-            }
-            else
-            {
-                palette.setColor(QPalette::ButtonText, QColor(40, 40, 40));
-            }
-            new_bttn->setPalette(palette);
-            new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
 
             QLayoutItem *OldBttn = play_BoardLayot->itemAtPosition(i, j);
-            if (OldBttn)
-            {
-                QWidget *old = OldBttn->widget();
-                delete old;
-            }
-            play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
+            QWidget *old = OldBttn->widget();
+            MyPushButton *current_bttn = static_cast<MyPushButton *>(old);
+            current_bttn->SetFigure(&NewBoard[i * 8 + j]);
         }
     }
 }
@@ -195,4 +179,23 @@ void Window::connect()
     QObject::connect(login_RegBttn, &QPushButton::clicked, this, registration);
     QObject::connect(reg_BackBttn, &QPushButton::clicked, this, login);
     // QObject::connect(main_PlayBttn, &QPushButton::clicked, this, play);
+}
+
+std::vector<MyPushButton *> Window::FillBoard()
+{
+    int new_bttn_size = screen_Height / 15;
+    int idx;
+    std::vector<MyPushButton *> NewBttns;
+    NewBttns.reserve(64);
+    for (int i = 0; i < 8; ++i)
+    {
+        for (int j = 0; j < 8; ++j)
+        {
+            MyPushButton *new_bttn = new MyPushButton(i, j); // к каждой кнопке добавить как то фунцию MakeMove DurakOnline
+            NewBttns.push_back(new_bttn);
+            new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
+            play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
+        }
+    }
+    return NewBttns;
 }

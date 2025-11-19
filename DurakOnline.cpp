@@ -100,7 +100,6 @@ void DurakOnline::connect()
 
 void DurakOnline::play()
 {
-    std::cout << "Read from buffer and draw the board depence of the data type\n";
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
@@ -119,47 +118,60 @@ void DurakOnline::play()
         window.get_play_EnemyName().setText(QString::fromStdString(opp_name));
 
         board = new Board;
-        window.UpdateBoard(*board); // сюда передадим ссылку на Board
-        window.play();              // передать указатель на Board
+        std::vector<MyPushButton *> NewBttns = window.FillBoard(); // сюда передадим ссылку на Board
+        for (auto i = NewBttns.begin(); i != NewBttns.end(); ++i)
+        {
+            QObject::connect(*i, &MyPushButton::clicked, this, &DurakOnline::MakeMove);
+        }
+        window.UpdateBoard(*board);
+        window.play(); // передать указатель на Board
     }
     // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
 }
 
 void DurakOnline::MakeMove()
 {
-    if (IsMyTurn)
+    if (IsMyTurn) // Сейчас мой ход
     {
         if (FirstPosition == nullptr)
         {
-            FirstPosition = static_cast<MyPushButton *>(sender());
-            if (FirstPosition->get_figure()->get_color() != MyColor) // Если пустая клетка или если фигура не так, цвета различаются
+            FirstPosition = static_cast<MyPushButton *>(sender()); // просто клетка
+            if (!FirstPosition->get_figure()->is_valid())
             {
                 FirstPosition = nullptr;
-            }
-        }
-        else
-        {
-            SecondPosition = static_cast<MyPushButton *>(sender());
-
-            int current_row = FirstPosition->get_row();
-            int current_column = FirstPosition->get_column();
-
-            int last_row = SecondPosition->get_row();
-            int last_column = SecondPosition->get_column();
-
-            const Figure *CurrentFigure = FirstPosition->get_figure();
-            const Figure *NextFigure = SecondPosition->get_figure();
-
-            if (!CurrentFigure->IsValidMove(current_row, current_column, last_row, last_column))
-            {
-                FirstPosition = nullptr;
-                SecondPosition = nullptr;
                 return;
             }
+            if (FirstPosition->get_figure()->get_color() != MyColor) // не своя фигура
+            {
+                FirstPosition = nullptr;
+                return;
+            }
+        }
+        else // Первая клетка получена
+        {
+            SecondPosition = static_cast<MyPushButton *>(sender());
+            if (SecondPosition->get_figure()->is_valid()) // на данно месте стоит фигура
+            {
+                FirstPosition = nullptr;
+                return;
+            }
+            else
+            {
+                int current_row = FirstPosition->get_row();
+                int current_column = FirstPosition->get_column();
 
-            (*board)[last_row * 8 + last_column] = *CurrentFigure;
-            (*board)[current_row * 8 + current_column] = Figure();
-            window.UpdateBoard(*board);
+                int last_row = SecondPosition->get_row();
+                int last_column = SecondPosition->get_column();
+
+                const Figure *current_figure = FirstPosition->get_figure();
+                if (current_figure->IsValidMove(current_row, current_column, last_row, last_column))
+                {
+                    board->replace(current_row, current_column, last_row, last_column);
+                    window.UpdateBoard(*board);
+                    FirstPosition = nullptr;
+                    SecondPosition = nullptr;
+                }
+            }
         }
     }
 }

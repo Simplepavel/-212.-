@@ -86,3 +86,11 @@ Figure &Board::operator[](int idx)
 {
     return self[idx];
 }
+
+void Board::replace(int c_row, int c_column, int l_row, int l_column)
+{
+    int idx1 = c_row * 8 + c_column;
+    int idx2 = l_row * 8 + l_column;
+    self[idx2] = self[idx1];
+    self[idx1] = Figure();
+}
