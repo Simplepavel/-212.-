@@ -5,7 +5,7 @@ enum DataType : uint8_t // что передали какой тип данны�
 {
     NONE,
     FIND_ENEMY,
-    MOVE,
+    BOARD, // ХОД
     START,
 };
 

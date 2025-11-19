@@ -168,6 +168,19 @@ void DurakOnline::MakeMove()
                 {
                     board->replace(current_row, current_column, last_row, last_column);
                     window.UpdateBoard(*board);
+
+                    char *new_board_serialize = board->serialize();
+                    uint32_t net_session_id = htonl(session_id);
+
+                    char *data = new char[board->capacity() + 4]; // Длина сериализованной доски и id ссесии
+                    memcpy(data, &net_session_id, 4);
+                    memcpy(data + 4, new_board_serialize, board->capacity());
+
+                    Mark1 to_send;
+                    to_send.type = DataType::BOARD;
+                    to_send.length = board->capacity() + 4;
+                    to_send.data = data;
+                    client.Client_Send(to_send);
                     FirstPosition = nullptr;
                     SecondPosition = nullptr;
                 }

@@ -130,12 +130,12 @@ void Durak_Server::Server_Go()
             {
                 if (FD_ISSET(*i, &master))
                 {
-                    char data[105]{0};
+                    char data[256]{0};
                     int bytes = recv(*i, data, sizeof(data), 0);
                     if (bytes > 0)
                     {
                         Mark1 recv_data = Mark1::deserialize(data);
-                        if (recv_data.type == FIND_ENEMY)
+                        if (recv_data.type == DataType::FIND_ENEMY)
                         {
                             uint32_t net_id;
                             memcpy(&net_id, recv_data.data, 4);
@@ -151,6 +151,13 @@ void Durak_Server::Server_Go()
                                 line.push(pl1);
                                 // статус ожидайте!
                             }
+                        }
+                        if (recv_data.type == DataType::BOARD)
+                        {
+                            uint32_t net_session_id;
+                            memcpy(&net_session_id, recv_data.data, 4);
+                            uint32_t session_id = ntohl(net_session_id);
+                            std::cout << "Session id " << session_id << '\n';
                         }
                     }
                     else if (bytes == 0)

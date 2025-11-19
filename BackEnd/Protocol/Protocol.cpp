@@ -26,6 +26,7 @@ Mark1 &Mark1::operator=(const Mark1 &argv)
 
 Mark1::Mark1(Mark1 &&argv)
 {
+    std::cout << "Move copy constructor\n";
     type = argv.type;
     length = argv.length;
     data = argv.data;
