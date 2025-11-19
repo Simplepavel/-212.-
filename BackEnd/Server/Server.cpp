@@ -157,7 +157,6 @@ void Durak_Server::Server_Go()
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
                             uint32_t session_id = ntohl(net_session_id);
-                            std::cout << "Session id " << session_id << '\n';
                         }
                     }
                     else if (bytes == 0)
