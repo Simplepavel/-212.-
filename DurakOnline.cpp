@@ -126,6 +126,13 @@ void DurakOnline::play()
         window.UpdateBoard(*board);
         window.play(); // передать указатель на Board
     }
+
+    if (recv_data.type == DataType::BOARD)
+    {
+        board->deserialize(recv_data.data + 4);
+        window.UpdateBoard(*board);
+        IsMyTurn = true;
+    }
     // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
 }
 
@@ -183,6 +190,7 @@ void DurakOnline::MakeMove()
                     client.Client_Send(to_send);
                     FirstPosition = nullptr;
                     SecondPosition = nullptr;
+                    IsMyTurn = false;
                 }
             }
         }

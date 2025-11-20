@@ -157,6 +157,12 @@ void Durak_Server::Server_Go()
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
                             uint32_t session_id = ntohl(net_session_id);
+
+                            Session *play_session = play_sessions[session_id];
+                            SOCKET one = play_session->pl1.fd;
+                            SOCKET two = play_session->pl2.fd;
+                            SOCKET opp_socket = (one == *i) ? two : one; // на какой сокет кидать данные
+                            Server_Send(recv_data, opp_socket);
                         }
                     }
                     else if (bytes == 0)

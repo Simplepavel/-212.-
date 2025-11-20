@@ -1,11 +1,12 @@
 #include <cstdint>
 #include "../Game/Board/Board.hpp"
 #include <stack>
+#include <winsock2.h>
 struct Player
 {
     uint32_t id;
     uint32_t fd;
-    Player(uint32_t i, uint32_t f) : id(i), fd(f) {}
+    Player(SOCKET i, SOCKET f) : id(i), fd(f) {}
     Player() : id(0), fd(0) {}
 };
 
