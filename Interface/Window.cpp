@@ -128,10 +128,26 @@ Window::Window(QWidget *parent)
 
     // Игровое полотно
 
+    // Поиск соперника
+    wait_Widget = new QWidget(this);
+    wait_Layout = new QVBoxLayout;
+    wait_Label = new QLabel("Find opponents. Please wait"); // здесь найдпись: Идет поиск соперника. Ожидайте...
+
+    wait_Timer = new QTimer(this);
+    wait_Timer->setInterval(std::chrono::milliseconds(1000));
+
+    QFont NewLabelFont = QFont("Calibri", 32);
+    wait_Label->setFont(NewLabelFont);
+    wait_Label->setAlignment(Qt::AlignCenter);
+    wait_Layout->addWidget(wait_Label, Qt::AlignCenter);
+    wait_Widget->setLayout(wait_Layout);
+    // Поиск соперника
+
     listOfLayout->addWidget(login_Widget);
     listOfLayout->addWidget(main_Widget);
     listOfLayout->addWidget(reg_Widget);
     listOfLayout->addWidget(play_Widget);
+    listOfLayout->addWidget(wait_Widget);
     listOfLayout->setAlignment(Qt::AlignCenter);
 }
 
@@ -153,6 +169,11 @@ void Window::registration()
 void Window::play() // скорее всего мы должны передать сюда какие-то параметры
 {
     listOfLayout->setCurrentWidget(play_Widget);
+}
+
+void Window::wait()
+{
+    listOfLayout->setCurrentWidget(wait_Widget);
 }
 
 void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполнили согласно новой расстановке
@@ -177,6 +198,7 @@ void Window::connect()
     // QObject::connect(main_LogoutBttn, &QPushButton::clicked, this, login);
     QObject::connect(login_RegBttn, &QPushButton::clicked, this, registration);
     QObject::connect(reg_BackBttn, &QPushButton::clicked, this, login);
+    QObject::connect(wait_Timer, QTimer::timeout, this, &Window::UpdateWaitLabel);
     // QObject::connect(main_PlayBttn, &QPushButton::clicked, this, play);
 }
 
@@ -198,3 +220,27 @@ std::vector<MyPushButton *> Window::FillBoard()
     }
     return NewBttns;
 }
+
+// Private slots
+void Window::UpdateWaitLabel()
+{
+    QString CurrentText = wait_Label->text();
+    if (CurrentText.size() == 27) // Длина "Find opponents. Please wait"
+    {
+        CurrentText.push_back(".");
+    }
+    else if (CurrentText.size() == 28) // Длина "Find opponents. Please wait."
+    {
+        CurrentText.push_back(".");
+    }
+    else if (CurrentText.size() == 29) // Длина "Find opponents. Please wait.."
+    {
+        CurrentText.push_back(".");
+    }
+    else if (CurrentText.size() == 30)
+    {
+        CurrentText = "Find opponents. Please wait";
+    }
+    wait_Label->setText(CurrentText);
+}
+// Private slots

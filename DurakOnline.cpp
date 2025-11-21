@@ -74,7 +74,12 @@ void DurakOnline::FindEnemy()
         to_send.type = DataType::FIND_ENEMY;
         int bytes = client.Client_Send(to_send);
         client.set_ready(true);
-        std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client));
+
+        // Поставить окно в режим ожидания соперника
+        window.wait();
+        window.get_wait_Timer().start();
+
+        std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client)); // ждем команд от сервера
         listen_thread.detach();
     }
 }
@@ -98,11 +103,13 @@ void DurakOnline::connect()
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
 }
 
-void DurakOnline::play()
+void DurakOnline::play() // Соперник уже найден
 {
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
+
+        window.get_wait_Timer().stop();
         uint32_t net_session_id;
 
         memcpy(&net_session_id, recv_data.data, 4);
@@ -171,21 +178,16 @@ void DurakOnline::MakeMove()
                 board->replace(current_row, current_column, last_row, last_column);
                 window.UpdateBoard(*board, MyColor);
                 char *new_board_serialize = board->SerializeMove();
-                std::cout << "new board serialize\n";
                 uint32_t net_session_id = htonl(session_id);
-                std::cout << "net session id\n";
                 char *data = new char[8];
                 memcpy(data, &net_session_id, 4);
-                std::cout << "memcpy one\n";
                 memcpy(data + 4, new_board_serialize, 4);
-                std::cout << "memcpy two\n";
                 Mark1 to_send;
                 to_send.type = DataType::BOARD;
                 to_send.length = 8;
                 to_send.data = data;
 
                 int send_bytes = client.Client_Send(to_send);
-                std::cout << "SEND: " << send_bytes << '\n';
                 FirstPosition = nullptr;
                 SecondPosition = nullptr;
                 IsMyTurn = false;

@@ -16,6 +16,7 @@
 #include <QFont>
 #include <QPalette>
 #include <QColor>
+#include <QTimer>
 
 #include "../BackEnd/Game/Board/Board.hpp"
 #include "MyPushButton/MyPushButton.hpp"
@@ -70,6 +71,16 @@ private:
     QPushButton *play_StopBttn;
     // Игровое полотно
 
+    // Окно ожидание соперника
+    QWidget *wait_Widget;
+    QVBoxLayout *wait_Layout;
+    QLabel *wait_Label; // здесь найдпись: Идет поиск соперника. Ожидайте...
+    QTimer *wait_Timer;
+    // Окно ожидание соперника
+
+private slots:
+    void UpdateWaitLabel();
+
 public:
     Window(QWidget *parent = nullptr);
     void login();
@@ -77,6 +88,7 @@ public:
     void connect();
     void registration();
     void play();
+    void wait();
 
     // Констатнтный доступ к элементам формы регистрации
     const QLineEdit &get_reg_Username() { return *reg_Username; }
@@ -105,4 +117,8 @@ public:
     QLabel &get_play_EnemyName() { return *play_EnemyName; }
     std::vector<MyPushButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
     // Метод отсоящиеся к игровому полю
+
+    // Методы относящиеся к игровому полю
+    QTimer &get_wait_Timer() { return *wait_Timer; }
+    // Методы относящиеся к игровому полю
 };

@@ -190,7 +190,6 @@ void Durak_Server::Server_Go()
                     } // что то пошло не так
                 }
             }
-            std::cout << '\n';
             mtx.lock();
             for (auto i = delete_clients.begin(); i != delete_clients.end(); ++i)
             {
