@@ -110,6 +110,7 @@ void DurakOnline::play()
 
         memcpy(&IsMyTurn, recv_data.data + 4, 1);
         MyColor = IsMyTurn ? FigureColor::WHITE : FigureColor::BLACK;
+        std::cout << (MyColor == FigureColor::WHITE ? "WHITE" : "BLACK") << '\n';
 
         std::string opp_name;
         opp_name.resize(recv_data.length - 5);
@@ -117,23 +118,24 @@ void DurakOnline::play()
 
         window.get_play_EnemyName().setText(QString::fromStdString(opp_name));
 
-        board = new Board;
+        board = new Board(MyColor);
         std::vector<MyPushButton *> NewBttns = window.FillBoard(); // сюда передадим ссылку на Board
         for (auto i = NewBttns.begin(); i != NewBttns.end(); ++i)
         {
             QObject::connect(*i, &MyPushButton::clicked, this, &DurakOnline::MakeMove);
         }
-        window.UpdateBoard(*board);
+        window.UpdateBoard(*board, MyColor);
         window.play(); // передать указатель на Board
     }
 
     if (recv_data.type == DataType::BOARD)
     {
-        board->deserialize(recv_data.data + 4);
-        window.UpdateBoard(*board);
+        board->DeserializeMove(recv_data.data + 4);
+        board->replace();
+
+        window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
     }
-    // с этого момента можно читать данные из buffer сокета и в зависимости от их типа данных вызывать те или иные фунции
 }
 
 void DurakOnline::MakeMove()
@@ -157,41 +159,36 @@ void DurakOnline::MakeMove()
         else // Первая клетка получена
         {
             SecondPosition = static_cast<MyPushButton *>(sender());
-            if (SecondPosition->get_figure()->is_valid()) // на данно месте стоит фигура
+            int current_row = FirstPosition->get_row();
+            int current_column = FirstPosition->get_column();
+
+            int last_row = SecondPosition->get_row();
+            int last_column = SecondPosition->get_column();
+
+            const Figure *current_figure = FirstPosition->get_figure();
+            if (current_figure->IsValidMove(current_row, current_column, last_row, last_column)) // теперь данных метод отвечает за ВСЮ логику игры
             {
+                board->replace(current_row, current_column, last_row, last_column);
+                window.UpdateBoard(*board, MyColor);
+                char *new_board_serialize = board->SerializeMove();
+                std::cout << "new board serialize\n";
+                uint32_t net_session_id = htonl(session_id);
+                std::cout << "net session id\n";
+                char *data = new char[8];
+                memcpy(data, &net_session_id, 4);
+                std::cout << "memcpy one\n";
+                memcpy(data + 4, new_board_serialize, 4);
+                std::cout << "memcpy two\n";
+                Mark1 to_send;
+                to_send.type = DataType::BOARD;
+                to_send.length = 8;
+                to_send.data = data;
+
+                int send_bytes = client.Client_Send(to_send);
+                std::cout << "SEND: " << send_bytes << '\n';
                 FirstPosition = nullptr;
-                return;
-            }
-            else
-            {
-                int current_row = FirstPosition->get_row();
-                int current_column = FirstPosition->get_column();
-
-                int last_row = SecondPosition->get_row();
-                int last_column = SecondPosition->get_column();
-
-                const Figure *current_figure = FirstPosition->get_figure();
-                if (current_figure->IsValidMove(current_row, current_column, last_row, last_column))
-                {
-                    board->replace(current_row, current_column, last_row, last_column);
-                    window.UpdateBoard(*board);
-
-                    char *new_board_serialize = board->serialize();
-                    uint32_t net_session_id = htonl(session_id);
-
-                    char *data = new char[board->capacity() + 4]; // Длина сериализованной доски и id ссесии
-                    memcpy(data, &net_session_id, 4);
-                    memcpy(data + 4, new_board_serialize, board->capacity());
-
-                    Mark1 to_send;
-                    to_send.type = DataType::BOARD;
-                    to_send.length = board->capacity() + 4;
-                    to_send.data = data;
-                    client.Client_Send(to_send);
-                    FirstPosition = nullptr;
-                    SecondPosition = nullptr;
-                    IsMyTurn = false;
-                }
+                SecondPosition = nullptr;
+                IsMyTurn = false;
             }
         }
     }

@@ -162,7 +162,8 @@ void Durak_Server::Server_Go()
                             SOCKET one = play_session->pl1.fd;
                             SOCKET two = play_session->pl2.fd;
                             SOCKET opp_socket = (one == *i) ? two : one; // на какой сокет кидать данные
-                            Server_Send(recv_data, opp_socket);
+                            SOCKET own_socket = *i;                      // на какой сокет кидать данные
+                            int send_data = Server_Send(recv_data, opp_socket);
                         }
                     }
                     else if (bytes == 0)
@@ -189,11 +190,13 @@ void Durak_Server::Server_Go()
                     } // что то пошло не так
                 }
             }
+            std::cout << '\n';
             mtx.lock();
             for (auto i = delete_clients.begin(); i != delete_clients.end(); ++i)
             {
                 clients.remove(*i);
             }
+            delete_clients.clear();
             mtx.unlock();
         }
         else if (ready_read == 0)
@@ -219,11 +222,12 @@ int Durak_Server::Server_Send(const Mark1 &data, int fd)
 void Durak_Server::Make_Session(const Player &pl1, const Player &pl2)
 {
     Session *new_session = new Session(pl1, pl2);
+    std::cout << "New session id: " << new_session->id << '\n';
     play_sessions[new_session->id] = new_session;
     pqxx::connection *database_session = make_session(url_base);
     pqxx::work tx(*database_session);
 
-    bool Player1White = (rand() % 2 == 0); // будет ли игрок1 белым
+    bool Player1White = true;
     Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
 
     uint32_t alfa;

@@ -89,11 +89,12 @@ void Durak_Client::Client_Listen()
         if (bytes > 0)
         {
             emit ServerSentData();
+            // memset(buffer, 0, sizeof(buffer));
         }
     }
 }
 
-char* Durak_Client::GetData()
+char *Durak_Client::GetData()
 {
     return buffer;
 }

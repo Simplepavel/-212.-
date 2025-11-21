@@ -155,19 +155,18 @@ void Window::play() // скорее всего мы должны передат�
     listOfLayout->setCurrentWidget(play_Widget);
 }
 
-void Window::UpdateBoard(Board &NewBoard) // заполнили согласно новой расстановке
+void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполнили согласно новой расстановке
 {
     int new_bttn_size = screen_Height / 15;
     for (int i = 0; i < 8; ++i)
     {
         for (int j = 0; j < 8; ++j)
         {
-            Figure alfa = NewBoard[i * 8 + j];
-
+            int position = i * 8 + j;
             QLayoutItem *OldBttn = play_BoardLayot->itemAtPosition(i, j);
             QWidget *old = OldBttn->widget();
             MyPushButton *current_bttn = static_cast<MyPushButton *>(old);
-            current_bttn->SetFigure(&NewBoard[i * 8 + j]);
+            current_bttn->SetFigure(&NewBoard[position]);
         }
     }
 }

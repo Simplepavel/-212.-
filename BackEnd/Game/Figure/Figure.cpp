@@ -38,7 +38,7 @@ std::string Figure::to_string() const
             return "P";
         }
     }
-    return "";
+    return " ";
 }
 
 bool Figure::IsValidMove(int current_row, int current_column, int last_row, int last_column) const

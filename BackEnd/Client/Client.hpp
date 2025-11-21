@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QObject>
 #include "../Protocol/Protocol.hpp"
+#include <cstring>
 class Durak_Client : public QObject
 {
     Q_OBJECT
