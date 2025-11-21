@@ -31,6 +31,7 @@ private slots:
     void FindEnemy();
     void play();
     void MakeMove();
+    void Disconnect();
 
 public:
     DurakOnline(int argc, char *argv[]);

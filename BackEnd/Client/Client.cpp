@@ -83,15 +83,16 @@ int Durak_Client::Client_Send(const Mark1 &data)
 
 void Durak_Client::Client_Listen()
 {
+    std::cout << "Start Listening\n";
     while (ready)
     {
         int bytes = ::recv(client_socket, buffer, sizeof(buffer), 0);
         if (bytes > 0)
         {
             emit ServerSentData();
-            // memset(buffer, 0, sizeof(buffer));
         }
     }
+    std::cout << "Stop Listening\n";
 }
 
 char *Durak_Client::GetData()

@@ -116,7 +116,8 @@ public:
     void UpdateBoard(Board &NewBoard, FigureColor MyColor);
     QLabel &get_play_EnemyName() { return *play_EnemyName; }
     std::vector<MyPushButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
-    // Метод отсоящиеся к игровому полю
+    const QPushButton &get_play_StopBttn() { return *play_StopBttn; };
+    // Метод отсносящиеся к игровому полю
 
     // Методы относящиеся к игровому полю
     QTimer &get_wait_Timer() { return *wait_Timer; }

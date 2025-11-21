@@ -100,6 +100,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
     QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
     QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
+    QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::Disconnect);
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
 }
 
@@ -108,7 +109,6 @@ void DurakOnline::play() // Соперник уже найден
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
-
         window.get_wait_Timer().stop();
         uint32_t net_session_id;
 
@@ -135,13 +135,25 @@ void DurakOnline::play() // Соперник уже найден
         window.play(); // передать указатель на Board
     }
 
-    if (recv_data.type == DataType::BOARD)
+    else if (recv_data.type == DataType::BOARD)
     {
         board->DeserializeMove(recv_data.data + 4);
         board->replace();
 
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
+    }
+    else if (recv_data.type == DataType::LEAVE_ENEMY) // Соперник покинул игру. Текущий игрок снова добавляется в очередь!!!!
+    {
+        delete board; // Вроде больше ничего и не надо. Остальное само перепишется
+        window.wait();
+        window.get_wait_Timer().start();
+    }
+    else if (recv_data.type == DataType::SHUTDOWN)
+    {
+        client.Client_Disconnect();
+        client.set_ready(false); // Больше не слушаем сервер
+        window.login();
     }
 }
 
@@ -194,4 +206,16 @@ void DurakOnline::MakeMove()
             }
         }
     }
+}
+
+void DurakOnline::Disconnect()
+{
+    uint32_t net_session_id = htonl(session_id);
+    char *data = new char[4];
+    memcpy(data, &net_session_id, 4);
+    Mark1 to_send;
+    to_send.type = DISCONNECT;
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
 }

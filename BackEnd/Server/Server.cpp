@@ -149,10 +149,9 @@ void Durak_Server::Server_Go()
                             else
                             {
                                 line.push(pl1);
-                                // статус ожидайте!
                             }
                         }
-                        if (recv_data.type == DataType::BOARD)
+                        else if (recv_data.type == DataType::BOARD)
                         {
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
@@ -162,8 +161,41 @@ void Durak_Server::Server_Go()
                             SOCKET one = play_session->pl1.fd;
                             SOCKET two = play_session->pl2.fd;
                             SOCKET opp_socket = (one == *i) ? two : one; // на какой сокет кидать данные
-                            SOCKET own_socket = *i;                      // на какой сокет кидать данные
                             int send_data = Server_Send(recv_data, opp_socket);
+                        }
+                        else if (recv_data.type = DataType::DISCONNECT)
+                        {
+                            uint32_t net_session_id;
+                            memcpy(&net_session_id, recv_data.data, 4);
+                            uint32_t session_id = ntohl(net_session_id);
+                            Session *play_session = play_sessions[session_id];
+
+                            SOCKET one = play_session->pl1.fd;
+                            SOCKET two = play_session->pl2.fd;
+
+                            SOCKET opp_socket = (one == *i) ? two : one;
+
+                            Mark1 to_send1;
+                            to_send1.type = DataType::LEAVE_ENEMY;
+                            to_send1.length = 0; // вроде никаких данных передавать не следует
+                            to_send1.data = nullptr;
+
+                            Server_Send(to_send1, opp_socket);
+
+                            Mark1 to_send2;
+                            to_send2.type = DataType::SHUTDOWN;
+                            to_send2.length = 0; // вроде никаких данных передавать не следует
+                            to_send2.data = nullptr;
+
+                            Server_Send(to_send2, *i);
+
+                            // игрок, снова нуждающийся в противнике
+                            Player Alone = (play_session->pl1.fd == opp_socket) ? play_session->pl1 : play_session->pl2;
+
+                            line.push(Alone);
+
+                            play_sessions.erase(session_id);
+                            delete play_session;
                         }
                     }
                     else if (bytes == 0)
@@ -176,6 +208,7 @@ void Durak_Server::Server_Go()
                         std::cout << " has disconnected\n";
                         closesocket(*i);
                         delete_clients.push_back(*i);
+
                     } // клиент отключился
                     else
                     {

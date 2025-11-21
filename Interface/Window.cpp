@@ -212,6 +212,12 @@ std::vector<MyPushButton *> Window::FillBoard()
     {
         for (int j = 0; j < 8; ++j)
         {
+            // ToDo: It can be impoved
+            if (QLayoutItem *layout = play_BoardLayot->itemAtPosition(i, j))
+            {
+                QWidget *old_widget = layout->widget();
+                play_BoardLayot->removeWidget(old_widget);
+            }
             MyPushButton *new_bttn = new MyPushButton(i, j); // к каждой кнопке добавить как то фунцию MakeMove DurakOnline
             NewBttns.push_back(new_bttn);
             new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
