@@ -117,6 +117,7 @@ public:
     QLabel &get_play_EnemyName() { return *play_EnemyName; }
     std::vector<MyPushButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
     const QPushButton &get_play_StopBttn() { return *play_StopBttn; };
+    const QPushButton &get_play_NextBttn() { return *play_NextBttn; };
     // Метод отсносящиеся к игровому полю
 
     // Методы относящиеся к игровому полю

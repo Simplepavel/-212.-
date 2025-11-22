@@ -32,6 +32,7 @@ private slots:
     void play();
     void MakeMove();
     void Disconnect();
+    void Next();
 
 public:
     DurakOnline(int argc, char *argv[]);

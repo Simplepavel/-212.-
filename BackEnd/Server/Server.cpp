@@ -163,7 +163,7 @@ void Durak_Server::Server_Go()
                             SOCKET opp_socket = (one == *i) ? two : one; // на какой сокет кидать данные
                             int send_data = Server_Send(recv_data, opp_socket);
                         }
-                        else if (recv_data.type = DataType::DISCONNECT)
+                        else if (recv_data.type == DataType::DISCONNECT)
                         {
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
@@ -202,6 +202,54 @@ void Durak_Server::Server_Go()
                                 line.push(Alone);
                             }
 
+                            play_sessions.erase(session_id);
+                            delete play_session;
+                        }
+                        else if (recv_data.type == DataType::NEXT_ENEMY)
+                        {
+                            std::cout << "Next Enemy\n";
+                            uint32_t net_session_id;
+                            memcpy(&net_session_id, recv_data.data, 4);
+                            uint32_t session_id = ntohl(net_session_id);
+                            Session *play_session = play_sessions[session_id];
+
+                            SOCKET one = play_session->pl1.fd;
+                            SOCKET two = play_session->pl2.fd;
+
+                            SOCKET opp_socket = (one == *i) ? two : one;
+
+                            Mark1 to_send1;
+                            to_send1.type = DataType::LEAVE_ENEMY;
+                            to_send1.length = 0; // вроде никаких данных передавать не следует
+                            to_send1.data = nullptr;
+
+                            // Оба переходят в статус ожидания
+                            Server_Send(to_send1, opp_socket);
+                            Server_Send(to_send1, *i);
+
+                            Player First = (play_session->pl1.fd == opp_socket) ? play_session->pl1 : play_session->pl2;
+                            Player Second = (play_session->pl1.fd == opp_socket) ? play_session->pl2 : play_session->pl1;
+                            if (!line.empty()) // сначала брошенному
+                            {
+                                Player pl2 = line.front();
+                                line.pop();
+                                Make_Session(pl2, First);
+                                if (!line.empty()) // теперь бросившему
+                                {
+                                    pl2 = line.front();
+                                    line.pop();
+                                    Make_Session(pl2, Second);
+                                }
+                                else
+                                {
+                                    line.push(Second);
+                                }
+                            }
+                            else
+                            {
+                                line.push(First);
+                                line.push(Second);
+                            }
                             play_sessions.erase(session_id);
                             delete play_session;
                         }

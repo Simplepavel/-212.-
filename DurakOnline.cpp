@@ -58,7 +58,7 @@ bool DurakOnline::login()
 void DurakOnline::logout()
 {
     current_user.to_null();
-    window.main();
+    window.login();
 }
 
 void DurakOnline::FindEnemy()
@@ -104,6 +104,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
     QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
     QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::Disconnect);
+    QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
 }
 
@@ -120,7 +121,6 @@ void DurakOnline::play() // Соперник уже найден
 
         memcpy(&IsMyTurn, recv_data.data + 4, 1);
         MyColor = IsMyTurn ? FigureColor::WHITE : FigureColor::BLACK;
-        std::cout << (MyColor == FigureColor::WHITE ? "WHITE" : "BLACK") << '\n';
 
         std::string opp_name;
         opp_name.resize(recv_data.length - 5);
@@ -213,7 +213,7 @@ void DurakOnline::MakeMove()
 
 void DurakOnline::Disconnect()
 {
-    uint32_t net_session_id = htonl(session_id);
+    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
     char *data = new char[4];
     memcpy(data, &net_session_id, 4);
     Mark1 to_send;
@@ -223,3 +223,16 @@ void DurakOnline::Disconnect()
     client.Client_Send(to_send);
 }
 
+void DurakOnline::Next()
+{
+    std::cout << "Next function\n";
+    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
+    char *data = new char[4];
+    memcpy(data, &net_session_id, 4);
+    Mark1 to_send;
+    to_send.type = DataType::NEXT_ENEMY;
+    std::cout << (int)to_send.type << '\n';
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
+}
