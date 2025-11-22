@@ -143,12 +143,12 @@ void Durak_Server::Server_Go()
                             if (!line.empty())
                             {
                                 Player pl2 = line.front();
-                                line.pop();
+                                line.erase(line.begin());
                                 Make_Session(pl2, pl1);
                             }
                             else
                             {
-                                line.push(pl1);
+                                line.push_back(pl1);
                             }
                         }
                         else if (recv_data.type == DataType::BOARD)
@@ -194,12 +194,12 @@ void Durak_Server::Server_Go()
                             if (!line.empty())
                             {
                                 Player pl2 = line.front();
-                                line.pop();
+                                line.erase(line.begin());
                                 Make_Session(pl2, Alone);
                             }
                             else
                             {
-                                line.push(Alone);
+                                line.push_back(Alone);
                             }
 
                             play_sessions.erase(session_id);
@@ -232,26 +232,45 @@ void Durak_Server::Server_Go()
                             if (!line.empty()) // сначала брошенному
                             {
                                 Player pl2 = line.front();
-                                line.pop();
+                                line.erase(line.begin());
                                 Make_Session(pl2, First);
                                 if (!line.empty()) // теперь бросившему
                                 {
                                     pl2 = line.front();
-                                    line.pop();
+                                    line.erase(line.begin());
                                     Make_Session(pl2, Second);
                                 }
                                 else
                                 {
-                                    line.push(Second);
+                                    line.push_back(Second);
                                 }
                             }
                             else
                             {
-                                line.push(First);
-                                line.push(Second);
+                                line.push_back(First);
+                                line.push_back(Second);
                             }
                             play_sessions.erase(session_id);
                             delete play_session;
+                        }
+                        else if (recv_data.type == DataType::STOP_FIND_ENEMY)
+                        {
+                            uint32_t net_id;
+                            memcpy(&net_id, recv_data.data, recv_data.length);
+                            uint32_t id = ntohl(net_id);
+                            for (auto j = line.begin(); j != line.end(); ++j) // оптимизировать!!!
+                            {
+                                if (j->id == id)
+                                {
+                                    line.erase(j);
+                                    break;
+                                }
+                            }
+                            Mark1 to_send;
+                            to_send.type = DataType::SHUTDOWN;
+                            to_send.length = 0;
+                            to_send.data = nullptr;
+                            Server_Send(to_send, *i);
                         }
                     }
                     else if (bytes == 0)

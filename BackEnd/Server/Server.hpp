@@ -19,7 +19,7 @@ class Durak_Server // основной поток слушает подключ�
 private:
     SOCKET server_socket;
     std::list<SOCKET> clients;
-    std::queue<Player> line;
+    std::list<Player> line;
     std::map<uint32_t, Session *> play_sessions;
     void print(sockaddr *);
     void Server_Accept();

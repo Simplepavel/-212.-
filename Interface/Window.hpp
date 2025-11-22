@@ -74,7 +74,8 @@ private:
     // Окно ожидание соперника
     QWidget *wait_Widget;
     QVBoxLayout *wait_Layout;
-    QLabel *wait_Label; // здесь найдпись: Идет поиск соперника. Ожидайте...
+    QLabel *wait_Label; // здесь надпись: Идет поиск соперника. Ожидайте...
+    QPushButton *wait_StopBttn;
     QTimer *wait_Timer;
     // Окно ожидание соперника
 
@@ -120,7 +121,8 @@ public:
     const QPushButton &get_play_NextBttn() { return *play_NextBttn; };
     // Метод отсносящиеся к игровому полю
 
-    // Методы относящиеся к игровому полю
+    // Методы относящиеся к полю ожидания
     QTimer &get_wait_Timer() { return *wait_Timer; }
-    // Методы относящиеся к игровому полю
+    const QPushButton &get_wait_StopBttn() { return *wait_StopBttn; }
+    // Методы относящиеся к полю ожидания
 };
