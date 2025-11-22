@@ -58,7 +58,7 @@ bool DurakOnline::login()
 void DurakOnline::logout()
 {
     current_user.to_null();
-    window.login();
+    window.main();
 }
 
 void DurakOnline::FindEnemy()
@@ -153,7 +153,7 @@ void DurakOnline::play() // Соперник уже найден
     {
         client.Client_Disconnect();
         client.set_ready(false); // Больше не слушаем сервер
-        window.login();
+        window.main();
     }
 }
 

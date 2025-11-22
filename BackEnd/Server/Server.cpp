@@ -191,8 +191,16 @@ void Durak_Server::Server_Go()
 
                             // игрок, снова нуждающийся в противнике
                             Player Alone = (play_session->pl1.fd == opp_socket) ? play_session->pl1 : play_session->pl2;
-
-                            line.push(Alone);
+                            if (!line.empty())
+                            {
+                                Player pl2 = line.front();
+                                line.pop();
+                                Make_Session(pl2, Alone);
+                            }
+                            else
+                            {
+                                line.push(Alone);
+                            }
 
                             play_sessions.erase(session_id);
                             delete play_session;
@@ -259,7 +267,7 @@ void Durak_Server::Make_Session(const Player &pl1, const Player &pl2)
     pqxx::connection *database_session = make_session(url_base);
     pqxx::work tx(*database_session);
 
-    bool Player1White = true;
+    bool Player1White = rand() % 2 == 0;
     Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
 
     uint32_t alfa;
