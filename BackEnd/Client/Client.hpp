@@ -11,7 +11,7 @@ class Durak_Client : public QObject
 private:
     SOCKET client_socket;
     void print(sockaddr *);
-    bool ready;
+    bool ready; // Слушаем ли сервер
     char buffer[256]{};
 signals:
     void ServerSentData();
@@ -23,5 +23,6 @@ public:
     int Client_Send(const Mark1 &);
     void Client_Listen();
     void set_ready(bool new_value) { ready = new_value; };
+    bool is_ready() { return ready; }
     char *GetData();
 };
