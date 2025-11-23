@@ -355,6 +355,34 @@ bool Board::kingWouldCheck(int current_row, int current_column, int last_row,
   return tmpBoard.isCheck(figure.get_color());
 }
 
+bool Board::canMove(FigureColor color) const {
+  for (int from_row = 0; from_row < 8; from_row++) {
+    for (int from_column = 0; from_column < 8; from_column++) {
+      const Figure& figure = self[from_row * 8 + from_column];
+      if (figure.is_valid() && figure.get_color() == color) {
+        for (int to_row = 0; to_row < 8; to_row++) {
+          for (int to_column = 0; to_column < 8; to_column++) {
+            if (from_row == to_row && from_column == to_column) continue;
+            if (isValidMove(from_row, from_column, to_row, to_column) &&
+                !kingWouldCheck(from_row, from_column, to_row, to_column)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+bool Board::isCheckmate(FigureColor color) const {
+  return isCheck(color) && !canMove(color);
+}
+
+bool Board::isStalemate(FigureColor color) const {
+  return !isCheck(color) && !canMove(color);
+}
+
 bool Board::move(int current_row, int current_column, int last_row,
                  int last_column) {
   if (!isValidMove(current_row, current_column, last_row, last_column)) {

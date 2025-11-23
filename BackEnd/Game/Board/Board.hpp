@@ -10,6 +10,7 @@ class Board {
                     int last_column) const;
   bool isFreeDiagonal(int current_row, int current_column, int last_row,
                       int last_column) const;
+  bool canMove(FigureColor color) const;
 
   bool whiteKingMoved = false;
   bool blackKingMoved = false;
@@ -35,6 +36,8 @@ class Board {
   bool isCheck(FigureColor color) const;
   bool kingWouldCheck(int current_row, int current_column, int last_row,
                       int last_column) const;
+  bool isCheckmate(FigureColor color) const;
+  bool isStalemate(FigureColor color) const;
   bool move(int current_row, int current_column, int last_row, int last_column);
   Figure& operator[](int idx);
 };
