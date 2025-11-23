@@ -1,4 +1,4 @@
-#include "board.h"
+#include "Board.hpp"
 
 Board::Board() {
   self.resize(64);
@@ -99,20 +99,180 @@ bool Board::isFreeDiagonal(int current_row, int current_column, int last_row,
   return true;
 }
 
+bool Board::isUnderAttack(int current_row, int current_column,
+                          FigureColor attackerColor) const {
+  // проверяем атакуют ли пешки
+  for (int LR = -1; LR <= 1; LR += 2) {
+    int column = current_column + LR;
+    int row = current_row + (attackerColor == BLACK ? -1 : 1);
+    if (row >= 0 && row < 8 && column >= 0 && column < 8) {
+      const Figure& figure = self[row * 8 + column];
+      if (figure.is_valid() && figure.get_name() == PAWN &&
+          figure.get_color() == attackerColor) {
+        return true;
+      }
+    }
+  }
+
+  // проверяем атакуют ли кони
+  const int knightMoves[8][2] = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
+                                 {1, -2},  {1, 2},  {2, -1},  {2, 1}};
+  for (int i = 0; i < 8; i++) {
+    int row = current_row + knightMoves[i][0];
+    int column = current_column + knightMoves[i][1];
+    if (row >= 0 && row < 8 && column >= 0 && column < 8) {
+      const Figure& figure = self[row * 8 + column];
+      if (figure.is_valid() && figure.get_name() == KNIGHT &&
+          figure.get_color() == attackerColor) {
+        return true;
+      }
+    }
+  }
+
+  // проверяем атакуют ли по горизонтали или вертикали
+  const int directionHV[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+  for (int i = 0; i < 4; i++) {
+    for (int j = 1; j < 8; ++j) {
+      int row = current_row + directionHV[i][0] * j;
+      int column = current_column + directionHV[i][1] * j;
+      if (!(row >= 0 && row < 8 && column >= 0 && column < 8)) {
+        break;
+      }
+
+      const Figure& figure = self[row * 8 + column];
+      if (!figure.is_valid()) continue;
+      if (figure.get_color() == attackerColor &&
+          (figure.get_name() == ROOK || figure.get_name() == QUEEN ||
+           (i == 1 ? figure.get_name() == KING : true))) {
+        return true;
+      }
+      break;
+    }
+  }
+
+  // проверяем атакуют ли по диагонали
+  const int directionD[4][2] = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+  for (int i = 0; i < 4; i++) {
+    for (int j = 1; j < 8; ++j) {
+      int row = current_row + directionD[i][0] * j;
+      int column = current_column + directionD[i][1] * j;
+      if (!(row >= 0 && row < 8 && column >= 0 && column < 8)) {
+        break;
+      }
+
+      const Figure& figure = self[row * 8 + column];
+      if (!figure.is_valid()) continue;
+      if (figure.get_color() == attackerColor &&
+          (figure.get_name() == BISHOP || figure.get_name() == QUEEN ||
+           (i == 1 ? figure.get_name() == KING : true))) {
+        return true;
+      }
+      break;
+    }
+  }
+
+  return false;
+}
+
+bool Board::isCheck(FigureColor color) const {
+  int king_row = -1;
+  int king_column = -1;
+  for (int i = 0; i < 64; i++) {
+    const Figure& figure = self[i];
+    if (figure.is_valid() && figure.get_name() == KING &&
+        figure.get_color() == color) {
+      king_row = i / 8;
+      king_column = i % 8;
+      break;
+    }
+  }
+
+  return isUnderAttack(
+      king_row, king_column,
+      self[king_row * 8 + king_column].get_color() == BLACK ? WHITE : BLACK);
+}
+
+bool Board::isValidCastling(int king_row, int king_column, int rook_row,
+                            int rook_column) const {
+  const Figure& king = self[king_row * 8 + king_column];
+  const Figure& rook = self[rook_row * 8 + rook_column];
+
+  if (king_row != rook_row) {
+    return false;
+  }
+
+  if (!king.is_valid() || king.get_name() != KING || !rook.is_valid() ||
+      rook.get_name() != ROOK) {
+    return false;
+  }
+
+  if (king.get_color() != rook.get_color()) {
+    return false;
+  }
+
+  if ((king_column < rook_column && rook_column != 7) ||
+      (king_column > rook_column && rook_column != 0)) {
+    return false;
+  }
+
+  if (king.get_color() == BLACK) {
+    if (blackKingMoved) {
+      return false;
+    }
+    if (king_column < rook_column && blackRookMoved[1]) {
+      return false;
+    }
+    if (king_column > rook_column && blackRookMoved[0]) {
+      return false;
+    }
+  } else {
+    if (whiteKingMoved) {
+      return false;
+    }
+    if (king_column < rook_column && whiteRookMoved[1]) {
+      return false;
+    }
+    if (king_column > rook_column && whiteRookMoved[0]) {
+      return false;
+    }
+  }
+
+  if (!isFreeRow(king_row, king_column, rook_row, rook_column)) {
+    return false;
+  }
+
+  int step = king_column < rook_column ? 1 : -1;
+  for (int col = king_column; col != king_column + 2 * step; col += step) {
+    if (isUnderAttack(king_row, col,
+                      king.get_color() == BLACK ? WHITE : BLACK)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool Board::isValidMove(int current_row, int current_column, int last_row,
                         int last_column) const {
   const Figure& figure = self[current_row * 8 + current_column];
+
   if (figure.is_valid()) {
     if (current_column == last_column && current_row == last_row) {
       return false;
     }
+    const Figure& targetFigure = self[last_row * 8 + last_column];
+    if (figure.get_color() == targetFigure.get_color()) {
+      return false;
+    }
+
     switch (figure.get_name()) {
       case (KING):
         if (abs(last_column - current_column) <= 1 &&
             abs(last_row - current_row) <= 1) {
-          return !self[last_row * 8 + last_column].is_valid();
+          return true;
         }
-        return false;
+        return isValidCastling(current_row, current_column, last_row,
+                               last_column);
       case (QUEEN):
         if (abs(last_column - current_column) == abs(last_row - current_row)) {
           return isFreeDiagonal(current_row, current_column, last_row,
@@ -143,32 +303,127 @@ bool Board::isValidMove(int current_row, int current_column, int last_row,
              abs(current_row - last_row) == 1) ||
             (abs(current_column - last_column) == 1 &&
              abs(current_row - last_row) == 2)) {
-          return !self[last_row * 8 + last_column].is_valid();
+          return true;
         }
         return false;
       case (PAWN):
         if (figure.get_color() == BLACK) {
-          if (current_column == last_column && last_row - current_row == 1) {
-            return !self[last_row * 8 + last_column].is_valid();
-          } else if (current_column == last_column && current_row == 1 &&
-                     last_row - current_row == 2) {
-            return !self[(current_row + 1) * 8 + current_column].is_valid() &&
-                   !self[last_row * 8 + last_column].is_valid();
+          if (!self[last_row * 8 + last_column].is_valid()) {
+            if (current_column == last_column && last_row - current_row == 1) {
+              return true;
+            } else if (current_column == last_column && current_row == 1 &&
+                       last_row - current_row == 2) {
+              return !self[(current_row + 1) * 8 + current_column].is_valid();
+            }
+          } else {
+            if (last_row - current_row == 1 &&
+                abs(current_column - last_column) == 1) {
+              return true;
+            }
           }
+          return false;
         }
         if (figure.get_color() == WHITE) {
-          if (current_column == last_column && current_row - last_row == 1) {
-            return !self[last_row * 8 + last_column].is_valid();
-          } else if (current_column == last_column && current_row == 6 &&
-                     current_row - last_row == 2) {
-            return !self[(current_row - 1) * 8 + current_column].is_valid() &&
-                   !self[last_row * 8 + last_column].is_valid();
+          if (!self[last_row * 8 + last_column].is_valid()) {
+            if (current_column == last_column && current_row - last_row == 1) {
+              return true;
+            } else if (current_column == last_column && current_row == 6 &&
+                       current_row - last_row == 2) {
+              return !self[(current_row - 1) * 8 + current_column].is_valid();
+            }
+          } else {
+            if (current_row - last_row == 1 &&
+                abs(current_column - last_column) == 1) {
+              return true;
+            }
           }
         }
         return false;
     }
   }
   return false;
+}
+
+bool Board::kingWouldCheck(int current_row, int current_column, int last_row,
+                           int last_column) const {
+  Board tmpBoard = *this;
+
+  Figure& figure = tmpBoard.self[current_row * 8 + current_column];
+  tmpBoard.self[last_row * 8 + last_column] = figure;
+  tmpBoard.self[current_row * 8 + current_column] = Figure();
+
+  return tmpBoard.isCheck(figure.get_color());
+}
+
+bool Board::move(int current_row, int current_column, int last_row,
+                 int last_column) {
+  if (!isValidMove(current_row, current_column, last_row, last_column)) {
+    return false;
+  }
+
+  if (kingWouldCheck(current_row, current_column, last_row, last_column)) {
+    return false;
+  }
+
+  Figure& figure = self[current_row * 8 + current_column];
+
+  if (figure.get_name() == KING) {
+    if (figure.get_color() == WHITE) {
+      whiteKingMoved = true;
+    } else {
+      blackKingMoved = true;
+    }
+
+    if (isValidCastling(current_row, current_column, last_row, last_column)) {
+      if (current_column < last_column) {
+        self[current_row * 8 + (last_column - 1)] = self[current_row * 8 + 7];
+        self[current_row * 8 + 7] = Figure();
+        if (figure.get_color() == WHITE) {
+          whiteRookMoved[1] = true;
+        } else {
+          blackRookMoved[1] = true;
+        }
+      } else {
+        self[current_row * 8 + (last_column + 1)] = self[current_row * 8];
+        self[current_row * 8] = Figure();
+        if (figure.get_color() == WHITE) {
+          whiteRookMoved[0] = true;
+        } else {
+          blackRookMoved[0] = true;
+        }
+      }
+    }
+  }
+  if (figure.get_name() == ROOK) {
+    if (figure.get_color() == WHITE) {
+      if (current_column == 0) {
+        whiteRookMoved[0] = true;
+      } else if (current_column == 7) {
+        whiteRookMoved[1] = true;
+      }
+    } else {
+      if (current_column == 0) {
+        blackRookMoved[0] = true;
+      } else if (current_column == 7) {
+        blackRookMoved[1] = true;
+      }
+    }
+  }
+
+  if (figure.get_name() == PAWN) {
+    if (figure.get_color() == WHITE && last_row == 7) {
+      figure = Figure(QUEEN, WHITE);
+    } else if (figure.get_color() == BLACK && last_row == 0) {
+      figure = Figure(QUEEN, BLACK);
+    }
+  }
+
+  self[last_row * 8 + last_column] = figure;
+  self[current_row * 8 + current_column] = Figure();
+
+  whiteCheck = isCheck(WHITE);
+  blackCheck = isCheck(BLACK);
+  return true;
 }
 
 Figure& Board::operator[](int idx) { return self[idx]; }
