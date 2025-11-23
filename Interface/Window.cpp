@@ -2,6 +2,14 @@
 
 Window::Window(QWidget *parent)
 {
+
+    // Неигровые параметры
+    screen_Objc = QApplication::primaryScreen();
+    QRect screen_Rect = screen_Objc->geometry();
+    screen_Height = screen_Rect.height() * screen_Objc->devicePixelRatio();
+    screen_Width = screen_Rect.width() * screen_Objc->devicePixelRatio();
+    // Неигровые параметры
+
     // Вспомогательные компоненты
     listOfLayout = new QStackedLayout(this);
     setLayout(listOfLayout);
@@ -41,22 +49,10 @@ Window::Window(QWidget *parent)
 
     main_Layout = new QVBoxLayout;
 
-    main_SearchRoom = new QLineEdit;
-    main_SearchRoom->setPlaceholderText("ID");
-    main_SearchRoom->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    main_FindRoomBttn = new QPushButton("Search");
-    main_FindRoomBttn->setBaseSize(main_SearchRoom->sizeHint());
-
-    main_CreateRoomBttn = new QPushButton("Create own room");
-    main_CreateRoomBttn->setBaseSize(main_SearchRoom->sizeHint());
-
     main_LogoutBttn = new QPushButton("Logout");
-    main_LogoutBttn->setBaseSize(main_SearchRoom->sizeHint());
 
-    main_Layout->addWidget(main_SearchRoom);
-    main_Layout->addWidget(main_FindRoomBttn);
-    main_Layout->addWidget(main_CreateRoomBttn);
+    main_PlayBttn = new QPushButton("Play");
+    main_Layout->addWidget(main_PlayBttn);
     main_Layout->addWidget(main_LogoutBttn);
 
     main_Layout->setAlignment(Qt::AlignCenter);
@@ -106,9 +102,52 @@ Window::Window(QWidget *parent)
     reg_Widget->setLayout(reg_Layout);
     // Регистрация
 
+    // Игровое полотно
+    play_Widget = new QWidget(this);
+    play_Layout = new QVBoxLayout;
+
+    play_EnemyName = new QLabel("User1");
+    play_EnemyName->setStyleSheet("font-size: 32px; font-family: Calibri;");
+    play_EnemyName->setAlignment(Qt::AlignCenter);
+
+    play_NextBttn = new QPushButton("Next");
+    play_NextBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
+
+    play_StopBttn = new QPushButton("Stop");
+    play_StopBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
+
+    play_BoardLayot = new QGridLayout;
+    play_BoardLayot->setSpacing(0);
+
+    play_Layout->addWidget(play_EnemyName);
+    play_Layout->addLayout(play_BoardLayot);
+    play_Layout->addWidget(play_NextBttn, Qt::AlignBottom);
+    play_Layout->addWidget(play_StopBttn, Qt::AlignBottom);
+    play_Layout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
+    play_Widget->setLayout(play_Layout);
+
+    // Игровое полотно
+
+    // Поиск соперника
+    wait_Widget = new QWidget(this);
+    wait_Layout = new QVBoxLayout;
+    wait_Label = new QLabel("Find opponents. Please wait"); // здесь найдпись: Идет поиск соперника. Ожидайте...
+
+    wait_Timer = new QTimer(this);
+    wait_Timer->setInterval(std::chrono::milliseconds(1000));
+
+    QFont NewLabelFont = QFont("Calibri", 32);
+    wait_Label->setFont(NewLabelFont);
+    wait_Label->setAlignment(Qt::AlignCenter);
+    wait_Layout->addWidget(wait_Label, Qt::AlignCenter);
+    wait_Widget->setLayout(wait_Layout);
+    // Поиск соперника
+
     listOfLayout->addWidget(login_Widget);
     listOfLayout->addWidget(main_Widget);
     listOfLayout->addWidget(reg_Widget);
+    listOfLayout->addWidget(play_Widget);
+    listOfLayout->addWidget(wait_Widget);
     listOfLayout->setAlignment(Qt::AlignCenter);
 }
 
@@ -124,14 +163,90 @@ void Window::main()
 
 void Window::registration()
 {
-    qDebug() << "Hello!";
     listOfLayout->setCurrentWidget(reg_Widget);
+}
+
+void Window::play() // скорее всего мы должны передать сюда какие-то параметры
+{
+    listOfLayout->setCurrentWidget(play_Widget);
+}
+
+void Window::wait()
+{
+    listOfLayout->setCurrentWidget(wait_Widget);
+}
+
+void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполнили согласно новой расстановке
+{
+    int new_bttn_size = screen_Height / 15;
+    for (int i = 0; i < 8; ++i)
+    {
+        for (int j = 0; j < 8; ++j)
+        {
+            int position = i * 8 + j;
+            QLayoutItem *OldBttn = play_BoardLayot->itemAtPosition(i, j);
+            QWidget *old = OldBttn->widget();
+            MyPushButton *current_bttn = static_cast<MyPushButton *>(old);
+            current_bttn->SetFigure(&NewBoard[position]);
+        }
+    }
 }
 
 void Window::connect()
 {
-    QObject::connect(login_LoginBttn, &QPushButton::clicked, this, main);
-    QObject::connect(main_LogoutBttn, &QPushButton::clicked, this, login);
+    // QObject::connect(login_LoginBttn, &QPushButton::clicked, this, main);
+    // QObject::connect(main_LogoutBttn, &QPushButton::clicked, this, login);
     QObject::connect(login_RegBttn, &QPushButton::clicked, this, registration);
     QObject::connect(reg_BackBttn, &QPushButton::clicked, this, login);
+    QObject::connect(wait_Timer, QTimer::timeout, this, &Window::UpdateWaitLabel);
+    // QObject::connect(main_PlayBttn, &QPushButton::clicked, this, play);
 }
+
+std::vector<MyPushButton *> Window::FillBoard()
+{
+    int new_bttn_size = screen_Height / 15;
+    int idx;
+    std::vector<MyPushButton *> NewBttns;
+    NewBttns.reserve(64);
+    for (int i = 0; i < 8; ++i)
+    {
+        for (int j = 0; j < 8; ++j)
+        {
+            // ToDo: It can be impoved
+            if (QLayoutItem *layout = play_BoardLayot->itemAtPosition(i, j))
+            {
+                QWidget *old_widget = layout->widget();
+                play_BoardLayot->removeWidget(old_widget);
+            }
+            MyPushButton *new_bttn = new MyPushButton(i, j); // к каждой кнопке добавить как то фунцию MakeMove DurakOnline
+            NewBttns.push_back(new_bttn);
+            new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
+            play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
+        }
+    }
+    return NewBttns;
+}
+
+// Private slots
+void Window::UpdateWaitLabel()
+{
+    QString CurrentText = wait_Label->text();
+    if (CurrentText.size() == 27) // Длина "Find opponents. Please wait"
+    {
+        CurrentText.push_back(".");
+    }
+    else if (CurrentText.size() == 28) // Длина "Find opponents. Please wait."
+    {
+        CurrentText.push_back(".");
+    }
+    else if (CurrentText.size() == 29) // Длина "Find opponents. Please wait.."
+    {
+        CurrentText.push_back(".");
+    }
+    else if (CurrentText.size() == 30)
+    {
+        CurrentText = "Find opponents. Please wait";
+    }
+    wait_Label->setText(CurrentText);
+}
+// Private slots

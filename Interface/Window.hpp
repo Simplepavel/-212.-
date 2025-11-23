@@ -1,13 +1,34 @@
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSizePolicy>
 #include <QDebug>
 #include <QStackedLayout>
+#include <QApplication>
+#include <QLabel>
+#include <QScrollArea>
+#include <QScreen>
+#include <QRect>
+
+#include <QFont>
+#include <QPalette>
+#include <QColor>
+#include <QTimer>
+
+#include "../BackEnd/Game/Board/Board.hpp"
+#include "MyPushButton/MyPushButton.hpp"
+
 class Window : public QWidget
 {
 private:
+    // Неигровые параметры
+    QScreen *screen_Objc;
+    int screen_Width;  // Ширина
+    int screen_Height; // Высота
+    // Неигровые параметры
     // Вспомогательные элементы
     QStackedLayout *listOfLayout;
     // Вспомогательные элементы
@@ -25,24 +46,40 @@ private:
     QWidget *main_Widget;
     QVBoxLayout *main_Layout;
 
-    QLineEdit *main_SearchRoom;
-    QPushButton *main_FindRoomBttn;
-    QPushButton *main_CreateRoomBttn;
+    QPushButton *main_PlayBttn;
     QPushButton *main_LogoutBttn;
     // Главное меню
 
     // Регистрация
-     QWidget *reg_Widget;
-     QVBoxLayout *reg_Layout;
+    QWidget *reg_Widget;
+    QVBoxLayout *reg_Layout;
 
-
-     QLineEdit *reg_Username;
-     QLineEdit *reg_Email;
-     QLineEdit *reg_Password;
-     QLineEdit *reg_ConfirmPassword;
-     QPushButton *reg_SubmitBttn;
-     QPushButton* reg_BackBttn;
+    QLineEdit *reg_Username;
+    QLineEdit *reg_Email;
+    QLineEdit *reg_Password;
+    QLineEdit *reg_ConfirmPassword;
+    QPushButton *reg_SubmitBttn;
+    QPushButton *reg_BackBttn;
     // Регистрация
+
+    // Игровое полотно
+    QWidget *play_Widget;
+    QVBoxLayout *play_Layout;
+    QLabel *play_EnemyName;
+    QGridLayout *play_BoardLayot;
+    QPushButton *play_NextBttn;
+    QPushButton *play_StopBttn;
+    // Игровое полотно
+
+    // Окно ожидание соперника
+    QWidget *wait_Widget;
+    QVBoxLayout *wait_Layout;
+    QLabel *wait_Label; // здесь найдпись: Идет поиск соперника. Ожидайте...
+    QTimer *wait_Timer;
+    // Окно ожидание соперника
+
+private slots:
+    void UpdateWaitLabel();
 
 public:
     Window(QWidget *parent = nullptr);
@@ -50,4 +87,39 @@ public:
     void main();
     void connect();
     void registration();
+    void play();
+    void wait();
+
+    // Констатнтный доступ к элементам формы регистрации
+    const QLineEdit &get_reg_Username() { return *reg_Username; }
+    const QLineEdit &get_reg_Email() { return *reg_Email; }
+    const QLineEdit &get_reg_Password() { return *reg_Password; }
+    const QLineEdit &get_reg_ConfirmPassword() { return *reg_ConfirmPassword; }
+    const QPushButton &get_reg_SubmitBttn() { return *reg_SubmitBttn; } // Чтобы привязать к ней действие
+    // Констатнтный доступ к элементам формы регистрации
+
+    // Константный доступ к элементам форма входа
+    const QLineEdit &get_login_Email() { return *login_Email; }
+    const QLineEdit &get_login_Password() { return *login_Password; }
+    const QPushButton &get_login_LoginBttn() { return *login_LoginBttn; }
+    // Константный доступ к элементам форма входа
+
+    // Константный доступ к элементам формы главного окна
+    // const QLineEdit& get_main_SearchRoom(){return *main_SearchRoom;}
+    // const QPushButton& get_main_FindRoomBttn(){return *main_FindRoomBttn;}
+    // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
+    const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
+    const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
+    // Константный доступ к элементам формы главного окна
+
+    // Метод относящиеся к игровому полю
+    void UpdateBoard(Board &NewBoard, FigureColor MyColor);
+    QLabel &get_play_EnemyName() { return *play_EnemyName; }
+    std::vector<MyPushButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
+    const QPushButton &get_play_StopBttn() { return *play_StopBttn; };
+    // Метод отсносящиеся к игровому полю
+
+    // Методы относящиеся к игровому полю
+    QTimer &get_wait_Timer() { return *wait_Timer; }
+    // Методы относящиеся к игровому полю
 };
