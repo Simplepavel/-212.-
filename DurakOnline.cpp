@@ -144,7 +144,6 @@ void DurakOnline::play() // Соперник уже найден
     {
         board->DeserializeMove(recv_data.data + 4);
         board->replace();
-
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
     }
@@ -188,10 +187,9 @@ void DurakOnline::MakeMove()
             int last_row = SecondPosition->get_row();
             int last_column = SecondPosition->get_column();
 
-            const Figure *current_figure = FirstPosition->get_figure();
-            if (current_figure->IsValidMove(current_row, current_column, last_row, last_column)) // теперь данных метод отвечает за ВСЮ логику игры
+            if (board->move(current_row, current_column, last_row, last_column)) // вызывать метод move у доски. Вставить в MOVE изменения LastMove
             {
-                board->replace(current_row, current_column, last_row, last_column);
+                board->replace(current_row, current_column, last_row, last_column); // при удачном move перерисовываем. Можно убрать после корректной реазлизации move
                 window.UpdateBoard(*board, MyColor);
                 char *new_board_serialize = board->SerializeMove();
                 uint32_t net_session_id = htonl(session_id);
