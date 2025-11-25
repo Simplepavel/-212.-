@@ -90,7 +90,7 @@ void DurakOnline::FindEnemy()
 int DurakOnline::start()
 {
     connect();
-    window.setWindowTitle("Дурак онлайн");
+    window.setWindowTitle("Chess");
     window.connect();
     window.showMaximized();
     int answer = app.exec();

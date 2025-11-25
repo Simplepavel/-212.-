@@ -71,22 +71,22 @@ void Board::deserialize(char *buffer)
   }
 }
 
-void Board::show() const
-{
-  for (int i = 0; i < 64; ++i)
-  {
-    Figure alfa = self[i];
-    std::cout << alfa.to_string();
-    if (i % 8 == 7)
-    {
-      std::cout << '\n';
-    }
-    else
-    {
-      std::cout << ' ';
-    }
-  }
-}
+// void Board::show() const
+// {
+//   for (int i = 0; i < 64; ++i)
+//   {
+//     Figure alfa = self[i];
+//     std::cout << alfa.to_string();
+//     if (i % 8 == 7)
+//     {
+//       std::cout << '\n';
+//     }
+//     else
+//     {
+//       std::cout << ' ';
+//     }
+//   }
+// }
 
 void Board::replace(int c_row, int c_column, int l_row, int l_column) // аргументы от 0 до 7
 {

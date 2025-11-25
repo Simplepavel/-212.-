@@ -16,6 +16,8 @@
 #include <QFont>
 #include <QPalette>
 #include <QColor>
+#include <QList>
+#include <QPixmap>
 #include <QTimer>
 
 #include "../BackEnd/Game/Board/Board.hpp"
@@ -26,8 +28,11 @@ class Window : public QWidget
 private:
     // Неигровые параметры
     QScreen *screen_Objc;
-    int screen_Width;  // Ширина
-    int screen_Height; // Высота
+    int screen_Width;  // Ширина экрана
+    int screen_Height; // Высота экрана
+
+    int cell_Size; // Высота X Ширина игровой клетки
+
     // Неигровые параметры
     // Вспомогательные элементы
     QStackedLayout *listOfLayout;
