@@ -68,7 +68,7 @@ void MyPushButton::LoadChessImages(int cell_Size)
 
     for (auto i = FigureNames.begin(); i != FigureNames.end(); ++i)
     {
-         QString filename = "Static/Chess/White" + *i;
+        QString filename = "Static/Chess/White" + *i;
         QPixmap img(filename);
         QPixmap *new_img = new QPixmap(img.scaled(cell_Size, cell_Size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         ChessImages.push_back(new_img);

@@ -1,6 +1,6 @@
 #include "Board.hpp"
 
-Board::Board(FigureColor MyColor)
+Board::Board(FigureColor Color) : myColor(Color)
 {
   LastMoves.resize(4);
   self.resize(64);
@@ -18,7 +18,9 @@ Board::Board(FigureColor MyColor)
   self[7 * 8 + 4] = Figure(FigureName::KING, FigureColor::BLACK);   // e8
   self[7 * 8 + 5] = Figure(FigureName::BISHOP, FigureColor::BLACK); // f8
   self[7 * 8 + 6] = Figure(FigureName::KNIGHT, FigureColor::BLACK); // g8
-  self[7 * 8 + 7] = Figure(FigureName::ROOK, FigureColor::BLACK);   // h8 внизу черные, индексы большие
+  self[7 * 8 + 7] =
+      Figure(FigureName::ROOK,
+             FigureColor::BLACK); // h8 внизу черные, индексы большие
 
   // Черные пешки
   for (int i = 0; i < 8; ++i)
@@ -33,14 +35,16 @@ Board::Board(FigureColor MyColor)
   self[0 * 8 + 4] = Figure(FigureName::KING, FigureColor::WHITE);   // e1
   self[0 * 8 + 5] = Figure(FigureName::BISHOP, FigureColor::WHITE); // f1
   self[0 * 8 + 6] = Figure(FigureName::KNIGHT, FigureColor::WHITE); // g1
-  self[0 * 8 + 7] = Figure(FigureName::ROOK, FigureColor::WHITE);   // h1 белые сверху, индексы маленькие
+  self[0 * 8 + 7] =
+      Figure(FigureName::ROOK,
+             FigureColor::WHITE); // h1 белые сверху, индексы маленькие
 
   // Белые пешки
   for (int i = 0; i < 8; ++i)
   {
     self[1 * 8 + i] = Figure(FigureName::PAWN, FigureColor::WHITE); // линия 2
   }
-  if (MyColor == FigureColor::WHITE)
+  if (myColor == FigureColor::WHITE)
   {
     for (int i = 0; i < 16; ++i)
     {
@@ -71,49 +75,32 @@ void Board::deserialize(char *buffer)
   }
 }
 
-// void Board::show() const
+// void Board::replace(int c_row, int c_column, int l_row,
+//                     int l_column) // аргументы от 0 до 7
 // {
-//   for (int i = 0; i < 64; ++i)
-//   {
-//     Figure alfa = self[i];
-//     std::cout << alfa.to_string();
-//     if (i % 8 == 7)
-//     {
-//       std::cout << '\n';
-//     }
-//     else
-//     {
-//       std::cout << ' ';
-//     }
-//   }
+//   LastMoves[0] = c_row;
+//   LastMoves[1] = c_column;
+//   LastMoves[2] = l_row;
+//   LastMoves[3] = l_column;
+
+//   int idx1 = c_row * 8 + c_column;
+//   int idx2 = l_row * 8 + l_column;
+//   self[idx2] = self[idx1];
+//   self[idx1] = Figure();
 // }
 
-void Board::replace(int c_row, int c_column, int l_row, int l_column) // аргументы от 0 до 7
-{
+// void Board::replace()
+// {
+//   int c_row = 7 - LastMoves[0];
+//   int c_column = 7 - LastMoves[1];
+//   int l_row = 7 - LastMoves[2];
+//   int l_column = 7 - LastMoves[3];
 
-  LastMoves[0] = c_row;
-  LastMoves[1] = c_column;
-  LastMoves[2] = l_row;
-  LastMoves[3] = l_column;
-
-  int idx1 = c_row * 8 + c_column;
-  int idx2 = l_row * 8 + l_column;
-  self[idx2] = self[idx1];
-  self[idx1] = Figure();
-}
-
-void Board::replace()
-{
-  int c_row = 7 - LastMoves[0];
-  int c_column = 7 - LastMoves[1];
-  int l_row = 7 - LastMoves[2];
-  int l_column = 7 - LastMoves[3];
-
-  int idx1 = c_row * 8 + c_column;
-  int idx2 = l_row * 8 + l_column;
-  self[idx2] = self[idx1];
-  self[idx1] = Figure();
-}
+//   int idx1 = c_row * 8 + c_column;
+//   int idx2 = l_row * 8 + l_column;
+//   self[idx2] = self[idx1];
+//   self[idx1] = Figure();
+// }
 
 char *Board::SerializeMove()
 {
@@ -177,11 +164,13 @@ bool Board::isFreeDiagonal(int current_row, int current_column, int last_row,
 bool Board::isUnderAttack(int current_row, int current_column,
                           FigureColor attackerColor) const
 {
+  int pawnDir = (attackerColor == myColor) ? -1 : 1;
+
   // проверяем атакуют ли пешки
   for (int LR = -1; LR <= 1; LR += 2)
   {
     int column = current_column + LR;
-    int row = current_row + (attackerColor == BLACK ? -1 : 1);
+    int row = current_row + pawnDir;
     if (row >= 0 && row < 8 && column >= 0 && column < 8)
     {
       const Figure &figure = self[row * 8 + column];
@@ -434,51 +423,29 @@ bool Board::isValidMove(int current_row, int current_column, int last_row,
       }
       return false;
     case (PAWN):
-      if (figure.get_color() == BLACK)
+      int direction = (figure.get_color() == myColor) ? -1 : 1;
+      int startRow = (figure.get_color() == myColor) ? 6 : 1;
+
+      if (!self[last_row * 8 + last_column].is_valid())
       {
-        if (!self[last_row * 8 + last_column].is_valid())
+        if (current_column == last_column &&
+            last_row - current_row == direction)
         {
-          if (current_column == last_column && last_row - current_row == 1)
-          {
-            return true;
-          }
-          else if (current_column == last_column && current_row == 1 &&
-                   last_row - current_row == 2)
-          {
-            return !self[(current_row + 1) * 8 + current_column].is_valid();
-          }
+          return true;
         }
-        else
+        else if (current_column == last_column && current_row == startRow &&
+                 last_row - current_row == 2 * direction)
         {
-          if (last_row - current_row == 1 &&
-              abs(current_column - last_column) == 1)
-          {
-            return true;
-          }
+          return !self[(current_row + direction) * 8 + current_column]
+                      .is_valid();
         }
-        return false;
       }
-      if (figure.get_color() == WHITE)
+      else
       {
-        if (!self[last_row * 8 + last_column].is_valid())
+        if (last_row - current_row == direction &&
+            abs(current_column - last_column) == 1)
         {
-          if (current_column == last_column && current_row - last_row == 1)
-          {
-            return true;
-          }
-          else if (current_column == last_column && current_row == 6 &&
-                   current_row - last_row == 2)
-          {
-            return !self[(current_row - 1) * 8 + current_column].is_valid();
-          }
-        }
-        else
-        {
-          if (current_row - last_row == 1 &&
-              abs(current_column - last_column) == 1)
-          {
-            return true;
-          }
+          return true;
         }
       }
       return false;
@@ -540,10 +507,6 @@ bool Board::isStalemate(FigureColor color) const
 bool Board::move(int current_row, int current_column, int last_row,
                  int last_column)
 {
-  if (true)
-  {
-    return true;
-  } // УБРААААААТЬ!!!!!ЧИСТО для ДЕБАГА
   if (!isValidMove(current_row, current_column, last_row, last_column))
   {
     return false;
@@ -625,13 +588,13 @@ bool Board::move(int current_row, int current_column, int last_row,
 
   if (figure.get_name() == PAWN)
   {
-    if (figure.get_color() == WHITE && last_row == 7)
+    if (figure.get_color() == myColor && last_row == 0)
     {
-      figure = Figure(QUEEN, WHITE);
+      figure = Figure(QUEEN, myColor);
     }
-    else if (figure.get_color() == BLACK && last_row == 0)
+    else if (figure.get_color() != myColor && last_row == 7)
     {
-      figure = Figure(QUEEN, BLACK);
+      figure = Figure(QUEEN, figure.get_color());
     }
   }
 
