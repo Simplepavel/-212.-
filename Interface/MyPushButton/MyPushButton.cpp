@@ -1,26 +1,16 @@
 #include "MyPushButton.hpp"
 
+QList<QPixmap *> MyPushButton::ChessImages;
+
 MyPushButton::MyPushButton(int r, int c) : row(r), column(c), figure(nullptr)
 {
     setAutoFillBackground(true);
     setBackGroundColor();
-    setFont(QFont("Calibri", 32));
 }
 
 void MyPushButton::SetFigure(const Figure *f)
 {
-    QPalette current_palette = palette();
     figure = f;
-    setText(QString::fromStdString(figure->to_string()));
-    if (figure->get_color() == FigureColor::WHITE)
-    {
-        current_palette.setColor(QPalette::ButtonText, QColor(200, 200, 200));
-    }
-    else
-    {
-        current_palette.setColor(QPalette::ButtonText, QColor(40, 40, 40));
-    }
-    setPalette(current_palette);
 }
 
 void MyPushButton::mousePressEvent(QMouseEvent *event)
@@ -63,3 +53,36 @@ void MyPushButton::setBackGroundColor()
 int MyPushButton::get_row() { return row; }
 int MyPushButton::get_column() { return column; }
 const Figure *MyPushButton::get_figure() { return figure; }
+
+void MyPushButton::LoadChessImages(int cell_Size)
+
+{
+    QList<QString> FigureNames{"King.png", "Queen.png", "Rook.png", "Bishop.png", "Knight.png", "Pawn.png"};
+    for (auto i = FigureNames.begin(); i != FigureNames.end(); ++i)
+    {
+        QString filename = "Static/Chess/Black" + *i;
+        QPixmap img(filename);
+        QPixmap *new_img = new QPixmap(img.scaled(cell_Size, cell_Size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        ChessImages.push_back(new_img);
+    }
+
+    for (auto i = FigureNames.begin(); i != FigureNames.end(); ++i)
+    {
+         QString filename = "Static/Chess/White" + *i;
+        QPixmap img(filename);
+        QPixmap *new_img = new QPixmap(img.scaled(cell_Size, cell_Size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        ChessImages.push_back(new_img);
+    }
+}
+
+void MyPushButton::paintEvent(QPaintEvent *e)
+{
+    QPushButton::paintEvent(e);
+    QPainter painter(this);
+    uint8_t idx = figure->GetImgNum();
+    if (idx < 255)
+    {
+        QPixmap *value = ChessImages[figure->GetImgNum()];
+        painter.drawPixmap(0, 0, *value);
+    }
+}

@@ -4,7 +4,7 @@ std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhos
 char SERVER_IP[] = "127.0.0.1";
 char SERVER_PORT[] = "6666";
 
-DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr) {}
+DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr), board(nullptr) {}
 
 bool DurakOnline::registration()
 {
@@ -63,8 +63,17 @@ void DurakOnline::logout()
 
 void DurakOnline::FindEnemy()
 {
-    bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT);
-    if (flag) // удачное подключение, пока только один поток
+    if (!client.is_ready())
+    {
+        bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT);
+        if (flag) // удачное подключение, пока только один поток
+        {
+            client.set_ready(true);
+            std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client)); // ждем команд от сервера
+            listen_thread.detach();
+        }
+    }
+    if (client.is_ready())
     {
         Mark1 to_send;
         to_send.data = new char[4];
@@ -73,21 +82,15 @@ void DurakOnline::FindEnemy()
         to_send.length = 4;
         to_send.type = DataType::FIND_ENEMY;
         int bytes = client.Client_Send(to_send);
-        client.set_ready(true);
-
-        // Поставить окно в режим ожидания соперника
         window.wait();
         window.get_wait_Timer().start();
-
-        std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client)); // ждем команд от сервера
-        listen_thread.detach();
     }
 }
 
 int DurakOnline::start()
 {
     connect();
-    window.setWindowTitle("Дурак онлайн");
+    window.setWindowTitle("Chess");
     window.connect();
     window.showMaximized();
     int answer = app.exec();
@@ -101,6 +104,8 @@ void DurakOnline::connect()
     QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
     QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
     QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::Disconnect);
+    QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
+    QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
 }
 
@@ -117,7 +122,6 @@ void DurakOnline::play() // Соперник уже найден
 
         memcpy(&IsMyTurn, recv_data.data + 4, 1);
         MyColor = IsMyTurn ? FigureColor::WHITE : FigureColor::BLACK;
-        std::cout << (MyColor == FigureColor::WHITE ? "WHITE" : "BLACK") << '\n';
 
         std::string opp_name;
         opp_name.resize(recv_data.length - 5);
@@ -125,6 +129,7 @@ void DurakOnline::play() // Соперник уже найден
 
         window.get_play_EnemyName().setText(QString::fromStdString(opp_name));
 
+        delete board;
         board = new Board(MyColor);
         std::vector<MyPushButton *> NewBttns = window.FillBoard(); // сюда передадим ссылку на Board
         for (auto i = NewBttns.begin(); i != NewBttns.end(); ++i)
@@ -139,13 +144,11 @@ void DurakOnline::play() // Соперник уже найден
     {
         board->DeserializeMove(recv_data.data + 4);
         board->replace();
-
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
     }
     else if (recv_data.type == DataType::LEAVE_ENEMY) // Соперник покинул игру. Текущий игрок снова добавляется в очередь!!!!
     {
-        delete board; // Вроде больше ничего и не надо. Остальное само перепишется
         window.wait();
         window.get_wait_Timer().start();
     }
@@ -153,7 +156,7 @@ void DurakOnline::play() // Соперник уже найден
     {
         client.Client_Disconnect();
         client.set_ready(false); // Больше не слушаем сервер
-        window.login();
+        window.main();
     }
 }
 
@@ -184,10 +187,9 @@ void DurakOnline::MakeMove()
             int last_row = SecondPosition->get_row();
             int last_column = SecondPosition->get_column();
 
-            const Figure *current_figure = FirstPosition->get_figure();
-            if (current_figure->IsValidMove(current_row, current_column, last_row, last_column)) // теперь данных метод отвечает за ВСЮ логику игры
+            if (board->move(current_row, current_column, last_row, last_column)) // вызывать метод move у доски. Вставить в MOVE изменения LastMove
             {
-                board->replace(current_row, current_column, last_row, last_column);
+                board->replace(current_row, current_column, last_row, last_column); // при удачном move перерисовываем. Можно убрать после корректной реазлизации move
                 window.UpdateBoard(*board, MyColor);
                 char *new_board_serialize = board->SerializeMove();
                 uint32_t net_session_id = htonl(session_id);
@@ -210,11 +212,35 @@ void DurakOnline::MakeMove()
 
 void DurakOnline::Disconnect()
 {
-    uint32_t net_session_id = htonl(session_id);
+    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
     char *data = new char[4];
     memcpy(data, &net_session_id, 4);
     Mark1 to_send;
     to_send.type = DISCONNECT;
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
+}
+
+void DurakOnline::Next()
+{
+    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
+    char *data = new char[4];
+    memcpy(data, &net_session_id, 4);
+    Mark1 to_send;
+    to_send.type = DataType::NEXT_ENEMY;
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
+}
+
+void DurakOnline::StopFind()
+{
+    uint32_t net_id = htonl(current_user.get_id()); // id сессии чтобы отключиться
+    char *data = new char[4];
+    memcpy(data, &net_id, 4);
+    Mark1 to_send;
+    to_send.type = DataType::STOP_FIND_ENEMY;
     to_send.length = 4;
     to_send.data = data;
     client.Client_Send(to_send);

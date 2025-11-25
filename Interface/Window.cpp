@@ -8,6 +8,8 @@ Window::Window(QWidget *parent)
     QRect screen_Rect = screen_Objc->geometry();
     screen_Height = screen_Rect.height() * screen_Objc->devicePixelRatio();
     screen_Width = screen_Rect.width() * screen_Objc->devicePixelRatio();
+
+    cell_Size = screen_Height / 15;
     // Неигровые параметры
 
     // Вспомогательные компоненты
@@ -131,15 +133,22 @@ Window::Window(QWidget *parent)
     // Поиск соперника
     wait_Widget = new QWidget(this);
     wait_Layout = new QVBoxLayout;
+
     wait_Label = new QLabel("Find opponents. Please wait"); // здесь найдпись: Идет поиск соперника. Ожидайте...
+    QFont NewLabelFont = QFont("Calibri", 32);
+    wait_Label->setFont(NewLabelFont);
+    wait_Label->setAlignment(Qt::AlignCenter);
+
+    wait_StopBttn = new QPushButton("Stop");
+    wait_StopBttn->setFont(NewLabelFont);
+    wait_StopBttn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     wait_Timer = new QTimer(this);
     wait_Timer->setInterval(std::chrono::milliseconds(1000));
 
-    QFont NewLabelFont = QFont("Calibri", 32);
-    wait_Label->setFont(NewLabelFont);
-    wait_Label->setAlignment(Qt::AlignCenter);
-    wait_Layout->addWidget(wait_Label, Qt::AlignCenter);
+    wait_Layout->addWidget(wait_Label);
+    wait_Layout->addWidget(wait_StopBttn, 0, Qt::AlignCenter);
+    wait_Layout->setAlignment(Qt::AlignCenter);
     wait_Widget->setLayout(wait_Layout);
     // Поиск соперника
 
@@ -149,6 +158,10 @@ Window::Window(QWidget *parent)
     listOfLayout->addWidget(play_Widget);
     listOfLayout->addWidget(wait_Widget);
     listOfLayout->setAlignment(Qt::AlignCenter);
+
+    // Загрузка изображений
+    MyPushButton::LoadChessImages(cell_Size);
+    // Загрузка изображений
 }
 
 void Window::login()
@@ -178,7 +191,6 @@ void Window::wait()
 
 void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполнили согласно новой расстановке
 {
-    int new_bttn_size = screen_Height / 15;
     for (int i = 0; i < 8; ++i)
     {
         for (int j = 0; j < 8; ++j)
@@ -188,6 +200,8 @@ void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполни
             QWidget *old = OldBttn->widget();
             MyPushButton *current_bttn = static_cast<MyPushButton *>(old);
             current_bttn->SetFigure(&NewBoard[position]);
+            current_bttn->repaint();
+            current_bttn->update();
         }
     }
 }
@@ -204,8 +218,6 @@ void Window::connect()
 
 std::vector<MyPushButton *> Window::FillBoard()
 {
-    int new_bttn_size = screen_Height / 15;
-    int idx;
     std::vector<MyPushButton *> NewBttns;
     NewBttns.reserve(64);
     for (int i = 0; i < 8; ++i)
@@ -218,9 +230,9 @@ std::vector<MyPushButton *> Window::FillBoard()
                 QWidget *old_widget = layout->widget();
                 play_BoardLayot->removeWidget(old_widget);
             }
-            MyPushButton *new_bttn = new MyPushButton(i, j); // к каждой кнопке добавить как то фунцию MakeMove DurakOnline
+            MyPushButton *new_bttn = new MyPushButton(i, j);
             NewBttns.push_back(new_bttn);
-            new_bttn->setFixedSize(new_bttn_size, new_bttn_size);
+            new_bttn->setFixedSize(cell_Size, cell_Size);
             play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
         }
     }

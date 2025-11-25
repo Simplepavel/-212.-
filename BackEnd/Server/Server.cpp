@@ -143,12 +143,12 @@ void Durak_Server::Server_Go()
                             if (!line.empty())
                             {
                                 Player pl2 = line.front();
-                                line.pop();
+                                line.erase(line.begin());
                                 Make_Session(pl2, pl1);
                             }
                             else
                             {
-                                line.push(pl1);
+                                line.push_back(pl1);
                             }
                         }
                         else if (recv_data.type == DataType::BOARD)
@@ -163,7 +163,7 @@ void Durak_Server::Server_Go()
                             SOCKET opp_socket = (one == *i) ? two : one; // на какой сокет кидать данные
                             int send_data = Server_Send(recv_data, opp_socket);
                         }
-                        else if (recv_data.type = DataType::DISCONNECT)
+                        else if (recv_data.type == DataType::DISCONNECT)
                         {
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
@@ -191,11 +191,86 @@ void Durak_Server::Server_Go()
 
                             // игрок, снова нуждающийся в противнике
                             Player Alone = (play_session->pl1.fd == opp_socket) ? play_session->pl1 : play_session->pl2;
-
-                            line.push(Alone);
+                            if (!line.empty())
+                            {
+                                Player pl2 = line.front();
+                                line.erase(line.begin());
+                                Make_Session(pl2, Alone);
+                            }
+                            else
+                            {
+                                line.push_back(Alone);
+                            }
 
                             play_sessions.erase(session_id);
                             delete play_session;
+                        }
+                        else if (recv_data.type == DataType::NEXT_ENEMY)
+                        {
+                            std::cout << "Next Enemy\n";
+                            uint32_t net_session_id;
+                            memcpy(&net_session_id, recv_data.data, 4);
+                            uint32_t session_id = ntohl(net_session_id);
+                            Session *play_session = play_sessions[session_id];
+
+                            SOCKET one = play_session->pl1.fd;
+                            SOCKET two = play_session->pl2.fd;
+
+                            SOCKET opp_socket = (one == *i) ? two : one;
+
+                            Mark1 to_send1;
+                            to_send1.type = DataType::LEAVE_ENEMY;
+                            to_send1.length = 0; // вроде никаких данных передавать не следует
+                            to_send1.data = nullptr;
+
+                            // Оба переходят в статус ожидания
+                            Server_Send(to_send1, opp_socket);
+                            Server_Send(to_send1, *i);
+
+                            Player First = (play_session->pl1.fd == opp_socket) ? play_session->pl1 : play_session->pl2;
+                            Player Second = (play_session->pl1.fd == opp_socket) ? play_session->pl2 : play_session->pl1;
+                            if (!line.empty()) // сначала брошенному
+                            {
+                                Player pl2 = line.front();
+                                line.erase(line.begin());
+                                Make_Session(pl2, First);
+                                if (!line.empty()) // теперь бросившему
+                                {
+                                    pl2 = line.front();
+                                    line.erase(line.begin());
+                                    Make_Session(pl2, Second);
+                                }
+                                else
+                                {
+                                    line.push_back(Second);
+                                }
+                            }
+                            else
+                            {
+                                line.push_back(First);
+                                line.push_back(Second);
+                            }
+                            play_sessions.erase(session_id);
+                            delete play_session;
+                        }
+                        else if (recv_data.type == DataType::STOP_FIND_ENEMY)
+                        {
+                            uint32_t net_id;
+                            memcpy(&net_id, recv_data.data, recv_data.length);
+                            uint32_t id = ntohl(net_id);
+                            for (auto j = line.begin(); j != line.end(); ++j) // оптимизировать!!!
+                            {
+                                if (j->id == id)
+                                {
+                                    line.erase(j);
+                                    break;
+                                }
+                            }
+                            Mark1 to_send;
+                            to_send.type = DataType::SHUTDOWN;
+                            to_send.length = 0;
+                            to_send.data = nullptr;
+                            Server_Send(to_send, *i);
                         }
                     }
                     else if (bytes == 0)
@@ -259,7 +334,7 @@ void Durak_Server::Make_Session(const Player &pl1, const Player &pl2)
     pqxx::connection *database_session = make_session(url_base);
     pqxx::work tx(*database_session);
 
-    bool Player1White = true;
+    bool Player1White = rand() % 2 == 0;
     Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
 
     uint32_t alfa;

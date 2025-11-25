@@ -18,30 +18,11 @@ void Figure::deserialize(char *buffer)
     memcpy(&color, buffer + 1, 1);
 }
 
-std::string Figure::to_string() const
+uint8_t Figure::GetImgNum() const
 {
     if (is_valid())
     {
-        switch (get_name())
-        {
-        case (KING):
-            return "K";
-        case (QUEEN):
-            return "Q";
-        case (ROOK):
-            return "R";
-        case (BISHOP):
-            return "B";
-        case (KNIGHT):
-            return "N";
-        case (PAWN):
-            return "P";
-        }
+        return color + name;
     }
-    return " ";
-}
-
-bool Figure::IsValidMove(int current_row, int current_column, int last_row, int last_column) const
-{
-    return true; // попросить кого то реализовать
+    return 255;
 }

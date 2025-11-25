@@ -2,23 +2,22 @@
 #include <cstdint>
 #include <memory>
 #include <iostream>
-
 enum FigureName : uint8_t
 {
-    EMPTY,
     KING,   // Король
     QUEEN,  // Ферщь
     ROOK,   // Ладья
     BISHOP, // Bishop
     KNIGHT, // Конь
     PAWN,   // Пешка
+    EMPTY,
 };
 
 enum FigureColor : uint8_t
 {
+    BLACK = 0,
+    WHITE = 6,
     NO_COLOR,
-    BLACK,
-    WHITE,
 };
 
 class Figure
@@ -36,6 +35,5 @@ public:
     uint8_t capacity() { return 2; }
     char *serialize();
     void deserialize(char *buffer);
-    std::string to_string() const;
-    bool IsValidMove(int current_row, int current_column, int last_row, int last_column) const;
+    uint8_t GetImgNum() const; // Порядковый номер готового изображения
 };

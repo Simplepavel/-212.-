@@ -16,6 +16,8 @@
 #include <QFont>
 #include <QPalette>
 #include <QColor>
+#include <QList>
+#include <QPixmap>
 #include <QTimer>
 
 #include "../BackEnd/Game/Board/Board.hpp"
@@ -26,8 +28,11 @@ class Window : public QWidget
 private:
     // Неигровые параметры
     QScreen *screen_Objc;
-    int screen_Width;  // Ширина
-    int screen_Height; // Высота
+    int screen_Width;  // Ширина экрана
+    int screen_Height; // Высота экрана
+
+    int cell_Size; // Высота X Ширина игровой клетки
+
     // Неигровые параметры
     // Вспомогательные элементы
     QStackedLayout *listOfLayout;
@@ -74,7 +79,8 @@ private:
     // Окно ожидание соперника
     QWidget *wait_Widget;
     QVBoxLayout *wait_Layout;
-    QLabel *wait_Label; // здесь найдпись: Идет поиск соперника. Ожидайте...
+    QLabel *wait_Label; // здесь надпись: Идет поиск соперника. Ожидайте...
+    QPushButton *wait_StopBttn;
     QTimer *wait_Timer;
     // Окно ожидание соперника
 
@@ -117,9 +123,11 @@ public:
     QLabel &get_play_EnemyName() { return *play_EnemyName; }
     std::vector<MyPushButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
     const QPushButton &get_play_StopBttn() { return *play_StopBttn; };
+    const QPushButton &get_play_NextBttn() { return *play_NextBttn; };
     // Метод отсносящиеся к игровому полю
 
-    // Методы относящиеся к игровому полю
+    // Методы относящиеся к полю ожидания
     QTimer &get_wait_Timer() { return *wait_Timer; }
-    // Методы относящиеся к игровому полю
+    const QPushButton &get_wait_StopBttn() { return *wait_StopBttn; }
+    // Методы относящиеся к полю ожидания
 };
