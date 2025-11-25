@@ -143,7 +143,7 @@ void DurakOnline::play() // Соперник уже найден
     else if (recv_data.type == DataType::BOARD)
     {
         board->DeserializeMove(recv_data.data + 4);
-        // board->replace();
+        board->replace();
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
     }
@@ -187,9 +187,9 @@ void DurakOnline::MakeMove()
             int last_row = SecondPosition->get_row();
             int last_column = SecondPosition->get_column();
 
-            if (board->move(current_row, current_column, last_row, last_column)) // вызывать метод move у доски. Вставить в MOVE изменения LastMove
+            bool ans = board->move(current_row, current_column, last_row, last_column);
+            if (ans) // вызывать метод move у доски. Вставить в MOVE изменения LastMove
             {
-                // board->replace(current_row, current_column, last_row, last_column); // при удачном move перерисовываем. Можно убрать после корректной реазлизации move
                 window.UpdateBoard(*board, MyColor);
                 char *new_board_serialize = board->SerializeMove();
                 uint32_t net_session_id = htonl(session_id);
@@ -202,10 +202,10 @@ void DurakOnline::MakeMove()
                 to_send.data = data;
 
                 int send_bytes = client.Client_Send(to_send);
-                FirstPosition = nullptr;
-                SecondPosition = nullptr;
                 IsMyTurn = false;
             }
+            FirstPosition = nullptr;
+            SecondPosition = nullptr;
         }
     }
 }

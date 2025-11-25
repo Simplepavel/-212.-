@@ -52,7 +52,7 @@ public:
     uint16_t capacity() { return 128; }
     Figure &operator[](int idx);
     // void replace(int c_row, int c_column, int l_row, int l_column);
-    // void replace();
+    void replace();
     char *SerializeMove();
     void DeserializeMove(char *);
 
