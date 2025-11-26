@@ -508,7 +508,7 @@ bool Board::move(int current_row, int current_column, int last_row,
     self[current_row * 8 + current_column + d] = figure;
     self[current_row * 8 + current_column] = Figure();
   } else {
-    self[current_row * 8 + last_column] = figure;
+    self[last_row * 8 + last_column] = figure;
     self[current_row * 8 + current_column] = Figure();
   }
 
