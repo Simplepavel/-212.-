@@ -164,6 +164,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
       const Figure& figure = self[row * 8 + column];
       if (figure.is_valid() && figure.get_name() == PAWN &&
           figure.get_color() == attackerColor) {
+        std::cout << "НАС АТАКУЕТ ПЕШКА " << row << ", " << column << std::endl;
         return true;
       }
     }
@@ -179,6 +180,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
       const Figure& figure = self[row * 8 + column];
       if (figure.is_valid() && figure.get_name() == KNIGHT &&
           figure.get_color() == attackerColor) {
+        std::cout << "НАС АТАКУЕТ КОНЬ " << row << ", " << column << std::endl;
         return true;
       }
     }
@@ -198,7 +200,9 @@ bool Board::isUnderAttack(int current_row, int current_column,
       if (!figure.is_valid()) continue;
       if (figure.get_color() == attackerColor &&
           (figure.get_name() == ROOK || figure.get_name() == QUEEN ||
-           (j == 1 ? figure.get_name() == KING : true))) {
+           (j == 1 ? figure.get_name() == KING : false))) {
+        std::cout << "НАС АТАКУЮТ ПО ВЕРТИКАЛИ " << row << ", " << column
+                  << std::endl;
         return true;
       }
       break;
@@ -219,7 +223,9 @@ bool Board::isUnderAttack(int current_row, int current_column,
       if (!figure.is_valid()) continue;
       if (figure.get_color() == attackerColor &&
           (figure.get_name() == BISHOP || figure.get_name() == QUEEN ||
-           (j == 1 ? figure.get_name() == KING : true))) {
+           (j == 1 ? figure.get_name() == KING : false))) {
+        std::cout << "НАС АТАКУЮТ ПО ДИАГОНАЛИ " << row << ", " << column
+                  << std::endl;
         return true;
       }
       break;
