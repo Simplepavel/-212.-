@@ -154,12 +154,12 @@ bool Board::isFreeDiagonal(int current_row, int current_column, int last_row,
 
 bool Board::isUnderAttack(int current_row, int current_column,
                           FigureColor attackerColor) const {
-  int pawnDir = (attackerColor == myColor) ? -1 : 1;
+  // int pawnDir = (attackerColor == myColor) ? -1 : 1;
 
   // проверяем атакуют ли пешки
   for (int LR = -1; LR <= 1; LR += 2) {
     int column = current_column + LR;
-    int row = current_row + pawnDir;
+    int row = current_row - 1;
     if (row >= 0 && row < 8 && column >= 0 && column < 8) {
       const Figure& figure = self[row * 8 + column];
       if (figure.is_valid() && figure.get_name() == PAWN &&
@@ -172,7 +172,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
   // проверяем атакуют ли кони
   const int knightMoves[8][2] = {{-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
                                  {1, -2},  {1, 2},  {2, -1},  {2, 1}};
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < 8; ++i) {
     int row = current_row + knightMoves[i][0];
     int column = current_column + knightMoves[i][1];
     if (row >= 0 && row < 8 && column >= 0 && column < 8) {
@@ -186,7 +186,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
 
   // проверяем атакуют ли по горизонтали или вертикали
   const int directionHV[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; ++i) {
     for (int j = 1; j < 8; ++j) {
       int row = current_row + directionHV[i][0] * j;
       int column = current_column + directionHV[i][1] * j;
@@ -207,7 +207,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
 
   // проверяем атакуют ли по диагонали
   const int directionD[4][2] = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
-  for (int i = 0; i < 4; i++) {
+  for (int i = 0; i < 4; ++i) {
     for (int j = 1; j < 8; ++j) {
       int row = current_row + directionD[i][0] * j;
       int column = current_column + directionD[i][1] * j;
@@ -444,16 +444,13 @@ bool Board::move(int current_row, int current_column, int last_row,
 
   Figure& figure = self[current_row * 8 + current_column];
 
+  bool isCastling = false;
   if (figure.get_name() == KING) {
-    if (figure.get_color() == WHITE) {
-      whiteKingMoved = true;
-    } else {
-      blackKingMoved = true;
-    }
-
     if (isValidCastling(current_row, current_column, last_row, last_column)) {
+      isCastling = true;
       if (current_column < last_column) {
-        self[current_row * 8 + (last_column - 1)] = self[current_row * 8 + 7];
+        self[current_row * 8 + (current_column + 1)] =
+            self[current_row * 8 + 7];
         self[current_row * 8 + 7] = Figure();
         if (figure.get_color() == WHITE) {
           whiteRookMoved[1] = true;
@@ -461,13 +458,18 @@ bool Board::move(int current_row, int current_column, int last_row,
           blackRookMoved[1] = true;
         }
       } else {
-        self[current_row * 8 + (last_column + 1)] = self[current_row * 8];
+        self[current_row * 8 + (current_column - 1)] = self[current_row * 8];
         self[current_row * 8] = Figure();
         if (figure.get_color() == WHITE) {
           whiteRookMoved[0] = true;
         } else {
           blackRookMoved[0] = true;
         }
+      }
+      if (figure.get_color() == WHITE) {
+        whiteKingMoved = true;
+      } else {
+        blackKingMoved = true;
       }
     }
   }
@@ -495,8 +497,14 @@ bool Board::move(int current_row, int current_column, int last_row,
     }
   }
 
-  self[last_row * 8 + last_column] = figure;
-  self[current_row * 8 + current_column] = Figure();
+  if (isCastling) {
+    int d = current_column < last_column ? 2 : -2;
+    self[current_row * 8 + current_column + d] = figure;
+    self[current_row * 8 + current_column] = Figure();
+  } else {
+    self[current_row * 8 + last_column] = figure;
+    self[current_row * 8 + current_column] = Figure();
+  }
 
   whiteCheck = isCheck(WHITE);
   blackCheck = isCheck(BLACK);
