@@ -25,8 +25,8 @@ private:
 
     void connect();
 private slots:
-    bool registration();
-    bool login();
+    void registration();
+    void login();
     void logout();
     void FindEnemy();
     void play();

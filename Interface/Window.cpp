@@ -18,6 +18,7 @@ Window::Window(QWidget *parent)
     // Вспомогательные компоненты
 
     // Вход
+
     login_Widget = new QWidget;
     login_Layout = new QVBoxLayout;
     login_Email = new QLineEdit;
@@ -29,15 +30,15 @@ Window::Window(QWidget *parent)
     login_Password->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
     login_LoginBttn = new QPushButton("LogIn");
-    login_LoginBttn->setBaseSize(login_Email->sizeHint());
+    login_LoginBttn->setFixedSize(login_Email->sizeHint());
 
     login_RegBttn = new QPushButton("Registration");
-    login_RegBttn->setBaseSize(login_Email->sizeHint());
+    login_RegBttn->setFixedSize(login_Email->sizeHint());
 
-    login_Layout->addWidget(login_Email);
-    login_Layout->addWidget(login_Password);
-    login_Layout->addWidget(login_LoginBttn);
-    login_Layout->addWidget(login_RegBttn);
+    login_Layout->addWidget(login_Email, Qt::AlignCenter);
+    login_Layout->addWidget(login_Password, Qt::AlignCenter);
+    login_Layout->addWidget(login_LoginBttn, Qt::AlignCenter);
+    login_Layout->addWidget(login_RegBttn, Qt::AlignCenter);
 
     login_Layout->setAlignment(Qt::AlignCenter);
     login_Layout->setSpacing(7);
@@ -54,8 +55,12 @@ Window::Window(QWidget *parent)
     main_LogoutBttn = new QPushButton("Logout");
 
     main_PlayBttn = new QPushButton("Play");
+
+    main_MyProfile = new QPushButton("Profile");
+
     main_Layout->addWidget(main_PlayBttn);
     main_Layout->addWidget(main_LogoutBttn);
+    main_Layout->addWidget(main_MyProfile);
 
     main_Layout->setAlignment(Qt::AlignCenter);
     main_Layout->setSpacing(7);
@@ -69,34 +74,36 @@ Window::Window(QWidget *parent)
     reg_Widget = new QWidget(this);
     reg_Layout = new QVBoxLayout;
 
+    reg_Layout->setContentsMargins(20, 20, 20, 20);
+
     reg_Username = new QLineEdit;
     reg_Username->setPlaceholderText("Enter username");
-    reg_Username->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    reg_Username->setFixedWidth(250);
 
     reg_Email = new QLineEdit;
     reg_Email->setPlaceholderText("Enter email");
-    reg_Email->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    reg_Email->setFixedWidth(250);
 
     reg_Password = new QLineEdit;
     reg_Password->setPlaceholderText("Enter password");
-    reg_Password->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    reg_Password->setFixedWidth(250);
 
     reg_ConfirmPassword = new QLineEdit;
     reg_ConfirmPassword->setPlaceholderText("Confirm password");
-    reg_ConfirmPassword->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    reg_ConfirmPassword->setFixedWidth(250);
 
     reg_SubmitBttn = new QPushButton("Check In");
-    reg_SubmitBttn->setBaseSize(reg_Username->sizeHint());
+    reg_SubmitBttn->setFixedWidth(250);
 
     reg_BackBttn = new QPushButton("Back");
-    reg_BackBttn->setBaseSize(reg_Username->sizeHint());
+    reg_BackBttn->setFixedWidth(250);
 
-    reg_Layout->addWidget(reg_Username);
-    reg_Layout->addWidget(reg_Email);
-    reg_Layout->addWidget(reg_Password);
-    reg_Layout->addWidget(reg_ConfirmPassword);
-    reg_Layout->addWidget(reg_SubmitBttn);
-    reg_Layout->addWidget(reg_BackBttn);
+    reg_Layout->addWidget(reg_Username, Qt::AlignCenter);
+    reg_Layout->addWidget(reg_Email, Qt::AlignCenter);
+    reg_Layout->addWidget(reg_Password, Qt::AlignCenter);
+    reg_Layout->addWidget(reg_ConfirmPassword, Qt::AlignCenter);
+    reg_Layout->addWidget(reg_SubmitBttn, Qt::AlignCenter);
+    reg_Layout->addWidget(reg_BackBttn, Qt::AlignCenter);
 
     reg_Layout->setAlignment(Qt::AlignHCenter);
     reg_Layout->setSpacing(7);
@@ -166,20 +173,29 @@ Window::Window(QWidget *parent)
 
 void Window::login()
 {
+    InsertMessage(LOGIN);
+    login_Email->clear();
+    login_Password->clear();
     listOfLayout->setCurrentWidget(login_Widget);
 }
 
 void Window::main()
 {
+    InsertMessage(MAIN);
     listOfLayout->setCurrentWidget(main_Widget);
 }
 
 void Window::registration()
 {
+    InsertMessage(CHECKIN);
+    reg_Username->clear();
+    reg_Email->clear();
+    reg_Password->clear();
+    reg_ConfirmPassword->clear();
     listOfLayout->setCurrentWidget(reg_Widget);
 }
 
-void Window::play() // скорее всего мы должны передать сюда какие-то параметры
+void Window::play()
 {
     listOfLayout->setCurrentWidget(play_Widget);
 }
@@ -187,6 +203,88 @@ void Window::play() // скорее всего мы должны передат�
 void Window::wait()
 {
     listOfLayout->setCurrentWidget(wait_Widget);
+}
+
+void Window::InsertMessage(Owners own, bool DeleteOld)
+{
+
+    QFont MessageFont("Calibri", 8);
+    QPalette palette;
+    QVBoxLayout *layout;
+    int k = 0; // Сколько виджетов есть у данного Layout по умолчанию
+    switch (own)
+    {
+    case (CHECKIN):
+        layout = reg_Layout;
+        k = 6;
+        break;
+    case (LOGIN):
+        layout = login_Layout;
+        k = 4;
+        break;
+    case (MAIN):
+        layout = main_Layout;
+        k = 3;
+        break;
+    case (PLAY):
+        layout = play_Layout; // Тут будет другой LAYOUT. Слева от игровой доски
+        break;
+    default:
+        return;
+    }
+
+    // Удалем старые препреждения если есть и надо
+    if (DeleteOld)
+    {
+        int count = layout->count();
+        int i = 0;
+        while (i < count - k)
+        {
+            QLayoutItem *item = layout->itemAt(i);
+            if (QLabel *LabelToDelete = dynamic_cast<QLabel *>(item->widget()))
+            {
+                layout->removeWidget(LabelToDelete);
+                delete LabelToDelete;
+            }
+            else
+            {
+                ++i;
+            }
+        }
+    }
+    // Удалем старые препреждения если есть
+    auto i = StateMessages.begin();
+    while (i != StateMessages.end())
+    {
+        if (i->owner == own)
+        {
+            QLabel *warning = new QLabel(i->message);
+            warning->setFont(MessageFont);
+            warning->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+            if (i->type == ERR)
+            {
+                palette.setColor(QPalette::WindowText, QColor(220, 0, 0));
+                warning->setPalette(palette);
+            }
+            else if (i->type == SUCCES)
+            {
+                palette.setColor(QPalette::WindowText, QColor(0, 255, 0));
+                warning->setPalette(palette);
+            }
+            layout->insertWidget(0, warning);
+            i = StateMessages.erase(i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+    // Вставка новых предупреждений
+}
+
+void Window::AddStateMessage(const Message &value)
+{
+    StateMessages.push_back(value);
 }
 
 void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполнили согласно новой расстановке
@@ -224,11 +322,11 @@ std::vector<MyPushButton *> Window::FillBoard()
     {
         for (int j = 0; j < 8; ++j)
         {
-            // ToDo: It can be impoved
             if (QLayoutItem *layout = play_BoardLayot->itemAtPosition(i, j))
             {
                 QWidget *old_widget = layout->widget();
                 play_BoardLayot->removeWidget(old_widget);
+                delete old_widget;
             }
             MyPushButton *new_bttn = new MyPushButton(i, j);
             NewBttns.push_back(new_bttn);
@@ -239,7 +337,6 @@ std::vector<MyPushButton *> Window::FillBoard()
     return NewBttns;
 }
 
-// Private slots
 void Window::UpdateWaitLabel()
 {
     QString CurrentText = wait_Label->text();

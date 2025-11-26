@@ -216,7 +216,8 @@ bool Board::isUnderAttack(int current_row, int current_column,
         continue;
       if (figure.get_color() == attackerColor &&
           (figure.get_name() == ROOK || figure.get_name() == QUEEN ||
-           (i == 1 ? figure.get_name() == KING : true)))
+
+           (j == 1 ? figure.get_name() == KING : true)))
       {
         return true;
       }
@@ -242,7 +243,8 @@ bool Board::isUnderAttack(int current_row, int current_column,
         continue;
       if (figure.get_color() == attackerColor &&
           (figure.get_name() == BISHOP || figure.get_name() == QUEEN ||
-           (i == 1 ? figure.get_name() == KING : true)))
+
+           (j == 1 ? figure.get_name() == KING : true)))
       {
         return true;
       }
@@ -337,8 +339,16 @@ bool Board::isValidCastling(int king_row, int king_column, int rook_row,
     return false;
   }
 
+  if (isUnderAttack(king_row, king_column,
+                    king.get_color() == BLACK ? WHITE : BLACK))
+  {
+    return false;
+  }
+
   int step = king_column < rook_column ? 1 : -1;
-  for (int col = king_column; col != king_column + 2 * step; col += step)
+
+  for (int col = king_column + step; col != king_column + 2 * step;
+       col += step)
   {
     if (isUnderAttack(king_row, col,
                       king.get_color() == BLACK ? WHITE : BLACK))
@@ -360,8 +370,10 @@ bool Board::isValidMove(int current_row, int current_column, int last_row,
     {
       return false;
     }
+
     const Figure &targetFigure = self[last_row * 8 + last_column];
-    if (figure.get_color() == targetFigure.get_color())
+    if (figure.get_name() != KING &&
+        figure.get_color() == targetFigure.get_color())
     {
       return false;
     }

@@ -7,7 +7,7 @@ libs_qt = -L C:\msys64\ucrt64\lib -l Qt6Widgets -l Qt6Core -l Qt6Gui
 
 
 
-object_file = currentuser.o database.o durakclient.o interface.o protocol.o figure.o board.o mypushbutton.o
+object_file = currentuser.o database.o durakclient.o interface.o protocol.o figure.o board.o mypushbutton.o utilts.o
 sources = main.cpp DurakOnline.cpp
 moc_sources =  moc_DurakOnline.cpp moc_Client.cpp moc_MyPushButton.cpp
 

@@ -6,53 +6,134 @@ char SERVER_PORT[] = "6666";
 
 DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr), board(nullptr) {}
 
-bool DurakOnline::registration()
+void DurakOnline::registration()
 {
-    pqxx::connection *session = make_session(url_base);
-    pqxx::work tx(*session);
 
     std::string name = window.get_reg_Username().text().toStdString();
     std::string email = window.get_reg_Email().text().toStdString();
     std::string password = window.get_reg_Password().text().toStdString();
     std::string confirmPassword = window.get_reg_ConfirmPassword().text().toStdString();
-    // Добавить больше валидации чтобы не вызывать базу данных просто так
+
+    bool flag = false; // Были или нет ошибки
+
+    if (name.empty())
+    {
+        flag = true;
+        window.AddStateMessage(CreateMessage("Field username must not be empty", CHECKIN, ERR));
+    }
+
+    if (email.empty())
+    {
+        flag = true;
+        window.AddStateMessage(CreateMessage("Field email must not be empty", CHECKIN, ERR));
+    }
+
+    if (password.empty())
+    {
+        flag = true;
+        window.AddStateMessage(CreateMessage("Field password must not be empty", CHECKIN, ERR));
+    }
+
+    if (password != confirmPassword)
+    {
+        flag = true;
+        window.AddStateMessage(CreateMessage("Password must be equal to ConfirmPassword", CHECKIN, ERR));
+    }
+
+    if (!ValidateEmail(email)) // Кириллллл
+    {
+        flag = true;
+        window.AddStateMessage(CreateMessage("Email is unavailable", CHECKIN, ERR));
+    }
+    if (flag) // простая валидация на стороне клиента
+    {
+        window.registration(); // очищаем данные добавляем информацию о ошибках
+        return;
+    }
+
+    pqxx::connection *session = make_session(url_base);
+    pqxx::work tx(*session);
+    flag = false;
+    {
+        pqxx::result username_check = tx.exec("select * from users where username = $1 limit 1", pqxx::params{name});
+        if (!username_check.empty())
+        {
+            flag = true;
+            window.AddStateMessage(CreateMessage("User with this username is already exists. Try another one", CHECKIN, ERR));
+        }
+
+        pqxx::result email_check = tx.exec("select * from users where username = $1 limit 1", pqxx::params{name});
+        if (!email_check.empty())
+        {
+            flag = true;
+            window.AddStateMessage(CreateMessage("User with this email is already exists. Try another one", CHECKIN, ERR));
+        }
+    }
+    if (flag) // сложная валидация с проверкой на существование
+    {
+        delete_session(session);
+        window.registration(); // очищаем данные добавляем информацию о ошибках
+        return;
+    }
+
     try
     {
         tx.exec("insert into users (username, email, password) values ($1, $2, $3)", pqxx::params{name, email, password});
-        std::cout << "Succes authorization new user\n";
+        window.AddStateMessage(CreateMessage("Succes authorization new user", LOGIN, SUCCES));
     }
     catch (std::exception &error)
     {
+        window.AddStateMessage(CreateMessage("Something went wrong. Please, try again", CHECKIN, ERR));
         delete_session(session);
-        std::cout << "Something went wrong\n";
-        return false;
+        return;
     }
     tx.commit();
     delete_session(session);
-    return true;
+    window.login();
 }
 
-bool DurakOnline::login()
+void DurakOnline::login()
 {
     std::string email = window.get_login_Email().text().toStdString();
     std::string password = window.get_login_Password().text().toStdString();
     // Валидация
+    bool flag = false;
+    if (email.empty())
+    {
+        flag = true;
+        window.AddStateMessage(CreateMessage("Field email must not be empty", LOGIN, ERR));
+    }
+
+    if (password.empty())
+    {
+        flag = true;
+        window.AddStateMessage(CreateMessage("Field password must not be empty", LOGIN, ERR));
+    }
+
+    if (flag)
+    {
+        window.login();
+        return;
+    }
+    // Валидация
     pqxx::connection *session = make_session(url_base);
     pqxx::work tx(*session);
+
     pqxx::result r = tx.exec("select id, username, email from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
     if (!r.empty())
     {
         pqxx::row user = r[0];
         CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>());
         current_user = std::move(NewUser);
+        window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES));
         window.main();
     }
     else
     {
-        std::cout << "Unavailable email or password\n";
-        return false;
+        window.AddStateMessage(CreateMessage("Unavailable email or password", LOGIN, ERR));
+        window.login();
     }
-    return true;
+    delete_session(session);
 }
 
 void DurakOnline::logout()

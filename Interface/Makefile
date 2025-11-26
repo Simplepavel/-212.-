@@ -2,13 +2,16 @@ libs = -L C:\msys64\ucrt64\lib  -l Qt6Widgets -l Qt6Core -l Qt6Gui
 includes = -I C:\msys64\ucrt64\include\qt6 -I C:\msys64\ucrt64\include\qt6\QtWidgets \
 			-I C:\msys64\ucrt64\include\qt6\QtCore -I C:\msys64\ucrt64\include\qt6\QtGui
 
-.PHONY: MyPushButton
+.PHONY: MyPushButton Utilts
 
-all: MyPushButton
+all: MyPushButton Utilts
 	g++ Window.cpp $(includes) $(libs) -o ../interface.o -c
 
 MyPushButton:
 	g++ MyPushButton/MyPushButton.cpp $(includes) $(libs) -o ../mypushbutton.o -c
+
+Utilts:
+	g++ Utilts.cpp -o ../utilts.o -c $(includes) $(libs)
 
 # moc:
 # 	rm -f moc_*.cpp

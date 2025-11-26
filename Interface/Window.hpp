@@ -22,6 +22,9 @@
 
 #include "../BackEnd/Game/Board/Board.hpp"
 #include "MyPushButton/MyPushButton.hpp"
+#include "Utilts.hpp"
+
+#include <list>
 
 class Window : public QWidget
 {
@@ -32,6 +35,7 @@ private:
     int screen_Height; // Высота экрана
 
     int cell_Size; // Высота X Ширина игровой клетки
+    std::list<Message> StateMessages;
 
     // Неигровые параметры
     // Вспомогательные элементы
@@ -53,6 +57,7 @@ private:
 
     QPushButton *main_PlayBttn;
     QPushButton *main_LogoutBttn;
+    QPushButton *main_MyProfile;
     // Главное меню
 
     // Регистрация
@@ -95,6 +100,8 @@ public:
     void registration();
     void play();
     void wait();
+    void InsertMessage(Owners, bool DeleteOld = true); // Вставка предупрждений
+    void AddStateMessage(const Message &);
 
     // Констатнтный доступ к элементам формы регистрации
     const QLineEdit &get_reg_Username() { return *reg_Username; }
