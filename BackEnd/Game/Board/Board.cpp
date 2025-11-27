@@ -74,33 +74,6 @@ void Board::deserialize(char *buffer)
   }
 }
 
-// void Board::replace(int c_row, int c_column, int l_row,
-//                     int l_column) // аргументы от 0 до 7
-// {
-//   LastMoves[0] = c_row;
-//   LastMoves[1] = c_column;
-//   LastMoves[2] = l_row;
-//   LastMoves[3] = l_column;
-
-//   int idx1 = c_row * 8 + c_column;
-//   int idx2 = l_row * 8 + l_column;
-//   self[idx2] = self[idx1];
-//   self[idx1] = Figure();
-// }
-
-void Board::replace()
-{
-  int c_row = 7 - LastMoves[0];
-  int c_column = 7 - LastMoves[1];
-  int l_row = 7 - LastMoves[2];
-  int l_column = 7 - LastMoves[3];
-
-  int idx1 = c_row * 8 + c_column;
-  int idx2 = l_row * 8 + l_column;
-  self[idx2] = self[idx1];
-  self[idx1] = Figure();
-}
-
 char *Board::SerializeMove()
 {
   char *result = new char[4];
@@ -111,15 +84,73 @@ char *Board::SerializeMove()
   return result;
 }
 
-void Board::DeserializeMove(char *buffer)
+const std::vector<uint8_t> &Board::DeserializeMove(char *buffer)
 {
   LastMoves[0] = buffer[0];
   LastMoves[1] = buffer[1];
   LastMoves[2] = buffer[2];
   LastMoves[3] = buffer[3];
+  return LastMoves;
 }
 
 Figure &Board::operator[](int idx) { return self[idx]; }
+
+void Board::replace(int current_row, int current_column, int last_row, int last_column)
+{
+  LastMoves[0] = current_row;
+  LastMoves[1] = current_column;
+  LastMoves[2] = last_row;
+  LastMoves[3] = last_column;
+  Figure &figure = self[current_row * 8 + current_column];
+  self[last_row * 8 + last_column] = figure;
+  self[current_row * 8 + current_column] = Figure();
+}
+
+void Board::clasting(int current_row, int current_column, int last_row, int last_column)
+{
+  Figure &figure = self[current_row * 8 + current_column];
+  if (current_column < last_column)
+  {
+    self[current_row * 8 + (current_column + 1)] = self[current_row * 8 + 7];
+    self[current_row * 8 + 7] = Figure();
+    if (figure.get_color() == WHITE)
+    {
+      whiteRookMoved[1] = true;
+    }
+    else
+    {
+      blackRookMoved[1] = true;
+    }
+  }
+  else
+  {
+    self[current_row * 8 + (current_column - 1)] = self[current_row * 8];
+    self[current_row * 8] = Figure();
+    if (figure.get_color() == WHITE)
+    {
+      whiteRookMoved[0] = true;
+    }
+    else
+    {
+      blackRookMoved[0] = true;
+    }
+  }
+  if (figure.get_color() == WHITE)
+  {
+    whiteKingMoved = true;
+  }
+  else
+  {
+    blackKingMoved = true;
+  }
+  LastMoves[0] = current_row;
+  LastMoves[1] = current_column;
+  LastMoves[2] = last_row;
+  LastMoves[3] = last_column;
+  int d = current_column < last_column ? 2 : -2;
+  self[current_row * 8 + current_column + d] = figure;
+  self[current_row * 8 + current_column] = Figure();
+}
 
 bool Board::isFreeRow(int current_row, int current_column, int last_row,
                       int last_column) const
@@ -176,7 +207,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
       if (figure.is_valid() && figure.get_name() == PAWN &&
           figure.get_color() == attackerColor)
       {
-        std::cout << "НАС АТАКУЕТ ПЕШКА " << row << ", " << column << std::endl;
+        std::cout << "UNDEE PAWN ATTACK " << row << ", " << column << std::endl;
         return true;
       }
     }
@@ -194,7 +225,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
       if (figure.is_valid() && figure.get_name() == KNIGHT &&
           figure.get_color() == attackerColor)
       {
-        std::cout << "НАС АТАКУЕТ КОНЬ " << row << ", " << column << std::endl;
+        std::cout << "UNDER KNIGHT ATTACK " << row << ", " << column << std::endl;
         return true;
       }
     }
@@ -220,7 +251,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
           (figure.get_name() == ROOK || figure.get_name() == QUEEN ||
            (j == 1 ? figure.get_name() == KING : false)))
       {
-        std::cout << "НАС АТАКУЮТ ПО ВЕРТИКАЛИ " << row << ", " << column
+        std::cout << "UNDER VERTICAL ATTACK " << row << ", " << column
                   << std::endl;
         return true;
       }
@@ -248,7 +279,7 @@ bool Board::isUnderAttack(int current_row, int current_column,
           (figure.get_name() == BISHOP || figure.get_name() == QUEEN ||
            (j == 1 ? figure.get_name() == KING : false)))
       {
-        std::cout << "НАС АТАКУЮТ ПО ДИАГОНАЛИ " << row << ", " << column
+        std::cout << "UNDER DIAGONALLY ATTACK " << row << ", " << column
                   << std::endl;
         return true;
       }
@@ -507,13 +538,8 @@ bool Board::canMove(FigureColor color) const
 
 bool Board::isCheckmate(FigureColor color) const
 {
-#ifdef DEBUG
-  int t = rand();
-  return (t % 2 == 0);
-#endif
-#ifndef DEBUG
+
   return isCheck(color) && !canMove(color);
-#endif
 }
 
 bool Board::isStalemate(FigureColor color) const
@@ -522,9 +548,8 @@ bool Board::isStalemate(FigureColor color) const
 }
 
 bool Board::move(int current_row, int current_column, int last_row,
-                 int last_column)
+                 int last_column) // move возвращет true или false не меняя доску
 {
-#ifndef DEBUG
   if (!isValidMove(current_row, current_column, last_row, last_column))
   {
     return false;
@@ -534,57 +559,49 @@ bool Board::move(int current_row, int current_column, int last_row,
     return false;
   }
 
-  if (kingWouldCheck(current_row, current_column, last_row, last_column))
-  {
-    return false;
-  }
-
   Figure &figure = self[current_row * 8 + current_column];
+#ifdef DEBUG
 
   bool isCastling = false;
-  if (figure.get_name() == KING)
+  if (isValidCastling(current_row, current_column, last_row, last_column)) // здесь проверяем, что фигура-король
   {
-    if (isValidCastling(current_row, current_column, last_row, last_column))
+    isCastling = true;
+    if (current_column < last_column)
     {
-      isCastling = true;
-      if (current_column < last_column)
-      {
-        self[current_row * 8 + (current_column + 1)] =
-            self[current_row * 8 + 7];
-        self[current_row * 8 + 7] = Figure();
-        if (figure.get_color() == WHITE)
-        {
-          whiteRookMoved[1] = true;
-        }
-        else
-        {
-          blackRookMoved[1] = true;
-        }
-      }
-      else
-      {
-        self[current_row * 8 + (current_column - 1)] = self[current_row * 8];
-        self[current_row * 8] = Figure();
-        if (figure.get_color() == WHITE)
-        {
-          whiteRookMoved[0] = true;
-        }
-        else
-        {
-          blackRookMoved[0] = true;
-        }
-      }
+      self[current_row * 8 + (current_column + 1)] = self[current_row * 8 + 7];
+      self[current_row * 8 + 7] = Figure();
       if (figure.get_color() == WHITE)
       {
-        whiteKingMoved = true;
+        whiteRookMoved[1] = true;
       }
       else
       {
-        blackKingMoved = true;
+        blackRookMoved[1] = true;
       }
     }
+    else
+    {
+      self[current_row * 8 + (current_column - 1)] = self[current_row * 8];
+      self[current_row * 8] = Figure();
+      if (figure.get_color() == WHITE)
+      {
+        whiteRookMoved[0] = true;
+      }
+      else
+      {
+        blackRookMoved[0] = true;
+      }
+    }
+    if (figure.get_color() == WHITE)
+    {
+      whiteKingMoved = true;
+    }
+    else
+    {
+      blackKingMoved = true;
+    }
   }
-
+#endif
   if (figure.get_name() == ROOK)
   {
     if (figure.get_color() == WHITE)
@@ -623,6 +640,7 @@ bool Board::move(int current_row, int current_column, int last_row,
     }
   }
 
+#ifdef DEBUG
   if (isCastling)
   {
     int d = current_column < last_column ? 2 : -2;
@@ -631,33 +649,11 @@ bool Board::move(int current_row, int current_column, int last_row,
   }
   else
   {
-    self[current_row * 8 + last_column] = figure;
+    self[last_row * 8 + last_column] = figure;
     self[current_row * 8 + current_column] = Figure();
   }
-
-  LastMoves[0] = current_row;
-  LastMoves[1] = current_column;
-  LastMoves[2] = last_row;
-  LastMoves[3] = last_column;
-
+#endif
   whiteCheck = isCheck(WHITE);
   blackCheck = isCheck(BLACK);
   return true;
-#endif
-
-#ifdef DEBUG
-  Figure &figure = self[current_row * 8 + current_column];
-
-  self[last_row * 8 + last_column] = figure;
-  self[current_row * 8 + current_column] = Figure();
-
-  LastMoves[0] = current_row;
-  LastMoves[1] = current_column;
-  LastMoves[2] = last_row;
-  LastMoves[3] = last_column;
-
-  whiteCheck = isCheck(WHITE);
-  blackCheck = isCheck(BLACK);
-  return true;
-#endif
 }

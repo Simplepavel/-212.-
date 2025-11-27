@@ -151,7 +151,7 @@ void Durak_Server::Server_Go()
                                 line.push_back(pl1);
                             }
                         }
-                        else if (recv_data.type == DataType::BOARD)
+                        else if (recv_data.type == DataType::MOVE || recv_data.type == DataType::CLASTING)
                         {
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);

@@ -230,10 +230,17 @@ void DurakOnline::play() // Соперник уже найден
         window.play(); // передать указатель на Board
     }
 
-    else if (recv_data.type == DataType::BOARD)
+    else if (recv_data.type == DataType::MOVE)
     {
-        board->DeserializeMove(recv_data.data + 4);
-        board->replace();
+        const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
+        board->replace(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
+        window.UpdateBoard(*board, MyColor);
+        IsMyTurn = true;
+    }
+    else if (recv_data.type == DataType::CLASTING)
+    {
+        const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
+        board->clasting(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
     }
@@ -278,26 +285,31 @@ void DurakOnline::MakeMove()
             int last_column = SecondPosition->get_column();
 
             bool ans = board->move(current_row, current_column, last_row, last_column);
+            std::cout << "Move: " << ans << '\n';
             if (ans) // вызывать метод move у доски. Вставить в MOVE изменения LastMove
             {
+                Mark1 to_send;
+                // if (board->isCheckmate(current_row, current_column, last_row, last_column))
+                // {
+
+                // }
+                if (board->isValidCastling(current_row, current_column, last_row, last_column)) // Рокировка
+                {
+                    board->clasting(current_row, current_column, last_row, last_column);
+                    to_send.type = DataType::CLASTING;
+                }
+                else // Обычный ход
+                {
+                    board->replace(current_row, current_column, last_row, last_column);
+                    to_send.type = DataType::MOVE;
+                }
+
                 window.UpdateBoard(*board, MyColor);
                 char *new_board_serialize = board->SerializeMove();
                 uint32_t net_session_id = htonl(session_id);
                 char *data = new char[8];
                 memcpy(data, &net_session_id, 4);
                 memcpy(data + 4, new_board_serialize, 4);
-                Mark1 to_send;
-                bool ischmt = board->isCheckmate(MyColor);
-                std::cout << ischmt << '\n';
-                // if (ischmt) // Мат. Какой цвет передавать????
-                // {
-                //     to_send.type = DataType::CHECKMATE;
-                // }
-                // else
-                // {
-                //     to_send.type = DataType::BOARD;
-                // }
-                to_send.type = DataType::BOARD;
                 to_send.length = 8;
                 to_send.data = data;
 
