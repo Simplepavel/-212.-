@@ -1,6 +1,10 @@
 #include <vector>
 
 #include "../Figure/Figure.hpp"
+
+#define DEBUG
+
+
 class Board
 {
 private:

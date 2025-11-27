@@ -210,7 +210,7 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
 
     QFont MessageFont("Calibri", 8);
     QPalette palette;
-    QVBoxLayout *layout;
+    QVBoxLayout *layout = nullptr;
     int k = 0; // Сколько виджетов есть у данного Layout по умолчанию
     switch (own)
     {

@@ -94,6 +94,7 @@ void DurakOnline::registration()
 
 void DurakOnline::login()
 {
+    std::cout << "\n\n\n\nStart\n";
     std::string email = window.get_login_Email().text().toStdString();
     std::string password = window.get_login_Password().text().toStdString();
     // Валидация
@@ -115,25 +116,33 @@ void DurakOnline::login()
         window.login();
         return;
     }
+
+    std::cout << "Field are not empty\n";
     // Валидация
     pqxx::connection *session = make_session(url_base);
     pqxx::work tx(*session);
 
     pqxx::result r = tx.exec("select id, username, email from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
+
     if (!r.empty())
     {
+        std::cout << "1\n";
         pqxx::row user = r[0];
+        std::cout << "2\n";
         CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>());
+        std::cout << "3\n";
         current_user = std::move(NewUser);
+        std::cout << "4\n";
         window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES));
+        std::cout << "5\n";
         window.main();
+        std::cout << "6\n";
     }
     else
     {
         window.AddStateMessage(CreateMessage("Unavailable email or password", LOGIN, ERR));
         window.login();
     }
-    delete_session(session);
 }
 
 void DurakOnline::logout()
@@ -278,6 +287,16 @@ void DurakOnline::MakeMove()
                 memcpy(data, &net_session_id, 4);
                 memcpy(data + 4, new_board_serialize, 4);
                 Mark1 to_send;
+                bool ischmt = board->isCheckmate(MyColor);
+                std::cout << ischmt << '\n';
+                // if (ischmt) // Мат. Какой цвет передавать????
+                // {
+                //     to_send.type = DataType::CHECKMATE;
+                // }
+                // else
+                // {
+                //     to_send.type = DataType::BOARD;
+                // }
                 to_send.type = DataType::BOARD;
                 to_send.length = 8;
                 to_send.data = data;
