@@ -430,12 +430,29 @@ bool Board::canMove(FigureColor color) const {
   return false;
 }
 
-bool Board::isCheckmate(FigureColor color) const {
-  return isCheck(color) && !canMove(color);
+bool Board::isCheckmate(int current_row, int current_column, int last_row,
+                        int last_column) const {
+  Board tmpBoard = *this;
+  if (tmpBoard.isValidMove(current_row, current_column, last_row,
+                           last_column)) {
+    tmpBoard.move(current_row, current_column, last_row, last_column);
+    return tmpBoard.isCheck(tmpBoard[last_row * 8 + last_column].get_color()) &&
+           !canMove(tmpBoard[last_row * 8 + last_column].get_color());
+  }
+  return false;
 }
 
-bool Board::isStalemate(FigureColor color) const {
-  return !isCheck(color) && !canMove(color);
+bool Board::isStalemate(int current_row, int current_column, int last_row,
+                        int last_column) const {
+  Board tmpBoard = *this;
+  if (tmpBoard.isValidMove(current_row, current_column, last_row,
+                           last_column)) {
+    tmpBoard.move(current_row, current_column, last_row, last_column);
+    return !tmpBoard.isCheck(
+               tmpBoard[last_row * 8 + last_column].get_color()) &&
+           !canMove(tmpBoard[last_row * 8 + last_column].get_color());
+  }
+  return false;
 }
 
 bool Board::move(int current_row, int current_column, int last_row,

@@ -40,8 +40,10 @@ class Board {
   bool isCheck(FigureColor color) const;
   bool kingWouldCheck(int current_row, int current_column, int last_row,
                       int last_column) const;
-  bool isCheckmate(FigureColor color) const;
-  bool isStalemate(FigureColor color) const;
+  bool isCheckmate(int current_row, int current_column, int last_row,
+                   int last_column) const;
+  bool isStalemate(int current_row, int current_column, int last_row,
+                   int last_column) const;
   bool move(int current_row, int current_column, int last_row, int last_column);
   // Сеня
 
