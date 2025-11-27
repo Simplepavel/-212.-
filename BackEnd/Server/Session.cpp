@@ -21,3 +21,26 @@ Session::~Session()
 {
     ids.push(id);
 }
+
+bool Player::operator==(const Player &argv)
+{
+    return (id == argv.id) && (fd == argv.fd);
+}
+
+const Player &Session::Sender(int fd)
+{
+    if (pl1.fd == fd)
+    {
+        return pl1;
+    }
+    return pl2;
+}
+
+const Player &Session::Reciver(int fd)
+{
+    if (pl1.fd == fd)
+    {
+        return pl2;
+    }
+    return pl1;
+}

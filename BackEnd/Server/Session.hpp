@@ -8,6 +8,7 @@ struct Player
     uint32_t fd;
     Player(SOCKET i, SOCKET f) : id(i), fd(f) {}
     Player() : id(0), fd(0) {}
+    bool operator==(const Player &);
 };
 
 struct Session
@@ -19,4 +20,6 @@ struct Session
     static std::stack<uint32_t> ids;
     Session(const Player &p1, const Player &p2);
     ~Session();
+    const Player &Sender(int fd);
+    const Player &Reciver(int fd);
 };

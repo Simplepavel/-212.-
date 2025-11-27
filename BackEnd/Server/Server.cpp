@@ -150,6 +150,21 @@ void Durak_Server::Server_Go()
                             {
                                 line.push_back(pl1);
                             }
+                            rating[pl1.id] = 0;
+                        }
+                        else if (recv_data.type == DataType::CHECKMATE)
+                        {
+                            uint32_t net_session_id;
+                            memcpy(&net_session_id, recv_data.data, 4);
+                            uint32_t session_id = ntohl(net_session_id);
+
+                            Session *play_session = play_sessions[session_id];
+                            SOCKET opp_socket = play_session->Reciver(*i).fd;
+
+                            // на какой сокет кидать данные
+                            int send_data = Server_Send(recv_data, opp_socket); // отправили ход
+
+                            // Помимо отправки хода еще какие нибудь действия
                         }
                         else if (recv_data.type == DataType::MOVE || recv_data.type == DataType::CLASTING)
                         {
@@ -158,9 +173,8 @@ void Durak_Server::Server_Go()
                             uint32_t session_id = ntohl(net_session_id);
 
                             Session *play_session = play_sessions[session_id];
-                            SOCKET one = play_session->pl1.fd;
-                            SOCKET two = play_session->pl2.fd;
-                            SOCKET opp_socket = (one == *i) ? two : one; // на какой сокет кидать данные
+                            SOCKET opp_socket = play_session->Reciver(*i).fd;
+
                             int send_data = Server_Send(recv_data, opp_socket);
                         }
                         else if (recv_data.type == DataType::DISCONNECT)
@@ -170,10 +184,7 @@ void Durak_Server::Server_Go()
                             uint32_t session_id = ntohl(net_session_id);
                             Session *play_session = play_sessions[session_id];
 
-                            SOCKET one = play_session->pl1.fd;
-                            SOCKET two = play_session->pl2.fd;
-
-                            SOCKET opp_socket = (one == *i) ? two : one;
+                            SOCKET opp_socket = play_session->Reciver(*i).fd;
 
                             Mark1 to_send1;
                             to_send1.type = DataType::LEAVE_ENEMY;
@@ -190,7 +201,7 @@ void Durak_Server::Server_Go()
                             Server_Send(to_send2, *i);
 
                             // игрок, снова нуждающийся в противнике
-                            Player Alone = (play_session->pl1.fd == opp_socket) ? play_session->pl1 : play_session->pl2;
+                            Player Alone = play_session->Reciver(*i);
                             if (!line.empty())
                             {
                                 Player pl2 = line.front();
@@ -326,7 +337,7 @@ int Durak_Server::Server_Send(const Mark1 &data, int fd)
     return result;
 }
 
-void Durak_Server::Make_Session(const Player &pl1, const Player &pl2)
+void Durak_Server::Make_Session(Player &pl1, Player &pl2)
 {
     Session *new_session = new Session(pl1, pl2);
     std::cout << "New session id: " << new_session->id << '\n';

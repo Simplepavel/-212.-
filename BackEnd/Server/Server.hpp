@@ -20,10 +20,13 @@ private:
     SOCKET server_socket;
     std::list<SOCKET> clients;
     std::list<Player> line;
+    std::map<uint32_t, uint32_t> rating;
+    // Система подсчета рейнтинга
+
     std::map<uint32_t, Session *> play_sessions;
     void print(sockaddr *);
     void Server_Accept();
-    void Make_Session(const Player &, const Player &);
+    void Make_Session(Player &, Player &);
     Mark1 MakeStartPacket(pqxx::work &tx, const Player &pl, uint32_t session_id, bool);
     std::mutex mtx;
 

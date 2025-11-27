@@ -255,6 +255,12 @@ void DurakOnline::play() // Соперник уже найден
         client.set_ready(false); // Больше не слушаем сервер
         window.main();
     }
+    else if (recv_data.type == DataType::CHECKMATE)
+    {
+        std::cout << "You  are lose\n";
+        
+        return;
+    }
 }
 
 void DurakOnline::MakeMove()
@@ -289,11 +295,13 @@ void DurakOnline::MakeMove()
             if (ans) // вызывать метод move у доски. Вставить в MOVE изменения LastMove
             {
                 Mark1 to_send;
-                // if (board->isCheckmate(current_row, current_column, last_row, last_column))
-                // {
-
-                // }
-                if (board->isValidCastling(current_row, current_column, last_row, last_column)) // Рокировка
+                if (board->isCheckmate(current_row, current_column, last_row, last_column))
+                {
+                    std::cout << "CHECKMATE";
+                    board->replace(current_row, current_column, last_row, last_column);
+                    to_send.type = DataType::CHECKMATE;
+                }
+                else if (board->isValidCastling(current_row, current_column, last_row, last_column)) // Рокировка
                 {
                     board->clasting(current_row, current_column, last_row, last_column);
                     to_send.type = DataType::CLASTING;
