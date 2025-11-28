@@ -18,6 +18,7 @@ struct Session
     Player pl2;
     static uint32_t last_id;
     static std::stack<uint32_t> ids;
+    bool IsFinished = false; // Закончена ли эта партия победой или ничьей(пат)
     Session(const Player &p1, const Player &p2);
     ~Session();
     const Player &Sender(int fd);

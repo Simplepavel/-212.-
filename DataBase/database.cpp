@@ -1,12 +1,13 @@
 #include "database.hpp"
 
+std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhost:5432/durak";
 
-pqxx::connection *make_session(const std::string &url)
+pqxx::connection *make_session()
 {
     pqxx::connection *cx = nullptr;
     try
     {
-        cx = new pqxx::connection{url}; // все будет хорошо
+        cx = new pqxx::connection{url_base}; // все будет хорошо
     }
     catch (std::exception &error)
     {

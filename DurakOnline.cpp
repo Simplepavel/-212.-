@@ -1,6 +1,5 @@
 #include "DurakOnline.hpp"
 
-std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhost:5432/durak";
 char SERVER_IP[] = "127.0.0.1";
 char SERVER_PORT[] = "6666";
 
@@ -51,7 +50,7 @@ void DurakOnline::registration()
         return;
     }
 
-    pqxx::connection *session = make_session(url_base);
+    pqxx::connection *session = make_session();
     pqxx::work tx(*session);
     flag = false;
     {
@@ -116,7 +115,7 @@ void DurakOnline::login()
         return;
     }
 
-    pqxx::connection *session = make_session(url_base);
+    pqxx::connection *session = make_session();
     pqxx::work tx(*session);
 
     pqxx::result r = tx.exec("select id, username, email from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});

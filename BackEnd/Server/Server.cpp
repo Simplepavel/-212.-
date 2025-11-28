@@ -1,7 +1,5 @@
 #include "Server.hpp"
 
-std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhost:5432/durak";
-
 Durak_Server::Durak_Server() : server_socket(INVALID_SOCKET)
 {
     WORD version = MAKEWORD(2, 2);
@@ -160,11 +158,17 @@ void Durak_Server::Server_Go()
 
                             Session *play_session = play_sessions[session_id];
                             SOCKET opp_socket = play_session->Reciver(*i).fd;
-
-                            // на какой сокет кидать данные
                             int send_data = Server_Send(recv_data, opp_socket); // отправили ход
 
+                            Player winner = play_session->Sender(*i);
+                            Player loser = play_session->Reciver(*i);
+
+                            rating[winner.id] += (30 + rand() % 2);
+                            rating[loser.id] -= (15 + rand() % 2);
+                            play_session->IsFinished = true; // Сессия закочена победой одного из игроков
+
                             // Помимо отправки хода еще какие нибудь действия
+                            // Удалять ссесия не надо. Она удалиться как только один игрок нажмет Next или Stop
                         }
                         else if (recv_data.type == DataType::MOVE || recv_data.type == DataType::CLASTING)
                         {
@@ -213,12 +217,24 @@ void Durak_Server::Server_Go()
                                 line.push_back(Alone);
                             }
 
+                            // Наконец, изменение рейтига для покинувшего
+                            Player loser = play_session->Sender(*i);
+                            if (!play_session->IsFinished)
+                            {
+                                rating[loser.id] += (-10 + rand() % 2);
+                            }
+
+                            pqxx::connection *database_session = make_session();
+                            pqxx::work tx(*database_session);
+                            tx.exec("update users set rating = rating + $1 where id = $2 where rating > 100", pqxx::params{rating[loser.id], loser.id});
+                            tx.commit();
+                            delete_session(database_session);
+
                             play_sessions.erase(session_id);
                             delete play_session;
                         }
                         else if (recv_data.type == DataType::NEXT_ENEMY)
                         {
-                            std::cout << "Next Enemy\n";
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
                             uint32_t session_id = ntohl(net_session_id);
@@ -261,6 +277,13 @@ void Durak_Server::Server_Go()
                                 line.push_back(First);
                                 line.push_back(Second);
                             }
+
+                            if (!play_session->IsFinished) // Только если отпрашиш решил сдаться
+                            {
+                                Player loser = play_session->Sender(*i);
+                                rating[loser.id] += (-30 - rand() % 2); // наказание решившего покинуть игру
+                            }
+
                             play_sessions.erase(session_id);
                             delete play_session;
                         }
@@ -282,6 +305,12 @@ void Durak_Server::Server_Go()
                             to_send.length = 0;
                             to_send.data = nullptr;
                             Server_Send(to_send, *i);
+
+                            pqxx::connection *database_session = make_session();
+                            pqxx::work tx(*database_session);
+                            tx.exec("update users set rating = rating + $1 where id = $2 where rating > 100", pqxx::params{rating[id], id});
+                            tx.commit();
+                            delete_session(database_session);
                         }
                     }
                     else if (bytes == 0)
@@ -342,7 +371,7 @@ void Durak_Server::Make_Session(Player &pl1, Player &pl2)
     Session *new_session = new Session(pl1, pl2);
     std::cout << "New session id: " << new_session->id << '\n';
     play_sessions[new_session->id] = new_session;
-    pqxx::connection *database_session = make_session(url_base);
+    pqxx::connection *database_session = make_session();
     pqxx::work tx(*database_session);
 
     bool Player1White = rand() % 2 == 0;

@@ -20,7 +20,7 @@ private:
     SOCKET server_socket;
     std::list<SOCKET> clients;
     std::list<Player> line;
-    std::map<uint32_t, uint32_t> rating;
+    std::map<int32_t, int32_t> rating;
     // Система подсчета рейнтинга
 
     std::map<uint32_t, Session *> play_sessions;
