@@ -113,26 +113,48 @@ Window::Window(QWidget *parent)
 
     // Игровое полотно
     play_Widget = new QWidget(this);
-    play_Layout = new QVBoxLayout;
+    play_Layout = new QHBoxLayout;
 
+    play_ScrollArea = new QScrollArea;
+    play_ScrollArea->setWidgetResizable(true);
+
+    play_ScrollLayout = new QVBoxLayout;
+    play_ScrollLayout->setSpacing(0);
+    play_ScrollLayout->setAlignment(Qt::AlignTop);
+    play_ScrollLayout->setContentsMargins(20, 20, 20, 20);
+
+    play_ScrollWidget = new QWidget(play_Widget);
+
+    play_ScrollWidget->setLayout(play_ScrollLayout);
+    play_ScrollArea->setWidget(play_ScrollWidget);
+
+    play_GameLayout = new QVBoxLayout;
     play_EnemyName = new QLabel("User1");
-    play_EnemyName->setStyleSheet("font-size: 32px; font-family: Calibri;");
+    play_EnemyName->setFont(QFont("Calibri", BIGGEST));
     play_EnemyName->setAlignment(Qt::AlignCenter);
 
     play_NextBttn = new QPushButton("Next");
-    play_NextBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
+    play_NextBttn->setFont(QFont("Calibri", BIGGEST));
 
     play_StopBttn = new QPushButton("Stop");
-    play_StopBttn->setStyleSheet("font-size: 32px; font-family: Calibri;");
+    play_StopBttn->setFont(QFont("Calibri", BIGGEST));
 
     play_BoardLayot = new QGridLayout;
     play_BoardLayot->setSpacing(0);
 
-    play_Layout->addWidget(play_EnemyName);
-    play_Layout->addLayout(play_BoardLayot);
-    play_Layout->addWidget(play_NextBttn, Qt::AlignBottom);
-    play_Layout->addWidget(play_StopBttn, Qt::AlignBottom);
-    play_Layout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
+    play_GameLayout->addWidget(play_EnemyName);
+    play_GameLayout->addLayout(play_BoardLayot);
+    play_GameLayout->addWidget(play_NextBttn, Qt::AlignBottom);
+    play_GameLayout->addWidget(play_StopBttn, Qt::AlignBottom);
+    play_GameLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
+
+    play_Layout->addWidget(play_ScrollWidget, Qt::AlignLeft);
+    play_Layout->addLayout(play_GameLayout);
+
+    play_Layout->setStretch(0, 2);
+    play_Layout->setStretch(1, 6);
+    play_Layout->addStretch(2);
+
     play_Widget->setLayout(play_Layout);
 
     // Игровое полотно
@@ -142,7 +164,7 @@ Window::Window(QWidget *parent)
     wait_Layout = new QVBoxLayout;
 
     wait_Label = new QLabel("Find opponents. Please wait"); // здесь найдпись: Идет поиск соперника. Ожидайте...
-    QFont NewLabelFont = QFont("Calibri", 32);
+    QFont NewLabelFont = QFont("Calibri", BIGGEST);
     wait_Label->setFont(NewLabelFont);
     wait_Label->setAlignment(Qt::AlignCenter);
 
@@ -207,8 +229,6 @@ void Window::wait()
 
 void Window::InsertMessage(Owners own, bool DeleteOld)
 {
-
-    QFont MessageFont("Calibri", 8);
     QPalette palette;
     QVBoxLayout *layout = nullptr;
     int k = 0; // Сколько виджетов есть у данного Layout по умолчанию
@@ -227,12 +247,11 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
         k = 3;
         break;
     case (PLAY):
-        layout = play_Layout; // Тут будет другой LAYOUT. Слева от игровой доски
+        layout = play_ScrollLayout; // Тут будет другой LAYOUT. Слева от игровой доски
         break;
     default:
         return;
     }
-
     // Удалем старые препреждения если есть и надо
     if (DeleteOld)
     {
@@ -245,6 +264,10 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
             {
                 layout->removeWidget(LabelToDelete);
                 delete LabelToDelete;
+                if (layout->count() == 0)
+                {
+                    break;
+                }
             }
             else
             {
@@ -254,13 +277,15 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
     }
     // Удалем старые препреждения если есть
     auto i = StateMessages.begin();
+    QFont MessageFont;
+    MessageFont.setFamily("Calibri");
     while (i != StateMessages.end())
     {
         if (i->owner == own)
         {
             QLabel *warning = new QLabel(i->message);
+            MessageFont.setPointSize(i->size);
             warning->setFont(MessageFont);
-            warning->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
             if (i->type == ERR)
             {
                 palette.setColor(QPalette::WindowText, QColor(220, 0, 0));
@@ -271,7 +296,7 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
                 palette.setColor(QPalette::WindowText, QColor(0, 255, 0));
                 warning->setPalette(palette);
             }
-            layout->insertWidget(0, warning);
+            layout->insertWidget(0, warning, 0);
             i = StateMessages.erase(i);
         }
         else

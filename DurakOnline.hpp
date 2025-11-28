@@ -37,6 +37,7 @@ private slots:
     void Next();
     void StopFind();
 
+
 public:
     DurakOnline(int argc, char *argv[]);
     int start();

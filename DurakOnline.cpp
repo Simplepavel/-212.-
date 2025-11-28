@@ -19,31 +19,31 @@ void DurakOnline::registration()
     if (name.empty())
     {
         flag = true;
-        window.AddStateMessage(CreateMessage("Field username must not be empty", CHECKIN, ERR));
+        window.AddStateMessage(CreateMessage("Field username must not be empty", CHECKIN, ERR, SMALLEST));
     }
 
     if (email.empty())
     {
         flag = true;
-        window.AddStateMessage(CreateMessage("Field email must not be empty", CHECKIN, ERR));
+        window.AddStateMessage(CreateMessage("Field email must not be empty", CHECKIN, ERR, SMALLEST));
     }
 
     if (password.empty())
     {
         flag = true;
-        window.AddStateMessage(CreateMessage("Field password must not be empty", CHECKIN, ERR));
+        window.AddStateMessage(CreateMessage("Field password must not be empty", CHECKIN, ERR, SMALLEST));
     }
 
     if (password != confirmPassword)
     {
         flag = true;
-        window.AddStateMessage(CreateMessage("Password must be equal to ConfirmPassword", CHECKIN, ERR));
+        window.AddStateMessage(CreateMessage("Password must be equal to ConfirmPassword", CHECKIN, ERR, SMALLEST));
     }
 
     if (!ValidateEmail(email)) // Кириллллл
     {
         flag = true;
-        window.AddStateMessage(CreateMessage("Email is unavailable", CHECKIN, ERR));
+        window.AddStateMessage(CreateMessage("Email is unavailable", CHECKIN, ERR, SMALLEST));
     }
     if (flag) // простая валидация на стороне клиента
     {
@@ -59,14 +59,14 @@ void DurakOnline::registration()
         if (!username_check.empty())
         {
             flag = true;
-            window.AddStateMessage(CreateMessage("User with this username is already exists. Try another one", CHECKIN, ERR));
+            window.AddStateMessage(CreateMessage("User with this username is already exists. Try another one", CHECKIN, ERR, SMALLEST));
         }
 
         pqxx::result email_check = tx.exec("select * from users where username = $1 limit 1", pqxx::params{name});
         if (!email_check.empty())
         {
             flag = true;
-            window.AddStateMessage(CreateMessage("User with this email is already exists. Try another one", CHECKIN, ERR));
+            window.AddStateMessage(CreateMessage("User with this email is already exists. Try another one", CHECKIN, ERR, SMALLEST));
         }
     }
     if (flag) // сложная валидация с проверкой на существование
@@ -79,11 +79,11 @@ void DurakOnline::registration()
     try
     {
         tx.exec("insert into users (username, email, password) values ($1, $2, $3)", pqxx::params{name, email, password});
-        window.AddStateMessage(CreateMessage("Succes authorization new user", LOGIN, SUCCES));
+        window.AddStateMessage(CreateMessage("Succes authorization new user", LOGIN, SUCCES, SMALLEST));
     }
     catch (std::exception &error)
     {
-        window.AddStateMessage(CreateMessage("Something went wrong. Please, try again", CHECKIN, ERR));
+        window.AddStateMessage(CreateMessage("Something went wrong. Please, try again", CHECKIN, ERR, SMALLEST));
         delete_session(session);
         return;
     }
@@ -94,7 +94,6 @@ void DurakOnline::registration()
 
 void DurakOnline::login()
 {
-    std::cout << "\n\n\n\nStart\n";
     std::string email = window.get_login_Email().text().toStdString();
     std::string password = window.get_login_Password().text().toStdString();
     // Валидация
@@ -102,13 +101,13 @@ void DurakOnline::login()
     if (email.empty())
     {
         flag = true;
-        window.AddStateMessage(CreateMessage("Field email must not be empty", LOGIN, ERR));
+        window.AddStateMessage(CreateMessage("Field email must not be empty", LOGIN, ERR, SMALLEST));
     }
 
     if (password.empty())
     {
         flag = true;
-        window.AddStateMessage(CreateMessage("Field password must not be empty", LOGIN, ERR));
+        window.AddStateMessage(CreateMessage("Field password must not be empty", LOGIN, ERR, SMALLEST));
     }
 
     if (flag)
@@ -117,8 +116,6 @@ void DurakOnline::login()
         return;
     }
 
-    std::cout << "Field are not empty\n";
-    // Валидация
     pqxx::connection *session = make_session(url_base);
     pqxx::work tx(*session);
 
@@ -133,14 +130,14 @@ void DurakOnline::login()
         std::cout << "3\n";
         current_user = std::move(NewUser);
         std::cout << "4\n";
-        window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES));
+        window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
         std::cout << "5\n";
         window.main();
         std::cout << "6\n";
     }
     else
     {
-        window.AddStateMessage(CreateMessage("Unavailable email or password", LOGIN, ERR));
+        window.AddStateMessage(CreateMessage("Unavailable email or password", LOGIN, ERR, SMALLEST));
         window.login();
     }
 }
@@ -204,7 +201,9 @@ void DurakOnline::play() // Соперник уже найден
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
+        window.InsertMessage(PLAY); // удаляем старые записи если есть
         window.get_wait_Timer().stop();
+
         uint32_t net_session_id;
 
         memcpy(&net_session_id, recv_data.data, 4);
@@ -234,6 +233,8 @@ void DurakOnline::play() // Соперник уже найден
     {
         const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
         board->replace(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
+        QString message = QString::fromStdString(board->numericToAlgebraic(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]));
+        window.AddStateMessage(CreateMessage(message, PLAY, TXT, BIG));
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
     }
@@ -241,6 +242,8 @@ void DurakOnline::play() // Соперник уже найден
     {
         const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
         board->clasting(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
+        QString message = "Clasting";
+        window.AddStateMessage(CreateMessage(message, PLAY, TXT, BIG));
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
     }
@@ -257,10 +260,12 @@ void DurakOnline::play() // Соперник уже найден
     }
     else if (recv_data.type == DataType::CHECKMATE)
     {
-        std::cout << "You  are lose\n";
-        
-        return;
+        window.AddStateMessage(CreateMessage("You are lose!", PLAY, ERR, BIG));
+        const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
+        board->replace(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
+        window.UpdateBoard(*board, MyColor);
     }
+    window.InsertMessage(PLAY, false);
 }
 
 void DurakOnline::MakeMove()
@@ -297,22 +302,27 @@ void DurakOnline::MakeMove()
                 Mark1 to_send;
                 if (board->isCheckmate(current_row, current_column, last_row, last_column))
                 {
-                    std::cout << "CHECKMATE";
+                    window.AddStateMessage(CreateMessage("You are win!", PLAY, SUCCES, BIG));
                     board->replace(current_row, current_column, last_row, last_column);
                     to_send.type = DataType::CHECKMATE;
                 }
                 else if (board->isValidCastling(current_row, current_column, last_row, last_column)) // Рокировка
                 {
+                    window.AddStateMessage(CreateMessage("Clasting", PLAY, TXT, BIG));
                     board->clasting(current_row, current_column, last_row, last_column);
                     to_send.type = DataType::CLASTING;
                 }
                 else // Обычный ход
                 {
+                    QString message = QString::fromStdString(board->numericToAlgebraic(current_row, current_column, last_row, last_column));
+                    window.AddStateMessage(CreateMessage(message, PLAY, TXT, BIG));
                     board->replace(current_row, current_column, last_row, last_column);
                     to_send.type = DataType::MOVE;
                 }
 
+                window.InsertMessage(PLAY, false);
                 window.UpdateBoard(*board, MyColor);
+
                 char *new_board_serialize = board->SerializeMove();
                 uint32_t net_session_id = htonl(session_id);
                 char *data = new char[8];

@@ -62,6 +62,8 @@ public:
     void clasting(int c_row, int c_column, int l_row, int l_column);
     char *SerializeMove();
     const std::vector<uint8_t> &DeserializeMove(char *);
-
+    char rowToAlgebraic(int row);
+    char columnToAlgebraic(int column);
+    std::string numericToAlgebraic(int c_row, int c_column, int l_row, int l_column);
     // Мое
 };

@@ -19,6 +19,7 @@
 #include <QList>
 #include <QPixmap>
 #include <QTimer>
+#include <QScrollArea>
 
 #include "../BackEnd/Game/Board/Board.hpp"
 #include "MyPushButton/MyPushButton.hpp"
@@ -73,12 +74,20 @@ private:
     // Регистрация
 
     // Игровое полотно
+
+    QHBoxLayout *play_Layout;
     QWidget *play_Widget;
-    QVBoxLayout *play_Layout;
+
+    QScrollArea *play_ScrollArea;
+    QVBoxLayout *play_ScrollLayout;
+    QWidget *play_ScrollWidget;
+
+    QVBoxLayout *play_GameLayout;
     QLabel *play_EnemyName;
     QGridLayout *play_BoardLayot;
     QPushButton *play_NextBttn;
     QPushButton *play_StopBttn;
+
     // Игровое полотно
 
     // Окно ожидание соперника

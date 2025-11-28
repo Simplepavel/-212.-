@@ -93,6 +93,27 @@ const std::vector<uint8_t> &Board::DeserializeMove(char *buffer)
   return LastMoves;
 }
 
+char Board::rowToAlgebraic(int row)
+{
+  return '8' - row;
+}
+
+char Board::columnToAlgebraic(int column)
+{
+  return 'a' + column;
+}
+
+std::string Board::numericToAlgebraic(int c_row, int c_column, int l_row, int l_column)
+{
+  std::string result;
+  result.resize(4);
+  result.data()[0] = columnToAlgebraic(c_column);
+  result.data()[1] = rowToAlgebraic(c_row);
+  result.data()[2] = columnToAlgebraic(l_column);
+  result.data()[3] = rowToAlgebraic(l_row);
+  return result;
+}
+
 Figure &Board::operator[](int idx) { return self[idx]; }
 
 void Board::replace(int current_row, int current_column, int last_row, int last_column)
