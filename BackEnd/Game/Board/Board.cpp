@@ -95,12 +95,20 @@ const std::vector<uint8_t> &Board::DeserializeMove(char *buffer)
 
 char Board::rowToAlgebraic(int row)
 {
-  return '8' - row;
+  if (myColor == WHITE)
+  {
+    return '8' - row;
+  }
+  return '1' + row;
 }
 
 char Board::columnToAlgebraic(int column)
 {
-  return 'a' + column;
+  if (myColor == WHITE)
+  {
+    return 'a' + column;
+  }
+  return 'h' - column;
 }
 
 std::string Board::numericToAlgebraic(int c_row, int c_column, int l_row, int l_column)

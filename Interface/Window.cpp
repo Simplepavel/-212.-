@@ -19,26 +19,25 @@ Window::Window(QWidget *parent)
 
     // Вход
 
-    login_Widget = new QWidget;
+    login_Widget = new QWidget(this);
     login_Layout = new QVBoxLayout;
     login_Email = new QLineEdit;
     login_Email->setPlaceholderText("Enter the email");
-    login_Email->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    login_Email->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     login_Password = new QLineEdit;
     login_Password->setPlaceholderText("Enter the password");
-    login_Password->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    login_Password->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     login_LoginBttn = new QPushButton("LogIn");
-    login_LoginBttn->setFixedSize(login_Email->sizeHint());
 
     login_RegBttn = new QPushButton("Registration");
-    login_RegBttn->setFixedSize(login_Email->sizeHint());
 
-    login_Layout->addWidget(login_Email, Qt::AlignCenter);
-    login_Layout->addWidget(login_Password, Qt::AlignCenter);
-    login_Layout->addWidget(login_LoginBttn, Qt::AlignCenter);
-    login_Layout->addWidget(login_RegBttn, Qt::AlignCenter);
+    login_Layout->addWidget(login_Email);
+    login_Layout->addWidget(login_Password);
+    login_Layout->addWidget(login_LoginBttn);
+    login_Layout->addWidget(login_RegBttn);
 
     login_Layout->setAlignment(Qt::AlignCenter);
     login_Layout->setSpacing(7);
@@ -74,38 +73,39 @@ Window::Window(QWidget *parent)
     reg_Widget = new QWidget(this);
     reg_Layout = new QVBoxLayout;
 
-    reg_Layout->setContentsMargins(20, 20, 20, 20);
+    // reg_Layout->setContentsMargins(20, 20, 20, 20);
 
     reg_Username = new QLineEdit;
     reg_Username->setPlaceholderText("Enter username");
-    reg_Username->setFixedWidth(250);
+    reg_Username->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    reg_Username->setMinimumWidth(250);
 
     reg_Email = new QLineEdit;
     reg_Email->setPlaceholderText("Enter email");
-    reg_Email->setFixedWidth(250);
+    reg_Email->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    reg_Username->setMinimumWidth(250);
 
     reg_Password = new QLineEdit;
     reg_Password->setPlaceholderText("Enter password");
-    reg_Password->setFixedWidth(250);
+    reg_Password->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    reg_Username->setMinimumWidth(250);
 
     reg_ConfirmPassword = new QLineEdit;
     reg_ConfirmPassword->setPlaceholderText("Confirm password");
-    reg_ConfirmPassword->setFixedWidth(250);
+    reg_ConfirmPassword->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     reg_SubmitBttn = new QPushButton("Check In");
-    reg_SubmitBttn->setFixedWidth(250);
 
     reg_BackBttn = new QPushButton("Back");
-    reg_BackBttn->setFixedWidth(250);
 
-    reg_Layout->addWidget(reg_Username, Qt::AlignCenter);
-    reg_Layout->addWidget(reg_Email, Qt::AlignCenter);
-    reg_Layout->addWidget(reg_Password, Qt::AlignCenter);
-    reg_Layout->addWidget(reg_ConfirmPassword, Qt::AlignCenter);
-    reg_Layout->addWidget(reg_SubmitBttn, Qt::AlignCenter);
-    reg_Layout->addWidget(reg_BackBttn, Qt::AlignCenter);
+    reg_Layout->addWidget(reg_Username);
+    reg_Layout->addWidget(reg_Email);
+    reg_Layout->addWidget(reg_Password);
+    reg_Layout->addWidget(reg_ConfirmPassword);
+    reg_Layout->addWidget(reg_SubmitBttn);
+    reg_Layout->addWidget(reg_BackBttn);
 
-    reg_Layout->setAlignment(Qt::AlignHCenter);
+    reg_Layout->setAlignment(Qt::AlignCenter);
     reg_Layout->setSpacing(7);
 
     reg_Widget->setLayout(reg_Layout);

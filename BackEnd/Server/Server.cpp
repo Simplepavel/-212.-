@@ -226,7 +226,14 @@ void Durak_Server::Server_Go()
 
                             pqxx::connection *database_session = make_session();
                             pqxx::work tx(*database_session);
-                            tx.exec("update users set rating = rating + $1 where id = $2 where rating > 100", pqxx::params{rating[loser.id], loser.id});
+                            if (rating[loser.id] >= 0) // нельзя отнимать от отрицательного индекса
+                            {
+                                tx.exec("update users set rating = rating + $1 where id = $2", pqxx::params{rating[loser.id], loser.id});
+                            }
+                            else
+                            {
+                                tx.exec("update users set rating = rating + $1 where id = $2 and rating > 100", pqxx::params{rating[loser.id], loser.id});
+                            }
                             tx.commit();
                             delete_session(database_session);
 
@@ -308,7 +315,14 @@ void Durak_Server::Server_Go()
 
                             pqxx::connection *database_session = make_session();
                             pqxx::work tx(*database_session);
-                            tx.exec("update users set rating = rating + $1 where id = $2 where rating > 100", pqxx::params{rating[id], id});
+                            if (rating[id] >= 0) // нельзя отнимать от отрицательного индекса
+                            {
+                                tx.exec("update users set rating = rating + $1 where id = $2", pqxx::params{rating[id], id});
+                            }
+                            else
+                            {
+                                tx.exec("update users set rating = rating + $1 where id = $2 and rating > 100", pqxx::params{rating[id], id});
+                            }
                             tx.commit();
                             delete_session(database_session);
                         }

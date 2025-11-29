@@ -61,7 +61,7 @@ void DurakOnline::registration()
             window.AddStateMessage(CreateMessage("User with this username is already exists. Try another one", CHECKIN, ERR, SMALLEST));
         }
 
-        pqxx::result email_check = tx.exec("select * from users where username = $1 limit 1", pqxx::params{name});
+        pqxx::result email_check = tx.exec("select * from users where email = $1 limit 1", pqxx::params{email});
         if (!email_check.empty())
         {
             flag = true;
@@ -70,7 +70,6 @@ void DurakOnline::registration()
     }
     if (flag) // сложная валидация с проверкой на существование
     {
-        delete_session(session);
         window.registration(); // очищаем данные добавляем информацию о ошибках
         return;
     }
@@ -83,8 +82,6 @@ void DurakOnline::registration()
     catch (std::exception &error)
     {
         window.AddStateMessage(CreateMessage("Something went wrong. Please, try again", CHECKIN, ERR, SMALLEST));
-        delete_session(session);
-        return;
     }
     tx.commit();
     delete_session(session);
@@ -232,7 +229,7 @@ void DurakOnline::play() // Соперник уже найден
     {
         const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
         board->replace(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
-        QString message = QString::fromStdString(board->numericToAlgebraic(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]));
+        QString message = QString::fromStdString(board->numericToAlgebraic(LastMoves[0], LastMoves[1], LastMoves[2], LastMoves[3]));
         window.AddStateMessage(CreateMessage(message, PLAY, TXT, BIG));
         window.UpdateBoard(*board, MyColor);
         IsMyTurn = true;
