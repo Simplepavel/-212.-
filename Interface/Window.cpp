@@ -48,23 +48,58 @@ Window::Window(QWidget *parent)
 
     // Основное меню
     main_Widget = new QWidget(this);
+    main_Layout = new QHBoxLayout;
 
-    main_Layout = new QVBoxLayout;
+    main_LiderBoardWidget = new QWidget;
+    main_LiderBoardLayout = new QVBoxLayout(main_LiderBoardWidget);
 
+    main_LiderBoardLayout->setSpacing(0);
+    main_LiderBoardLayout->setAlignment(Qt::AlignTop);
+
+    main_LiderBoardScroll = new QScrollArea;
+    main_LiderBoardScroll->setWidgetResizable(true);
+    main_LiderBoardScroll->setWidget(main_LiderBoardWidget);
+
+    main_LiderBoardLabel = new QLabel("LiderBoard");
+    main_LiderBoardLabel->setFont(QFont("Calibri", BIG));
+
+
+    main_SearchLayout = new QHBoxLayout;
+    main_SearchLine = new QLineEdit;
+    main_SearchLine->setPlaceholderText("Find enemy...");
+    main_SearchButton = new QPushButton("Search");
+
+    main_SearchLayout->addWidget(main_SearchLine);
+    main_SearchLayout->addWidget(main_SearchButton);
+
+
+    main_LiderBoardLayout->addWidget(main_LiderBoardLabel);
+    main_LiderBoardLayout->addLayout(main_SearchLayout);
+
+    main_ProfileLayout = new QVBoxLayout;
     main_LogoutBttn = new QPushButton("Logout");
-
     main_PlayBttn = new QPushButton("Play");
-
     main_MyProfile = new QPushButton("Profile");
 
-    main_Layout->addWidget(main_PlayBttn);
-    main_Layout->addWidget(main_LogoutBttn);
-    main_Layout->addWidget(main_MyProfile);
+    main_ProfileLayout->addWidget(main_PlayBttn);
+    main_ProfileLayout->addWidget(main_LogoutBttn);
+    main_ProfileLayout->addWidget(main_MyProfile);
 
-    main_Layout->setAlignment(Qt::AlignCenter);
-    main_Layout->setSpacing(7);
+    main_ProfileLayout->setAlignment(Qt::AlignCenter);
+    main_ProfileLayout->setSpacing(7);
+
+    main_Layout->addWidget(main_LiderBoardScroll, 2, Qt::AlignLeft);
+    main_Layout->addLayout(main_ProfileLayout, Qt::AlignLeft);
+    main_Layout->addStretch(2);
 
     main_Widget->setLayout(main_Layout);
+
+    for (int i = 0; i < 1000; ++i)
+    {
+        QLabel *userLabel = new QLabel(QString("Player %1 - Score: %2").arg(i + 1).arg(1000 - i * 50));
+        userLabel->setMinimumHeight(30);
+        main_LiderBoardLayout->addWidget(userLabel);
+    }
 
     // Основное меню
 
@@ -113,23 +148,20 @@ Window::Window(QWidget *parent)
 
     // Игровое полотно
     play_Widget = new QWidget(this);
-    play_Layout = new QHBoxLayout;
-
-    play_ScrollArea = new QScrollArea;
-    play_ScrollArea->setWidgetResizable(true);
-
-    play_ScrollLayout = new QVBoxLayout;
-    play_ScrollLayout->setSpacing(0);
-    play_ScrollLayout->setAlignment(Qt::AlignTop);
-    play_ScrollLayout->setContentsMargins(20, 20, 20, 20);
+    play_Layout = new QHBoxLayout(play_Widget);
 
     play_ScrollWidget = new QWidget(play_Widget);
 
-    play_ScrollWidget->setLayout(play_ScrollLayout);
+    play_ScrollLayout = new QVBoxLayout(play_ScrollWidget);
+    play_ScrollLayout->setSpacing(0);
+    play_ScrollLayout->setAlignment(Qt::AlignTop);
+
+    play_ScrollArea = new QScrollArea;
+    play_ScrollArea->setWidgetResizable(true);
     play_ScrollArea->setWidget(play_ScrollWidget);
 
     play_GameLayout = new QVBoxLayout;
-    play_EnemyName = new QLabel("User1");
+    play_EnemyName = new QLabel();
     play_EnemyName->setFont(QFont("Calibri", BIGGEST));
     play_EnemyName->setAlignment(Qt::AlignCenter);
 
@@ -148,7 +180,8 @@ Window::Window(QWidget *parent)
     play_GameLayout->addWidget(play_StopBttn, Qt::AlignBottom);
     play_GameLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
-    play_Layout->addWidget(play_ScrollWidget, Qt::AlignLeft);
+    // play_Layout->addWidget(play_ScrollWidget, Qt::AlignLeft);
+    play_Layout->addWidget(play_ScrollArea, Qt::AlignLeft);
     play_Layout->addLayout(play_GameLayout);
 
     play_Layout->setStretch(0, 2);
@@ -243,7 +276,7 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
         k = 4;
         break;
     case (MAIN):
-        layout = main_Layout;
+        layout = main_ProfileLayout;
         k = 3;
         break;
     case (PLAY):

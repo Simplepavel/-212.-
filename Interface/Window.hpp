@@ -54,8 +54,25 @@ private:
 
     // Главное меню
     QWidget *main_Widget;
-    QVBoxLayout *main_Layout;
+    QHBoxLayout *main_Layout;
 
+    // ЛидерБорд
+    QWidget *main_LiderBoardWidget;
+    QVBoxLayout *main_LiderBoardLayout;
+    QScrollArea *main_LiderBoardScroll;
+
+
+    QLabel* main_LiderBoardLabel;
+    QHBoxLayout *main_SearchLayout;
+    QLineEdit *main_SearchLine;
+    QPushButton *main_SearchButton;
+
+    // ЛидерБорд
+
+
+
+
+    QVBoxLayout *main_ProfileLayout;
     QPushButton *main_PlayBttn;
     QPushButton *main_LogoutBttn;
     QPushButton *main_MyProfile;
