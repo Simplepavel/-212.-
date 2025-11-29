@@ -35,5 +35,20 @@ class Stats{
         }
 };
 
+class Rating {
+    private:
+        int rating;
+        Stats stats;
+    public:
+        Rating(int initial = 1200):rating(initial) {}
+        int getRating() const {
+            return rating;
+        }
+        const Stats& getStats() const {
+             return stats; 
+        }
+        void updateRating(int opponentRating, double score);
+};
+
 
 #endif
