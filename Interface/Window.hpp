@@ -57,12 +57,12 @@ private:
     QHBoxLayout *main_Layout;
 
     // ЛидерБорд
-    QWidget *main_LiderBoardWidget;
-    QVBoxLayout *main_LiderBoardLayout;
-    QScrollArea *main_LiderBoardScroll;
+    QWidget *main_LeaderBoardWidget;
+    QVBoxLayout *main_LeaderBoardLayout;
+    QScrollArea *main_LeaderBoardScroll;
 
 
-    QLabel* main_LiderBoardLabel;
+    QLabel* main_LeaderBoardLabel;
     QHBoxLayout *main_SearchLayout;
     QLineEdit *main_SearchLine;
     QPushButton *main_SearchButton;

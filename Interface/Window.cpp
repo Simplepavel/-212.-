@@ -50,18 +50,18 @@ Window::Window(QWidget *parent)
     main_Widget = new QWidget(this);
     main_Layout = new QHBoxLayout;
 
-    main_LiderBoardWidget = new QWidget;
-    main_LiderBoardLayout = new QVBoxLayout(main_LiderBoardWidget);
+    main_LeaderBoardWidget = new QWidget;
+    main_LeaderBoardLayout = new QVBoxLayout(main_LeaderBoardWidget);
 
-    main_LiderBoardLayout->setSpacing(0);
-    main_LiderBoardLayout->setAlignment(Qt::AlignTop);
+    main_LeaderBoardLayout->setSpacing(0);
+    main_LeaderBoardLayout->setAlignment(Qt::AlignTop);
 
-    main_LiderBoardScroll = new QScrollArea;
-    main_LiderBoardScroll->setWidgetResizable(true);
-    main_LiderBoardScroll->setWidget(main_LiderBoardWidget);
+    main_LeaderBoardScroll = new QScrollArea;
+    main_LeaderBoardScroll->setWidgetResizable(true);
+    main_LeaderBoardScroll->setWidget(main_LeaderBoardWidget);
 
-    main_LiderBoardLabel = new QLabel("LiderBoard");
-    main_LiderBoardLabel->setFont(QFont("Calibri", BIG));
+    main_LeaderBoardLabel = new QLabel("LeaderBoard");
+    main_LeaderBoardLabel->setFont(QFont("Calibri", BIG));
 
 
     main_SearchLayout = new QHBoxLayout;
@@ -73,8 +73,8 @@ Window::Window(QWidget *parent)
     main_SearchLayout->addWidget(main_SearchButton);
 
 
-    main_LiderBoardLayout->addWidget(main_LiderBoardLabel);
-    main_LiderBoardLayout->addLayout(main_SearchLayout);
+    main_LeaderBoardLayout->addWidget(main_LeaderBoardLabel);
+    main_LeaderBoardLayout->addLayout(main_SearchLayout);
 
     main_ProfileLayout = new QVBoxLayout;
     main_LogoutBttn = new QPushButton("Logout");
@@ -88,7 +88,7 @@ Window::Window(QWidget *parent)
     main_ProfileLayout->setAlignment(Qt::AlignCenter);
     main_ProfileLayout->setSpacing(7);
 
-    main_Layout->addWidget(main_LiderBoardScroll, 2, Qt::AlignLeft);
+    main_Layout->addWidget(main_LeaderBoardScroll, 2, Qt::AlignLeft);
     main_Layout->addLayout(main_ProfileLayout, Qt::AlignLeft);
     main_Layout->addStretch(2);
 
@@ -98,7 +98,7 @@ Window::Window(QWidget *parent)
     {
         QLabel *userLabel = new QLabel(QString("Player %1 - Score: %2").arg(i + 1).arg(1000 - i * 50));
         userLabel->setMinimumHeight(30);
-        main_LiderBoardLayout->addWidget(userLabel);
+        main_LeaderBoardLayout->addWidget(userLabel);
     }
 
     // Основное меню
