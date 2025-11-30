@@ -16,3 +16,10 @@ void Rating::updateRating(int opponentRating, double score) {
          stats.recordDraw();
     }
 }
+
+ const char* Rating::getRank() const{
+     if (rating < 1000) return "Noob";
+    if (rating < 1200) return "Pro";
+    if (rating < 1400) return "Hacker";
+    return "God";
+ }

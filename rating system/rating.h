@@ -48,7 +48,10 @@ class Rating {
              return stats; 
         }
         void updateRating(int opponentRating, double score);
+        const char* getRank() const;
 };
+
+
 
 
 #endif
