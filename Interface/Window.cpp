@@ -26,6 +26,7 @@ Window::Window(QWidget *parent)
     login_Email->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     login_Password = new QLineEdit;
+    login_Password->setEchoMode(QLineEdit::Password);
     login_Password->setPlaceholderText("Enter the password");
 
     login_Password->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -111,11 +112,13 @@ Window::Window(QWidget *parent)
     reg_Username->setMinimumWidth(250);
 
     reg_Password = new QLineEdit;
+    reg_Password->setEchoMode(QLineEdit::Password);
     reg_Password->setPlaceholderText("Enter password");
     reg_Password->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     reg_Username->setMinimumWidth(250);
 
     reg_ConfirmPassword = new QLineEdit;
+    reg_ConfirmPassword->setEchoMode(QLineEdit::Password);
     reg_ConfirmPassword->setPlaceholderText("Confirm password");
     reg_ConfirmPassword->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
@@ -419,8 +422,9 @@ void Window::FillLeaderBoard()
         QLabel *name = new QLabel;
         profile->hide();
         name->hide();
-        box->addWidget(name);
-        box->addWidget(profile);
+        box->addWidget(name, 1, Qt::AlignLeft);
+        box->addStretch(1);
+        box->addWidget(profile, 1, Qt::AlignRight);
         main_LeaderBoardLayout->addLayout(box);
     }
 }
@@ -431,8 +435,8 @@ void Window::UpdateLeaderBoard(const std::string &username, const std::string &r
     QHBoxLayout *box = static_cast<QHBoxLayout *>(item->layout());
 
     QLabel *UsernameLabel = static_cast<QLabel *>(box->itemAt(0)->widget());
-    QPushButton *ProfileButton = static_cast<QPushButton *>(box->itemAt(1)->widget());
-    
+    QPushButton *ProfileButton = static_cast<QPushButton *>(box->itemAt(2)->widget());
+
     UsernameLabel->show();
     ProfileButton->show();
     std::string result = username + "-" + rating;
