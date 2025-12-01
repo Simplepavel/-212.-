@@ -51,6 +51,10 @@ class Rating {
         const char* getRank() const;
 };
 
+class Matchmaker{
+public:
+    bool arePlayersCompatible(int r1, int r2, int maxdiff = 150) const;
+};
 
 
 

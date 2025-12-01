@@ -23,3 +23,11 @@ void Rating::updateRating(int opponentRating, double score) {
     if (rating < 1400) return "Hacker";
     return "God";
  }
+
+ bool Matchmaker::arePlayersCompatible(int r1, int r2, int maxDiff) const {
+    int diff = r1- r2;
+    if (diff < 0) {
+        diff = -diff;
+    }
+    return diff <= maxDiff;
+}
