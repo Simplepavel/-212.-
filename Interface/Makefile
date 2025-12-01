@@ -4,11 +4,14 @@ includes = -I C:\msys64\ucrt64\include\qt6 -I C:\msys64\ucrt64\include\qt6\QtWid
 
 .PHONY: MyPushButton Utilts
 
-all: MyPushButton Utilts
+all: MyPushButton Utilts RoundedAvatar
 	g++ Window.cpp $(includes) $(libs) -o ../interface.o -c
 
 MyPushButton:
 	g++ MyPushButton/MyPushButton.cpp $(includes) $(libs) -o ../mypushbutton.o -c
+
+RoundedAvatar::
+	g++ RoundedAvatar/RoundedAvatar.cpp $(includes) $(libs) -o ../roundedavatar.o -c
 
 Utilts:
 	g++ Utilts.cpp -o ../utilts.o -c $(includes) $(libs)

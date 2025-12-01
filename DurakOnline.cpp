@@ -149,6 +149,11 @@ void DurakOnline::logout()
     window.login();
 }
 
+void DurakOnline::profile()
+{
+    window.profile();
+}
+
 void DurakOnline::FindEnemy()
 {
     if (!client.is_ready())
@@ -194,6 +199,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::Disconnect);
     QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
     QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
+    QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
     QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
 }

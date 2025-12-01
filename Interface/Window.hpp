@@ -23,6 +23,7 @@
 
 #include "../BackEnd/Game/Board/Board.hpp"
 #include "MyPushButton/MyPushButton.hpp"
+#include "RoundedAvatar/RoundedAvatar.hpp"
 #include "Utilts.hpp"
 
 #include <list>
@@ -111,6 +112,22 @@ private:
     QTimer *wait_Timer;
     // Окно ожидание соперника
 
+    // Профиль
+    QWidget *profile_Widget;
+    QVBoxLayout *profile_Layout;
+
+    RoundedAvatar* profile_Avatar;
+    QPushButton* profile_ChangePhoto;
+    
+    QLabel* profile_UsernameLabel;
+    QLineEdit* profile_UsernameLineEdit;
+    
+    QLabel* profile_EmailLabel;
+    QLineEdit* profile_EmailLineEdit;
+    QLabel* profile_Rating;
+    QLabel* profile_Rank;
+    // Профиль
+
 private slots:
     void UpdateWaitLabel();
 
@@ -122,6 +139,7 @@ public:
     void registration();
     void play();
     void wait();
+    void profile();
     void InsertMessage(Owners, bool DeleteOld = true); // Вставка предупрждений
     void AddStateMessage(const Message &);
 
@@ -145,9 +163,10 @@ public:
     // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
+    const QPushButton &get_main_MyProfile() {return *main_MyProfile;}
     void FillLeaderBoard(); // заполнение доски лидеров шаблонами для вставки
     QVBoxLayout &get_main_LeaderBoardLayout() { return *main_LeaderBoardLayout; }
-    void UpdateLeaderBoard(const std::string& username, const std::string& rating, int idx);
+    void UpdateLeaderBoard(const std::string &username, const std::string &rating, int idx);
     // Константный доступ к элементам формы главного окна
 
     // Метод относящиеся к игровому полю

@@ -7,6 +7,14 @@
 #include <iostream>
 #include <thread>
 
+enum UserStatus : uint8_t
+{
+    online = 0,       // просто в сети(зеленым цветом)
+    offline,          // не в сети(серым цветом)
+    in_match,         // играет(желтым)
+    looking_for_match // поиск соперника(желтым)
+};
+
 class DurakOnline : public QObject
 {
     Q_OBJECT
@@ -32,6 +40,7 @@ private slots:
     void logout();
     void FindEnemy();
     void play();
+    void profile();
     void MakeMove();
     void UpdateLeaderBoard();
 

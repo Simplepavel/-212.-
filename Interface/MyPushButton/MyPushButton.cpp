@@ -79,6 +79,7 @@ void MyPushButton::paintEvent(QPaintEvent *e)
 {
     QPushButton::paintEvent(e);
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
     uint8_t idx = figure->GetImgNum();
     if (idx < 255)
     {
