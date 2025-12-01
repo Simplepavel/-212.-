@@ -3,7 +3,12 @@
 char SERVER_IP[] = "127.0.0.1";
 char SERVER_PORT[] = "6666";
 
-DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr), board(nullptr) {}
+DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr), board(nullptr)
+{
+    LeaderBoardUpdateTimer.setInterval(std::chrono::seconds(60));
+    UpdateLeaderBoard();
+    LeaderBoardUpdateTimer.start();
+}
 
 void DurakOnline::registration()
 {
@@ -39,7 +44,7 @@ void DurakOnline::registration()
         window.AddStateMessage(CreateMessage("Password must be equal to ConfirmPassword", CHECKIN, ERR, SMALLEST));
     }
 
-    if (!ValidateEmail(email)) // Кириллллл
+    if (!isValidEmail(email))
     {
         flag = true;
         window.AddStateMessage(CreateMessage("Email is unavailable", CHECKIN, ERR, SMALLEST));
@@ -190,6 +195,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
     QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
+    QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
 }
 
 void DurakOnline::play() // Соперник уже найден
@@ -370,4 +376,16 @@ void DurakOnline::StopFind()
     to_send.length = 4;
     to_send.data = data;
     client.Client_Send(to_send);
+}
+
+void DurakOnline::UpdateLeaderBoard()
+{
+    pqxx::connection *session = make_session();
+    pqxx::work tx(*session);
+    pqxx::result response = tx.exec("select username, rating from users order by rating desc limit 50");
+    int idx = 0;
+    for (auto i = response.begin(); i != response.end(); ++i)
+    {
+        window.UpdateLeaderBoard(i[0].as<std::string>(), i[1].as<std::string>(), idx++);
+    }
 }

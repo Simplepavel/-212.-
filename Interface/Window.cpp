@@ -410,19 +410,31 @@ void Window::UpdateWaitLabel()
 }
 // Private slots
 
-// void Window::FillLeaderBoard()
-// {
-//     for (int i = 0; i < 50; ++i)
-//     {
-//         QHBoxLayout *layout = new QHBoxLayout;
-//         QLabel *NameRating = new QLabel;
-//         NameRating->setFont(QFont("Calibri", SMALLEST));
-//         QPushButton *Profile = new QPushButton("Profile");
-//         NameRating->hide();
-//         Profile->hide();
-//         layout->addWidget(NameRating, Qt::AlignRight);
-//         layout->addWidget(Profile, Qt::AlignLeft);
-//         main_LeaderBoardLayout->addLayout(layout);
-//     }
-// }
+void Window::FillLeaderBoard()
+{
+    for (int i = 0; i < 50; ++i)
+    {
+        QHBoxLayout *box = new QHBoxLayout;
+        QPushButton *profile = new QPushButton("profile");
+        QLabel *name = new QLabel;
+        profile->hide();
+        name->hide();
+        box->addWidget(name);
+        box->addWidget(profile);
+        main_LeaderBoardLayout->addLayout(box);
+    }
+}
 
+void Window::UpdateLeaderBoard(const std::string &username, const std::string &rating, int idx)
+{
+    QLayoutItem *item = main_LeaderBoardLayout->itemAt(idx + 2);
+    QHBoxLayout *box = static_cast<QHBoxLayout *>(item->layout());
+
+    QLabel *UsernameLabel = static_cast<QLabel *>(box->itemAt(0)->widget());
+    QPushButton *ProfileButton = static_cast<QPushButton *>(box->itemAt(1)->widget());
+    
+    UsernameLabel->show();
+    ProfileButton->show();
+    std::string result = username + "-" + rating;
+    UsernameLabel->setText(QString::fromStdString(result));
+}

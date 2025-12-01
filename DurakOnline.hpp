@@ -23,6 +23,8 @@ private:
     MyPushButton *FirstPosition;
     MyPushButton *SecondPosition;
 
+    QTimer LeaderBoardUpdateTimer;
+
     void connect();
 private slots:
     void registration();
@@ -31,12 +33,12 @@ private slots:
     void FindEnemy();
     void play();
     void MakeMove();
-    
+    void UpdateLeaderBoard();
+
     // Возможно объединить это в одну фунцию
     void Disconnect();
     void Next();
     void StopFind();
-
 
 public:
     DurakOnline(int argc, char *argv[]);

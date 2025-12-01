@@ -25,8 +25,6 @@
 #include "MyPushButton/MyPushButton.hpp"
 #include "Utilts.hpp"
 
-#include "../DataBase/database.hpp"
-
 #include <list>
 
 class Window : public QWidget
@@ -147,8 +145,9 @@ public:
     // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
-    void UpdateLeaderBoard();
-    void FillLeaderBoard();
+    void FillLeaderBoard(); // заполнение доски лидеров шаблонами для вставки
+    QVBoxLayout &get_main_LeaderBoardLayout() { return *main_LeaderBoardLayout; }
+    void UpdateLeaderBoard(const std::string& username, const std::string& rating, int idx);
     // Константный доступ к элементам формы главного окна
 
     // Метод относящиеся к игровому полю

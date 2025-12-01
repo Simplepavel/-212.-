@@ -32,5 +32,5 @@ struct Message
     TextSize size;
 };
 
-bool ValidateEmail(const std::string &value);
+bool isValidEmail(const std::string &value);
 Message CreateMessage(const QString mess, Owners ow, MessageType type, TextSize size);
