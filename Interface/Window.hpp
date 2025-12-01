@@ -25,6 +25,8 @@
 #include "MyPushButton/MyPushButton.hpp"
 #include "Utilts.hpp"
 
+#include "../DataBase/database.hpp"
+
 #include <list>
 
 class Window : public QWidget
@@ -61,16 +63,12 @@ private:
     QVBoxLayout *main_LeaderBoardLayout;
     QScrollArea *main_LeaderBoardScroll;
 
-
-    QLabel* main_LeaderBoardLabel;
+    QLabel *main_LeaderBoardLabel;
     QHBoxLayout *main_SearchLayout;
     QLineEdit *main_SearchLine;
     QPushButton *main_SearchButton;
 
     // ЛидерБорд
-
-
-
 
     QVBoxLayout *main_ProfileLayout;
     QPushButton *main_PlayBttn;
@@ -149,6 +147,8 @@ public:
     // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
+    void UpdateLeaderBoard();
+    void FillLeaderBoard();
     // Константный доступ к элементам формы главного окна
 
     // Метод относящиеся к игровому полю

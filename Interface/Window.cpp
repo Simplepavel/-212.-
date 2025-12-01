@@ -63,7 +63,6 @@ Window::Window(QWidget *parent)
     main_LeaderBoardLabel = new QLabel("LeaderBoard");
     main_LeaderBoardLabel->setFont(QFont("Calibri", BIG));
 
-
     main_SearchLayout = new QHBoxLayout;
     main_SearchLine = new QLineEdit;
     main_SearchLine->setPlaceholderText("Find enemy...");
@@ -71,7 +70,6 @@ Window::Window(QWidget *parent)
 
     main_SearchLayout->addWidget(main_SearchLine);
     main_SearchLayout->addWidget(main_SearchButton);
-
 
     main_LeaderBoardLayout->addWidget(main_LeaderBoardLabel);
     main_LeaderBoardLayout->addLayout(main_SearchLayout);
@@ -93,14 +91,6 @@ Window::Window(QWidget *parent)
     main_Layout->addStretch(2);
 
     main_Widget->setLayout(main_Layout);
-
-    for (int i = 0; i < 1000; ++i)
-    {
-        QLabel *userLabel = new QLabel(QString("Player %1 - Score: %2").arg(i + 1).arg(1000 - i * 50));
-        userLabel->setMinimumHeight(30);
-        main_LeaderBoardLayout->addWidget(userLabel);
-    }
-
     // Основное меню
 
     // Регистрация
@@ -223,7 +213,9 @@ Window::Window(QWidget *parent)
 
     // Загрузка изображений
     MyPushButton::LoadChessImages(cell_Size);
-    // Загрузка изображений
+
+    // Загрука LeaderBoard
+    FillLeaderBoard();
 }
 
 void Window::login()
@@ -417,3 +409,20 @@ void Window::UpdateWaitLabel()
     wait_Label->setText(CurrentText);
 }
 // Private slots
+
+// void Window::FillLeaderBoard()
+// {
+//     for (int i = 0; i < 50; ++i)
+//     {
+//         QHBoxLayout *layout = new QHBoxLayout;
+//         QLabel *NameRating = new QLabel;
+//         NameRating->setFont(QFont("Calibri", SMALLEST));
+//         QPushButton *Profile = new QPushButton("Profile");
+//         NameRating->hide();
+//         Profile->hide();
+//         layout->addWidget(NameRating, Qt::AlignRight);
+//         layout->addWidget(Profile, Qt::AlignLeft);
+//         main_LeaderBoardLayout->addLayout(layout);
+//     }
+// }
+

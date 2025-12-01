@@ -25,9 +25,9 @@ mocTarget:
 	C:\msys64\ucrt64\share\qt6\bin\moc.exe Interface/MyPushButton/MyPushButton.hpp -o moc_MyPushButton.cpp
 
 all: mocTarget backendTarget
-	cd Interface && make && cd ..
 	cd DataBase && make && cd ..
 	cd CurrentUser && make && cd ..
+	cd Interface && make && cd ..
 	
 	g++ $(sources) $(moc_sources) $(object_file) $(includes_pqxx) $(libs_pqxx) $(includes_qt) $(libs_qt) -o main
 
