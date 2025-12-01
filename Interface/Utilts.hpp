@@ -1,4 +1,4 @@
-
+#include <regex>
 #include <QString>
 enum Owners : uint8_t // кому предназначена ифномарция
 {
