@@ -26,6 +26,7 @@ Window::Window(QWidget *parent)
     login_Email->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
     login_Password = new QLineEdit;
+    login_Password->setEchoMode(QLineEdit::Password);
     login_Password->setPlaceholderText("Enter the password");
 
     login_Password->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -111,11 +112,13 @@ Window::Window(QWidget *parent)
     reg_Username->setMinimumWidth(250);
 
     reg_Password = new QLineEdit;
+    reg_Password->setEchoMode(QLineEdit::Password);
     reg_Password->setPlaceholderText("Enter password");
     reg_Password->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     reg_Username->setMinimumWidth(250);
 
     reg_ConfirmPassword = new QLineEdit;
+    reg_ConfirmPassword->setEchoMode(QLineEdit::Password);
     reg_ConfirmPassword->setPlaceholderText("Confirm password");
     reg_ConfirmPassword->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
@@ -204,11 +207,59 @@ Window::Window(QWidget *parent)
     wait_Widget->setLayout(wait_Layout);
     // Поиск соперника
 
+    // Профиль
+    profile_Widget = new QWidget(this);
+    profile_Layout = new QVBoxLayout;
+
+    profile_Avatar = new RoundedAvatar;
+    QPixmap img("D:/C++/Durak/Static/Favorite.jpg");
+    profile_Avatar->setPixmap(img, 400, 400);
+
+    profile_ChangePhoto = new QPushButton("Change photo");
+
+    profile_UsernameLabel = new QLabel("Username:");
+    profile_UsernameLabel->setFont(QFont("Calibri", SMALL));
+
+    profile_UsernameLineEdit = new QLineEdit("UserName");
+    profile_UsernameLineEdit->setFont(QFont("Calibri", BIG));
+
+    profile_EmailLabel = new QLabel("Email");
+    profile_EmailLabel->setFont(QFont("Calibri", SMALL));
+
+    profile_EmailLineEdit = new QLineEdit("UserEmail@gmail.com");
+    profile_EmailLineEdit->setFont(QFont("Calibri", BIG));
+
+    profile_Rating = new QLabel("Rating: 1000");
+    profile_Rating->setFont(QFont("Calibri", BIG));
+
+    profile_Rank = new QLabel("Rank: NOOD");
+    profile_Rank->setFont(QFont("Calibri", BIG));
+
+    profile_Layout->addWidget(profile_Avatar, Qt::AlignCenter | Qt::AlignTop);
+    profile_Layout->addWidget(profile_ChangePhoto,Qt::AlignCenter | Qt::AlignTop);
+
+    profile_Layout->addWidget(profile_UsernameLabel, Qt::AlignCenter | Qt::AlignTop);
+    profile_Layout->addWidget(profile_UsernameLineEdit,Qt::AlignCenter | Qt::AlignTop);
+
+    profile_Layout->addWidget(profile_EmailLabel, Qt::AlignCenter | Qt::AlignTop);
+    profile_Layout->addWidget(profile_EmailLineEdit, Qt::AlignCenter | Qt::AlignTop);
+
+    profile_Layout->addWidget(profile_Rating, Qt::AlignCenter | Qt::AlignTop);
+    profile_Layout->addWidget(profile_Rank, Qt::AlignCenter | Qt::AlignTop);
+
+    profile_Layout->setAlignment(Qt::AlignCenter);
+    // profile_Layout->setSpacing(4);
+
+    profile_Widget->setLayout(profile_Layout);
+
+    // Профиль
+
     listOfLayout->addWidget(login_Widget);
     listOfLayout->addWidget(main_Widget);
     listOfLayout->addWidget(reg_Widget);
     listOfLayout->addWidget(play_Widget);
     listOfLayout->addWidget(wait_Widget);
+    listOfLayout->addWidget(profile_Widget);
     listOfLayout->setAlignment(Qt::AlignCenter);
 
     // Загрузка изображений
@@ -250,6 +301,11 @@ void Window::play()
 void Window::wait()
 {
     listOfLayout->setCurrentWidget(wait_Widget);
+}
+
+void Window::profile()
+{
+    listOfLayout->setCurrentWidget(profile_Widget);
 }
 
 void Window::InsertMessage(Owners own, bool DeleteOld)
@@ -419,8 +475,9 @@ void Window::FillLeaderBoard()
         QLabel *name = new QLabel;
         profile->hide();
         name->hide();
-        box->addWidget(name);
-        box->addWidget(profile);
+        box->addWidget(name, 1, Qt::AlignLeft);
+        box->addStretch(1);
+        box->addWidget(profile, 1, Qt::AlignRight);
         main_LeaderBoardLayout->addLayout(box);
     }
 }
@@ -431,8 +488,8 @@ void Window::UpdateLeaderBoard(const std::string &username, const std::string &r
     QHBoxLayout *box = static_cast<QHBoxLayout *>(item->layout());
 
     QLabel *UsernameLabel = static_cast<QLabel *>(box->itemAt(0)->widget());
-    QPushButton *ProfileButton = static_cast<QPushButton *>(box->itemAt(1)->widget());
-    
+    QPushButton *ProfileButton = static_cast<QPushButton *>(box->itemAt(2)->widget());
+
     UsernameLabel->show();
     ProfileButton->show();
     std::string result = username + "-" + rating;
