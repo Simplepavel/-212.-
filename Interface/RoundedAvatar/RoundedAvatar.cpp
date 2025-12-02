@@ -1,12 +1,16 @@
 #include "RoundedAvatar.hpp"
 
-void RoundedAvatar::setPixmap(const QPixmap &argv, int height, int width)
+RoundedAvatar::RoundedAvatar(int width, int height, QWidget *parent) : QWidget(parent), img_height(height), img_width(width)
 {
-    resize(width, height);
-    QRect rectcrop(0, 0, width, height);
-    rectcrop.moveCenter(img.rect().center());
+    setFixedSize(height, width);
+}
+
+void RoundedAvatar::setPixmap(const QPixmap &argv)
+{
+    QRect rectcrop(0, 0, img_width, img_height);
+    rectcrop.moveCenter(argv.rect().center());
     img = argv.copy(rectcrop);
-    update();
+    img.save("output.jpg");
 }
 
 void RoundedAvatar::paintEvent(QPaintEvent *e)
@@ -14,7 +18,7 @@ void RoundedAvatar::paintEvent(QPaintEvent *e)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     QPainterPath path;
-    path.addEllipse(img.rect()); // Вписываем окружность
-    painter.setClipPath(path);   // Устанавливаем область обрезания по кругу
-    painter.drawPixmap(0, 0, img);
+    path.addEllipse(rect());   // Вписываем окружность
+    painter.setClipPath(path); // Устанавливаем область обрезания по кру
+    painter.drawPixmap(rect(), img);
 }

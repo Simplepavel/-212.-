@@ -9,10 +9,14 @@
 #include <iostream>
 class RoundedAvatar : public QWidget
 {
+    Q_OBJECT
     QPixmap img;
+    int img_height;
+    int img_width;
 
 public:
-    RoundedAvatar(QWidget *parent = nullptr) {};
-    void setPixmap(const QPixmap &argv, int height, int width);
+    RoundedAvatar(QWidget *parent = nullptr) : QWidget(parent) {};
+    RoundedAvatar(int, int, QWidget *parent = nullptr);
+    void setPixmap(const QPixmap &argv);
     void paintEvent(QPaintEvent *);
 };

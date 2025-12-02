@@ -41,6 +41,7 @@ private slots:
     void FindEnemy();
     void play();
     void profile();
+    void main();
     void MakeMove();
     void UpdateLeaderBoard();
 

@@ -114,18 +114,18 @@ private:
 
     // Профиль
     QWidget *profile_Widget;
-    QVBoxLayout *profile_Layout;
+    QHBoxLayout *profile_Layout;
 
-    RoundedAvatar* profile_Avatar;
-    QPushButton* profile_ChangePhoto;
-    
-    QLabel* profile_UsernameLabel;
-    QLineEdit* profile_UsernameLineEdit;
-    
-    QLabel* profile_EmailLabel;
-    QLineEdit* profile_EmailLineEdit;
-    QLabel* profile_Rating;
-    QLabel* profile_Rank;
+    QWidget *profile_UserInfoWidget;
+    QVBoxLayout *profile_UserInfoLayout;
+
+    RoundedAvatar *profile_Avatar;
+    QLabel *profile_Username;
+    QPushButton *profile_ChangePhoto;
+
+    QLabel *profile_Rank;
+    QLabel *profile_Status;
+    QPushButton *profile_BackBttn;
     // Профиль
 
 private slots:
@@ -163,7 +163,7 @@ public:
     // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
-    const QPushButton &get_main_MyProfile() {return *main_MyProfile;}
+    const QPushButton &get_main_MyProfile() { return *main_MyProfile; }
     void FillLeaderBoard(); // заполнение доски лидеров шаблонами для вставки
     QVBoxLayout &get_main_LeaderBoardLayout() { return *main_LeaderBoardLayout; }
     void UpdateLeaderBoard(const std::string &username, const std::string &rating, int idx);
@@ -177,7 +177,10 @@ public:
     const QPushButton &get_play_NextBttn() { return *play_NextBttn; };
     // Метод отсносящиеся к игровому полю
 
-    // Методы относящиеся к полю ожидания
+    // Методы относящиеся к профилю
+    const QPushButton &get_profile_BackBttn() { return *profile_BackBttn; }
+    // Методы относящиеся к профилю
+    //  Методы относящиеся к полю ожидания
     QTimer &get_wait_Timer() { return *wait_Timer; }
     const QPushButton &get_wait_StopBttn() { return *wait_StopBttn; }
     // Методы относящиеся к полю ожидания

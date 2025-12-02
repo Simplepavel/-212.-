@@ -208,49 +208,53 @@ Window::Window(QWidget *parent)
     // Поиск соперника
 
     // Профиль
-    profile_Widget = new QWidget(this);
-    profile_Layout = new QVBoxLayout;
 
-    profile_Avatar = new RoundedAvatar;
+    profile_Widget = new QWidget(this);
+    profile_Layout = new QHBoxLayout(profile_Widget);
+
+    profile_BackBttn = new QPushButton("<");
+    profile_BackBttn->setFixedWidth(30);
+    profile_BackBttn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+
+    profile_UserInfoWidget = new QWidget(profile_Widget);
+    profile_UserInfoLayout = new QVBoxLayout(profile_UserInfoWidget);
+
+    profile_Avatar = new RoundedAvatar(screen_Height * 0.3, screen_Height * 0.3);
     QPixmap img("D:/C++/Durak/Static/Favorite.jpg");
-    profile_Avatar->setPixmap(img, 400, 400);
+    profile_Avatar->setPixmap(img);
+
+    profile_Username = new QLabel("Username");
+    profile_Username->setFont(QFont("Calibri", BIGGEST));
+    profile_Username->setAlignment(Qt::AlignCenter);
 
     profile_ChangePhoto = new QPushButton("Change photo");
 
-    profile_UsernameLabel = new QLabel("Username:");
-    profile_UsernameLabel->setFont(QFont("Calibri", SMALL));
+    profile_Rank = new QLabel("BigBoss");
+    profile_Rank->setFont(QFont("Calibri", BIG, 4));
+    QPalette rank_palette = profile_Rank->palette();
+    rank_palette.setColor(QPalette::WindowText, QColor(255, 215, 0));
+    profile_Rank->setPalette(rank_palette);
+    profile_Rank->setAlignment(Qt::AlignCenter);
 
-    profile_UsernameLineEdit = new QLineEdit("UserName");
-    profile_UsernameLineEdit->setFont(QFont("Calibri", BIG));
+    profile_Status = new QLabel("online");
+    profile_Status->setAlignment(Qt::AlignCenter);
+    profile_Status->setFont(QFont("Calibri", SMALLEST));
 
-    profile_EmailLabel = new QLabel("Email");
-    profile_EmailLabel->setFont(QFont("Calibri", SMALL));
+    QPalette status_palette = profile_Status->palette();
+    status_palette.setColor(QPalette::WindowText, QColor(0, 255, 0));
+    profile_Status->setPalette(status_palette);
 
-    profile_EmailLineEdit = new QLineEdit("UserEmail@gmail.com");
-    profile_EmailLineEdit->setFont(QFont("Calibri", BIG));
+    profile_UserInfoLayout->setSpacing(5);
+    profile_UserInfoLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
-    profile_Rating = new QLabel("Rating: 1000");
-    profile_Rating->setFont(QFont("Calibri", BIG));
+    profile_UserInfoLayout->addWidget(profile_Avatar);
+    profile_UserInfoLayout->addWidget(profile_Status);
+    profile_UserInfoLayout->addWidget(profile_ChangePhoto, 0, Qt::AlignHCenter);
+    profile_UserInfoLayout->addWidget(profile_Username);
+    profile_UserInfoLayout->addWidget(profile_Rank);
 
-    profile_Rank = new QLabel("Rank: NOOD");
-    profile_Rank->setFont(QFont("Calibri", BIG));
-
-    profile_Layout->addWidget(profile_Avatar, Qt::AlignCenter | Qt::AlignTop);
-    profile_Layout->addWidget(profile_ChangePhoto,Qt::AlignCenter | Qt::AlignTop);
-
-    profile_Layout->addWidget(profile_UsernameLabel, Qt::AlignCenter | Qt::AlignTop);
-    profile_Layout->addWidget(profile_UsernameLineEdit,Qt::AlignCenter | Qt::AlignTop);
-
-    profile_Layout->addWidget(profile_EmailLabel, Qt::AlignCenter | Qt::AlignTop);
-    profile_Layout->addWidget(profile_EmailLineEdit, Qt::AlignCenter | Qt::AlignTop);
-
-    profile_Layout->addWidget(profile_Rating, Qt::AlignCenter | Qt::AlignTop);
-    profile_Layout->addWidget(profile_Rank, Qt::AlignCenter | Qt::AlignTop);
-
-    profile_Layout->setAlignment(Qt::AlignCenter);
-    // profile_Layout->setSpacing(4);
-
-    profile_Widget->setLayout(profile_Layout);
+    profile_Layout->addWidget(profile_BackBttn, Qt::AlignTop);
+    profile_Layout->addWidget(profile_UserInfoWidget);
 
     // Профиль
 

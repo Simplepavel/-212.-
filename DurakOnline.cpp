@@ -78,7 +78,6 @@ void DurakOnline::registration()
         window.registration(); // очищаем данные добавляем информацию о ошибках
         return;
     }
-
     try
     {
         tx.exec("insert into users (username, email, password) values ($1, $2, $3)", pqxx::params{name, email, password});
@@ -143,6 +142,11 @@ void DurakOnline::login()
     }
 }
 
+void DurakOnline::main()
+{
+    window.main();
+}
+
 void DurakOnline::logout()
 {
     current_user.to_null();
@@ -183,6 +187,7 @@ void DurakOnline::FindEnemy()
 int DurakOnline::start()
 {
     connect();
+
     window.setWindowTitle("Chess");
     window.connect();
     window.showMaximized();
@@ -202,6 +207,10 @@ void DurakOnline::connect()
     QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
     QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
+    
+    std::cout << "Before\n";
+    QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
+    std::cout << "After\n";
 }
 
 void DurakOnline::play() // Соперник уже найден
