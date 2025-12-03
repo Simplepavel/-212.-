@@ -46,7 +46,7 @@ bool Durak_Client::Client_Connect(char *IP, char *PORT)
 
 bool Durak_Client::Client_Disconnect()
 {
-    ::shutdown(client_socket, SD_BOTH);
+    ::shutdown(client_socket, SD_SEND);
     char empty_buffer[4096]{0};
     int recived_bytes = 0;
     do

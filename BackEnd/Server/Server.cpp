@@ -186,6 +186,7 @@ void Durak_Server::Server_Go()
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
                             uint32_t session_id = ntohl(net_session_id);
+
                             Session *play_session = play_sessions[session_id];
 
                             SOCKET opp_socket = play_session->Reciver(*i).fd;
@@ -236,7 +237,6 @@ void Durak_Server::Server_Go()
                             }
                             tx.commit();
                             delete_session(database_session);
-
                             play_sessions.erase(session_id);
                             delete play_session;
                         }

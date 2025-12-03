@@ -7,13 +7,13 @@
 #include <string>
 #include <iostream>
 #include <thread>
+#include <fstream>
 
-enum UserStatus : uint8_t
+enum GameStatus : uint8_t
 {
-    online = 0,       // просто в сети(зеленым цветом)
-    offline,          // не в сети(серым цветом)
-    in_match,         // играет(желтым)
-    looking_for_match // поиск соперника(желтым)
+    ONLINE,
+    LOOKING_FOR,
+    IN_GAME
 };
 
 class DurakOnline : public QObject
@@ -28,11 +28,10 @@ private:
     uint32_t session_id; // по умолчанию равно 0. Это значит что игрок не в игровой сессии
     bool IsMyTurn;
     FigureColor MyColor; // white - белый, black - черный
-
     MyPushButton *FirstPosition;
     MyPushButton *SecondPosition;
-
     QTimer LeaderBoardUpdateTimer;
+    GameStatus Status; // В игре. Ожидает соперника. Просто онлайн
 
     void connect();
 private slots:
@@ -46,6 +45,8 @@ private slots:
     void MakeMove();
     void UpdateLeaderBoard();
     void ChangeUserName();
+    void ChangePhoto();
+    void OnCloseWindow();
 
     // Возможно объединить это в одну фунцию
     void Disconnect();

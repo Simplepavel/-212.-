@@ -13,6 +13,7 @@
 #include <QScreen>
 #include <QRect>
 #include <QDialog>
+#include <QFileDialog>
 
 #include <QFont>
 #include <QPalette>
@@ -148,8 +149,9 @@ public:
     void profile();
     void InsertMessage(Owners, bool DeleteOld = true); // Вставка предупрждений
     void AddStateMessage(const Message &);
-    // int DialogWindow(const QString &txt);
+
     QString GetNewName();
+    QString GetNewPhoto();
 
     // Констатнтный доступ к элементам формы регистрации
     const QLineEdit &get_reg_Username() { return *reg_Username; }
@@ -192,6 +194,8 @@ public:
     QLabel &get_profile_Rank() { return *profile_Rank; }
     QPushButton &get_profile_Invite() { return *profile_Invite; }
     QPushButton &get_profile_ChangeUnBttn() { return *profile_ChangeUsernameBttn; }
+    QPushButton &get_profile_ChangePhoto() { return *profile_ChangePhoto; }
+    RoundedAvatar &get_profile_RoundedAvatar() { return *profile_Avatar; }
     // Методы относящиеся к профилю
 
     //  Методы относящиеся к полю ожидания

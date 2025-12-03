@@ -228,9 +228,6 @@ Window::Window(QWidget *parent)
     // profile_Avatar->update();
     // profile_Avatar->repaint();
 
-    QPixmap img("D:/C++/Durak/Static/Favorite.jpg");
-    profile_Avatar->setPixmap(img);
-
     profile_UsernameLayout = new QHBoxLayout;
     profile_ChangeUsernameBttn = new QPushButton("...");
     profile_ChangeUsernameBttn->setFixedSize(30, 30);
@@ -552,6 +549,21 @@ QString Window::GetNewName()
     else
         return "";
 }
+
+QString Window::GetNewPhoto()
+{
+    QFileDialog FileDialog(this);
+    FileDialog.setFileMode(QFileDialog::ExistingFile);
+    FileDialog.setNameFilter("Images (*.png *.jpg)");
+    if (FileDialog.exec() == QDialog::Accepted)
+    {
+        QString file = FileDialog.selectedFiles()[0];
+        return file;
+    }
+    return "";
+}
+
+
 
 // int Window::DialogWindow(const QString &txt) // сохрнаить заметку а еще удалить заметку и тп?
 // {

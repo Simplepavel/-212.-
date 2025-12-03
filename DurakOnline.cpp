@@ -124,13 +124,11 @@ void DurakOnline::login()
     if (!r.empty())
     {
         pqxx::row user = r[0];
+
         CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>(), user[3].as<uint32_t>());
         current_user = std::move(NewUser);
         window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
-        window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
-
-        // std::string rating_str = std::string::t
-        // window.get_profile_Rank().setText(); пока будет BigBoss у все
+        std::ofstream ConfigFile("Config.txt");
 
         window.main();
     }
@@ -175,6 +173,7 @@ void DurakOnline::FindEnemy()
     }
     if (client.is_ready())
     {
+        Status = LOOKING_FOR;
         Mark1 to_send;
         to_send.data = new char[4];
         uint32_t net_id = htonl(current_user.get_id());
@@ -213,6 +212,11 @@ void DurakOnline::ChangeUserName()
     delete_session(session);
 }
 
+void DurakOnline::ChangePhoto()
+{
+    std::cout << "Get path to new photo\n";
+}
+
 int DurakOnline::start()
 {
     connect();
@@ -238,6 +242,8 @@ void DurakOnline::connect()
     QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
     QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
     QObject::connect(&window.get_profile_ChangeUnBttn(), &QPushButton::clicked, this, &DurakOnline::ChangeUserName);
+    QObject::connect(&window.get_profile_ChangePhoto(), &QPushButton::clicked, this, &DurakOnline::ChangePhoto);
+    QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
 }
 
 void DurakOnline::play() // Соперник уже найден
@@ -245,6 +251,8 @@ void DurakOnline::play() // Соперник уже найден
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
+        Status = IN_GAME;
+
         window.InsertMessage(PLAY); // удаляем старые записи если есть
         window.get_wait_Timer().stop();
 
@@ -295,11 +303,13 @@ void DurakOnline::play() // Соперник уже найден
     {
         window.wait();
         window.get_wait_Timer().start();
+        Status = LOOKING_FOR;
     }
     else if (recv_data.type == DataType::SHUTDOWN)
     {
         client.Client_Disconnect();
         client.set_ready(false); // Больше не слушаем сервер
+        Status = ONLINE;
         window.main();
     }
     else if (recv_data.type == DataType::CHECKMATE)
@@ -430,4 +440,24 @@ void DurakOnline::UpdateLeaderBoard()
     {
         window.UpdateLeaderBoard(i[0].as<std::string>(), i[1].as<std::string>(), idx++);
     }
+}
+
+void DurakOnline::OnCloseWindow()
+{
+    if (client.is_ready())
+    {
+        if (Status == IN_GAME)
+        {
+            Disconnect();
+        }
+        else if (Status == LOOKING_FOR)
+        {
+            StopFind();
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Сервер должен успеть сработать
+        client.Client_Disconnect();
+        client.set_ready(false); // Больше не слушаем сервер
+    }
+    std::ofstream ConfigFile("config.txt");
+    ConfigFile << current_user;
 }

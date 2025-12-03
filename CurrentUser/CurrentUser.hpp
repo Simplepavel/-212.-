@@ -13,6 +13,7 @@ private:
 public:
     CurrentUser();
     CurrentUser(uint32_t _id, const std::string &_username, const std::string &_email, uint32_t _rating);
+
     CurrentUser &operator=(CurrentUser &&);
     uint32_t get_id() const;
     const std::string &get_username() const;
@@ -20,7 +21,7 @@ public:
     uint32_t get_rating() const;
 
     void set_username(const std::string &);
-    bool is_null();
+    bool is_null() const;
     void to_null();
 };
 
