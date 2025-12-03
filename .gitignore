@@ -1,0 +1,5 @@
+*.exe
+*.dll
+/bin/
+/obj/
+BackEnd/Server/main.exe
