@@ -1,9 +1,7 @@
 #include <iostream>
-#include <memory>
 #include <string>
 
-// ######## кодирование ########
-
+// кодирование
 char base64Char(unsigned char b) {
   b &= 0x3F;
   if (b < 26) return 'A' + b;
@@ -13,21 +11,20 @@ char base64Char(unsigned char b) {
   return '/';
 }
 
-unsigned int base64Encode(const std::string& str, char outStr[]) {
+unsigned int base64Encode(char inStr[], int len, , char outStr[]) {
   unsigned int inIndex = 0, outIndex = 0;
-  unsigned int len = str.length();
   unsigned char a1, a2, a3;
   unsigned char b1, b2, b3, b4;
 
   for (inIndex = 0; inIndex < len; inIndex += 3) {
     a1 = a2 = a3 = 0;
-    a1 = str[inIndex];
+    a1 = inStr[inIndex];
 
     if (inIndex + 1 < len) {
-      a2 = str[inIndex + 1];
+      a2 = inStr[inIndex + 1];
     }
     if (inIndex + 2 < len) {
-      a3 = str[inIndex + 2];
+      a3 = inStr[inIndex + 2];
     }
 
     b1 = a1 >> 2;
@@ -43,7 +40,9 @@ unsigned int base64Encode(const std::string& str, char outStr[]) {
 
   return outIndex;
 }
+////////////////////////////
 
+// декодирование
 unsigned char base64Code(char ch) {
   if (ch >= '0' && ch <= '9') return (ch - '0') + 52;
   if (ch >= 'A' && ch <= 'Z') return ch - 'A';
@@ -63,7 +62,7 @@ bool isBase64(char ch) {
   return false;
 }
 
-int base64Decode(char inStr[], unsigned int Len, char outStr[]) {
+int base64Decode(const char inStr[], unsigned int Len, unsigned char outStr[]) {
   if (Len % 4 > 0) throw "Wrong data for decoding";
 
   unsigned int inIndex = 0, outIndex = 0;
@@ -95,23 +94,4 @@ int base64Decode(char inStr[], unsigned int Len, char outStr[]) {
 
   return outIndex - s;
 }
-
-std::string decode(const char str[]) {
-  char inStr[4];
-  char outStr[3];
-  int cnt = 0;
-  std::string res;
-
-  for (size_t i = 0; str[i] != '\0'; ++i) {
-    char ch = str[i];
-    if (isBase64(ch)) {
-      inStr[cnt++] = ch;
-      if (cnt == 4) {
-        int decoded = base64Decode(inStr, 4, outStr);
-        res.append(outStr, outStr + decoded);
-        cnt = 0;
-      }
-    }
-  }
-  return res;
-}
+////////////////////////////
