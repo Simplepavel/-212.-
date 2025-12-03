@@ -119,21 +119,20 @@ void DurakOnline::login()
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
 
-    pqxx::result r = tx.exec("select id, username, email from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
+    pqxx::result r = tx.exec("select id, username, email, rating from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
 
     if (!r.empty())
     {
-        std::cout << "1\n";
         pqxx::row user = r[0];
-        std::cout << "2\n";
-        CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>());
-        std::cout << "3\n";
+        CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>(), user[3].as<uint32_t>());
         current_user = std::move(NewUser);
-        std::cout << "4\n";
         window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
-        std::cout << "5\n";
+        window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
+
+        // std::string rating_str = std::string::t
+        // window.get_profile_Rank().setText(); пока будет BigBoss у все
+
         window.main();
-        std::cout << "6\n";
     }
     else
     {
@@ -155,6 +154,10 @@ void DurakOnline::logout()
 
 void DurakOnline::profile()
 {
+    // пользователь не видит свой же статус и приглашение на игру
+    window.get_profile_Status().hide();
+    window.get_profile_Invite().hide();
+    window.InsertMessage(PROFILE);
     window.profile();
 }
 
@@ -184,6 +187,32 @@ void DurakOnline::FindEnemy()
     }
 }
 
+void DurakOnline::ChangeUserName()
+{
+    std::string NewName = window.GetNewName().toStdString();
+    if (NewName == "")
+    {
+        return;
+    }
+    pqxx::connection *session = make_session();
+    pqxx::work tx(*session);
+    pqxx::result username_check = tx.exec("select * from users where username = $1 limit 1", pqxx::params{NewName});
+    if (!username_check.empty())
+    {
+        window.AddStateMessage(CreateMessage("User with this username is already exists. Try another one", PROFILE, ERR, SMALLEST));
+    }
+    else
+    {
+        tx.exec("update users set username = $1 where id = $2", pqxx::params{NewName, current_user.get_id()});
+        current_user.set_username(NewName);
+        // Не вижу смысла каждый раз при загрузке профиля обновлять имя соглано current_user
+        window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
+        tx.commit();
+    }
+
+    delete_session(session);
+}
+
 int DurakOnline::start()
 {
     connect();
@@ -207,10 +236,8 @@ void DurakOnline::connect()
     QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
     QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
-    
-    std::cout << "Before\n";
     QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
-    std::cout << "After\n";
+    QObject::connect(&window.get_profile_ChangeUnBttn(), &QPushButton::clicked, this, &DurakOnline::ChangeUserName);
 }
 
 void DurakOnline::play() // Соперник уже найден

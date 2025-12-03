@@ -7,15 +7,19 @@ private:
     uint32_t id;
     std::string username;
     std::string email;
+    uint32_t rating;
     bool null;
 
 public:
     CurrentUser();
-    CurrentUser(uint32_t _id, const std::string &_username, const std::string &_email);
+    CurrentUser(uint32_t _id, const std::string &_username, const std::string &_email, uint32_t _rating);
     CurrentUser &operator=(CurrentUser &&);
     uint32_t get_id() const;
     const std::string &get_username() const;
     const std::string &get_email() const;
+    uint32_t get_rating() const;
+
+    void set_username(const std::string &);
     bool is_null();
     void to_null();
 };

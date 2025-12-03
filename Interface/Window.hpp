@@ -12,6 +12,7 @@
 #include <QScrollArea>
 #include <QScreen>
 #include <QRect>
+#include <QDialog>
 
 #include <QFont>
 #include <QPalette>
@@ -120,12 +121,17 @@ private:
     QVBoxLayout *profile_UserInfoLayout;
 
     RoundedAvatar *profile_Avatar;
-    QLabel *profile_Username;
-    QPushButton *profile_ChangePhoto;
 
+    QHBoxLayout *profile_UsernameLayout;
+    QPushButton *profile_ChangeUsernameBttn;
+    QLabel *profile_Username;
+
+    QPushButton *profile_ChangePhoto;
     QLabel *profile_Rank;
     QLabel *profile_Status;
     QPushButton *profile_BackBttn;
+
+    QPushButton *profile_Invite;
     // Профиль
 
 private slots:
@@ -142,6 +148,8 @@ public:
     void profile();
     void InsertMessage(Owners, bool DeleteOld = true); // Вставка предупрждений
     void AddStateMessage(const Message &);
+    // int DialogWindow(const QString &txt);
+    QString GetNewName();
 
     // Констатнтный доступ к элементам формы регистрации
     const QLineEdit &get_reg_Username() { return *reg_Username; }
@@ -179,7 +187,13 @@ public:
 
     // Методы относящиеся к профилю
     const QPushButton &get_profile_BackBttn() { return *profile_BackBttn; }
+    QLabel &get_profile_Username() { return *profile_Username; }
+    QLabel &get_profile_Status() { return *profile_Status; }
+    QLabel &get_profile_Rank() { return *profile_Rank; }
+    QPushButton &get_profile_Invite() { return *profile_Invite; }
+    QPushButton &get_profile_ChangeUnBttn() { return *profile_ChangeUsernameBttn; }
     // Методы относящиеся к профилю
+
     //  Методы относящиеся к полю ожидания
     QTimer &get_wait_Timer() { return *wait_Timer; }
     const QPushButton &get_wait_StopBttn() { return *wait_StopBttn; }

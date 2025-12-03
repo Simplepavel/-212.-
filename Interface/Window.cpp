@@ -220,12 +220,29 @@ Window::Window(QWidget *parent)
     profile_UserInfoLayout = new QVBoxLayout(profile_UserInfoWidget);
 
     profile_Avatar = new RoundedAvatar(screen_Height * 0.3, screen_Height * 0.3);
+
+    // QPalette p;
+    // profile_Avatar->setAutoFillBackground(true);
+    // p.setColor(QPalette::Window, Qt::red);
+    // profile_Avatar->setPalette(p);
+    // profile_Avatar->update();
+    // profile_Avatar->repaint();
+
     QPixmap img("D:/C++/Durak/Static/Favorite.jpg");
     profile_Avatar->setPixmap(img);
 
+    profile_UsernameLayout = new QHBoxLayout;
+    profile_ChangeUsernameBttn = new QPushButton("...");
+    profile_ChangeUsernameBttn->setFixedSize(30, 30);
     profile_Username = new QLabel("Username");
+    profile_Username->setMaximumWidth(0.3 * screen_Height);
+
     profile_Username->setFont(QFont("Calibri", BIGGEST));
-    profile_Username->setAlignment(Qt::AlignCenter);
+    // profile_Username->setAlignment(Qt::AlignRight);
+
+    profile_UsernameLayout->addWidget(profile_Username);
+    profile_UsernameLayout->addWidget(profile_ChangeUsernameBttn);
+    profile_UsernameLayout->setAlignment(Qt::AlignCenter);
 
     profile_ChangePhoto = new QPushButton("Change photo");
 
@@ -244,14 +261,17 @@ Window::Window(QWidget *parent)
     status_palette.setColor(QPalette::WindowText, QColor(0, 255, 0));
     profile_Status->setPalette(status_palette);
 
+    profile_Invite = new QPushButton("Invite to game");
+
     profile_UserInfoLayout->setSpacing(5);
     profile_UserInfoLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
     profile_UserInfoLayout->addWidget(profile_Avatar);
     profile_UserInfoLayout->addWidget(profile_Status);
     profile_UserInfoLayout->addWidget(profile_ChangePhoto, 0, Qt::AlignHCenter);
-    profile_UserInfoLayout->addWidget(profile_Username);
+    profile_UserInfoLayout->addLayout(profile_UsernameLayout);
     profile_UserInfoLayout->addWidget(profile_Rank);
+    profile_UserInfoLayout->addWidget(profile_Invite);
 
     profile_Layout->addWidget(profile_BackBttn, Qt::AlignTop);
     profile_Layout->addWidget(profile_UserInfoWidget);
@@ -334,6 +354,9 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
     case (PLAY):
         layout = play_ScrollLayout; // Тут будет другой LAYOUT. Слева от игровой доски
         break;
+    case (PROFILE):
+        layout = profile_UserInfoLayout;
+        k = 4;
     default:
         return;
     }
@@ -499,3 +522,57 @@ void Window::UpdateLeaderBoard(const std::string &username, const std::string &r
     std::string result = username + "-" + rating;
     UsernameLabel->setText(QString::fromStdString(result));
 }
+
+QString Window::GetNewName()
+{
+    QDialog *window = new QDialog(this);
+    window->setModal(true);
+    QLineEdit *line = new QLineEdit(window);
+    line->setPlaceholderText("Enter new name");
+
+    QVBoxLayout *outer = new QVBoxLayout;
+    QHBoxLayout *inner = new QHBoxLayout;
+
+    QPushButton *ok = new QPushButton("Ok", window);
+    QPushButton *close = new QPushButton("Cancel", window);
+
+    inner->addWidget(ok);
+    inner->addWidget(close);
+
+    outer->addWidget(line);
+    outer->addLayout(inner);
+
+    window->setLayout(outer);
+
+    QObject::connect(ok, &QPushButton::clicked, window, &QDialog::accept);
+    QObject::connect(close, &QPushButton::clicked, window, &QDialog::reject);
+
+    if (window->exec() == QDialog::Accepted)
+        return line->text();
+    else
+        return "";
+}
+
+// int Window::DialogWindow(const QString &txt) // сохрнаить заметку а еще удалить заметку и тп?
+// {
+//     QDialog *dialog = new QDialog(this);
+//     dialog->setModal(true);
+//     QLabel *lbl = new QLabel(txt, dialog);
+//     QPushButton *ok = new QPushButton("Ок", dialog);
+//     QPushButton *cancel = new QPushButton("Отмена", dialog);
+//     QHBoxLayout *inner = new QHBoxLayout;
+//     inner->addWidget(ok);
+//     inner->addWidget(cancel);
+
+//     QVBoxLayout *outer = new QVBoxLayout;
+
+//     outer->addWidget(lbl);
+//     outer->addLayout(inner);
+
+//     dialog->setLayout(outer);
+
+//     QObject::connect(ok, &QPushButton::clicked, dialog, &QDialog::accept);
+//     QObject::connect(cancel, &QPushButton::clicked, dialog, &QDialog::reject);
+
+//     return dialog->exec();
+// }

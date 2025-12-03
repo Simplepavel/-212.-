@@ -2,6 +2,7 @@
 #include "Interface/Window.hpp"
 #include "CurrentUser/CurrentUser.hpp"
 #include "BackEnd/Client/Client.hpp"
+#include "RatingSystem/rating.hpp"
 
 #include <string>
 #include <iostream>
@@ -44,6 +45,7 @@ private slots:
     void main();
     void MakeMove();
     void UpdateLeaderBoard();
+    void ChangeUserName();
 
     // Возможно объединить это в одну фунцию
     void Disconnect();
