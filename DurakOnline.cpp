@@ -119,7 +119,7 @@ void DurakOnline::login()
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
 
-    pqxx::result r = tx.exec("select id, username, email, rating from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
+    pqxx::result r = tx.exec("select id, username, email, rating, picture from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
 
     if (!r.empty())
     {
@@ -128,7 +128,9 @@ void DurakOnline::login()
         CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>(), user[3].as<uint32_t>());
         current_user = std::move(NewUser);
         window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
-        std::ofstream ConfigFile("Config.txt");
+
+        window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
+        window.get_profile_Rank().setText(QString::number(current_user.get_rating()));
 
         window.main();
     }
@@ -214,13 +216,21 @@ void DurakOnline::ChangeUserName()
 
 void DurakOnline::ChangePhoto()
 {
-    std::cout << "Get path to new photo\n";
+    std::string NewPhoto = window.GetNewPhoto().toStdString();
+    if (NewPhoto != "")
+    {
+        bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT); // Подключаемся к серверу
+        if (!flag)
+        {
+            return;
+        }
+        std::ifstream NewImg(NewPhoto, std::ios::binary);
+    }
 }
 
 int DurakOnline::start()
 {
     connect();
-
     window.setWindowTitle("Chess");
     window.connect();
     window.showMaximized();
@@ -458,6 +468,4 @@ void DurakOnline::OnCloseWindow()
         client.Client_Disconnect();
         client.set_ready(false); // Больше не слушаем сервер
     }
-    std::ofstream ConfigFile("config.txt");
-    ConfigFile << current_user;
 }

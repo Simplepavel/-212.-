@@ -21,8 +21,13 @@ public:
     uint32_t get_rating() const;
 
     void set_username(const std::string &);
+    void set_id(uint32_t);
+    void set_email(const std::string &);
+    void set_rating(uint32_t);
+    void set_null(bool new_vl);
     bool is_null() const;
     void to_null();
 };
 
 std::ostream &operator<<(std::ostream &cout, const CurrentUser &argv);
+CurrentUser &operator>>(std::istream &cout,CurrentUser &argv);

@@ -17,6 +17,11 @@ const std::string &CurrentUser::get_email() const { return email; }
 const std::string &CurrentUser::get_username() const { return username; }
 uint32_t CurrentUser::get_rating() const { return rating; }
 bool CurrentUser::is_null() const { return null; }
+void CurrentUser::set_username(const std::string &new_vl) { username = new_vl; }
+void CurrentUser::set_email(const std::string &new_vl) { email = new_vl; }
+void CurrentUser::set_rating(uint32_t new_vl) { rating = new_vl; }
+void CurrentUser::set_id(uint32_t new_vl) { id = new_vl; }
+void CurrentUser::set_null(bool new_vl) { null = new_vl; }
 void CurrentUser::to_null()
 {
     id = -1;
@@ -32,12 +37,7 @@ std::ostream &operator<<(std::ostream &cout, const CurrentUser &argv)
         cout << "id:" << argv.get_id() << '\n';
         cout << "username:" << argv.get_username() << '\n';
         cout << "email:" << argv.get_email() << '\n';
-        cout << "rating:" << argv.get_rating() << '\n';
+        cout << "rating:" << argv.get_rating();
     }
     return cout;
-}
-
-void CurrentUser::set_username(const std::string &new_value)
-{
-    username = new_value;
 }
