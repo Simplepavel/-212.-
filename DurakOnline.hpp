@@ -3,7 +3,7 @@
 #include "CurrentUser/CurrentUser.hpp"
 #include "BackEnd/Client/Client.hpp"
 #include "RatingSystem/rating.hpp"
-
+#include "Backend/Base64/Base64.hpp"
 #include <string>
 #include <iostream>
 #include <thread>
@@ -55,7 +55,6 @@ private slots:
     void Disconnect();
     void Next();
     void StopFind();
-
 
 public:
     DurakOnline(int argc, char *argv[]);

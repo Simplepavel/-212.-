@@ -1,8 +1,8 @@
-#include <iostream>
-#include <string>
 
+#include "Base64.hpp"
 // кодирование
-char base64Char(unsigned char b) {
+char base64Char(unsigned char b)
+{
   b &= 0x3F;
   if (b < 26)
     return 'A' + b;
@@ -15,7 +15,8 @@ char base64Char(unsigned char b) {
   return '/';
 }
 
-unsigned int base64Encode(char inStr[], int len, char outStr[]) {
+unsigned int base64Encode(char inStr[], int len, char outStr[])
+{
   unsigned int inIndex = 0, outIndex = 0;
   unsigned char a1, a2, a3;
   unsigned char b1, b2, b3, b4;
@@ -25,10 +26,12 @@ unsigned int base64Encode(char inStr[], int len, char outStr[]) {
     a1 = a2 = a3 = 0;
     a1 = inStr[inIndex];
 
-    if (inIndex + 1 < len) {
+    if (inIndex + 1 < len)
+    {
       a2 = inStr[inIndex + 1];
     }
-    if (inIndex + 2 < len) {
+    if (inIndex + 2 < len)
+    {
       a3 = inStr[inIndex + 2];
     }
 
@@ -48,12 +51,18 @@ unsigned int base64Encode(char inStr[], int len, char outStr[]) {
 ////////////////////////////
 
 // декодирование
-unsigned char base64Code(char ch) {
-  if (ch >= '0' && ch <= '9') return (ch - '0') + 52;
-  if (ch >= 'A' && ch <= 'Z') return ch - 'A';
-  if (ch >= 'a' && ch <= 'z') return (ch - 'a') + 26;
-  if (ch == '+') return 62;
-  if (ch == '/') return 63;
+unsigned char base64Code(char ch)
+{
+  if (ch >= '0' && ch <= '9')
+    return (ch - '0') + 52;
+  if (ch >= 'A' && ch <= 'Z')
+    return ch - 'A';
+  if (ch >= 'a' && ch <= 'z')
+    return (ch - 'a') + 26;
+  if (ch == '+')
+    return 62;
+  if (ch == '/')
+    return 63;
   return 64;
 }
 
@@ -74,8 +83,10 @@ bool isBase64(char ch)
   return false;
 }
 
-int base64Decode(const char inStr[], unsigned int Len, unsigned char outStr[]) {
-  if (Len % 4 > 0) throw "Wrong data for decoding";
+int base64Decode(const char inStr[], unsigned int Len, char outStr[])
+{
+  if (Len % 4 > 0)
+    throw "Wrong data for decoding";
 
   unsigned int inIndex = 0, outIndex = 0;
   unsigned char b1, b2, b3, b4;

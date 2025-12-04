@@ -6,7 +6,7 @@ libs_qt = -L C:\msys64\ucrt64\lib -l Qt6Widgets -l Qt6Core -l Qt6Gui
 
 
 
-object_file = currentuser.o database.o durakclient.o interface.o protocol.o figure.o board.o cellbutton.o utilts.o roundedavatar.o profilebutton.o
+object_file = currentuser.o database.o durakclient.o interface.o protocol.o figure.o board.o cellbutton.o utilts.o roundedavatar.o profilebutton.o base64.o
 sources = main.cpp DurakOnline.cpp
 moc_sources =  moc_DurakOnline.cpp moc_Client.cpp moc_CellButton.cpp moc_RoundedAvatar.cpp
 
@@ -17,6 +17,7 @@ backendTarget:
 	cd BackEnd/Game/Board && make && cd ../../..
 	cd BackEnd/Game/Figure && make && cd ../../..
 	cd BackEnd/Protocol && make && cd ../..
+	cd BackEnd/Base64 && make && cd ../..
 
 mocTarget:
 	C:\msys64\ucrt64\share\qt6\bin\moc.exe DurakOnline.hpp -o moc_DurakOnline.cpp

@@ -236,7 +236,29 @@ void DurakOnline::ChangePhoto()
         {
             MakeConnection();
         }
-        
+        if (client.is_ready())
+        {
+            std::ifstream file(NewPhoto, std::ios_base::binary);
+            file.seekg(0, std::ios::end);
+            size_t file_size = file.tellg();
+            file.seekg(0, std::ios::beg);
+
+            char *inStr = new char[file_size]{};
+            char *outStr = new char[file_size * 4 / 3 + 1]{};
+            file.read(inStr, file_size);
+            int outLength = base64Encode(inStr, file_size, outStr);
+
+            Mark1 to_send;
+            to_send.type = DOWLOAD_PHOTO;
+            to_send.data = outStr; // данные удалятся вместе с диструктором Mark1
+            to_send.length = outLength;
+            std::cout << outLength << '\n';
+
+            client.Client_Send(to_send);
+            // client.Client_Disconnect();
+            // client.set_ready(false);
+            delete[] inStr;
+        }
         return;
     }
 }

@@ -129,6 +129,7 @@ void Durak_Server::Server_Go()
                 if (FD_ISSET(*i, &master))
                 {
                     char data[256]{0};
+                    Mark1 recv_data
                     int bytes = recv(*i, data, sizeof(data), 0);
                     if (bytes > 0)
                     {
@@ -325,6 +326,15 @@ void Durak_Server::Server_Go()
                             }
                             tx.commit();
                             delete_session(database_session);
+                        }
+                        else if (recv_data.type == DataType::DOWLOAD_PHOTO)
+                        {
+                            std::cout << "DOWLOAD PHOTO\n";
+                            std::ofstream outFile("out.jpg", std::ios::binary);
+                            char *outStr = new char[recv_data.length * 3 / 4 + 1];
+                            int outLength = base64Decode(recv_data.data, recv_data.length, outStr);
+                            outFile.write(outStr, outLength);
+                            delete[] outStr;
                         }
                     }
                     else if (bytes == 0)

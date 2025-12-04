@@ -1,6 +1,6 @@
 #include "Protocol.hpp"
 
-Mark1::Mark1() : type(DataType::NONE), length(0), data(nullptr)
+Mark1::Mark1() : type(DataType::NONE), length(-1), data(nullptr)
 {
 }
 
@@ -26,7 +26,6 @@ Mark1 &Mark1::operator=(const Mark1 &argv)
 
 Mark1::Mark1(Mark1 &&argv)
 {
-    std::cout << "Move copy constructor\n";
     type = argv.type;
     length = argv.length;
     data = argv.data;
@@ -52,13 +51,13 @@ Mark1::~Mark1()
     delete[] data;
 }
 
-uint32_t Mark1::capacity() const { return length + 5; }
+int32_t Mark1::capacity() const { return length + 5; }
 
 char *Mark1::serialize() const
 {
     char *result = new char[capacity()];
 
-    uint32_t net_length = htonl(length);
+    int32_t net_length = htonl(length);
 
     memcpy(result, &type, 1);           // запоминаем тип данных
     memcpy(result + 1, &net_length, 4); // запоминаем длину данных
@@ -66,16 +65,34 @@ char *Mark1::serialize() const
     return result;
 }
 
+void Mark1::SetDataType(char *buffer)
+{
+    memcpy(&type, buffer, 1);
+}
+
+void Mark1::SetDataLength(char *buffer)
+{
+    int32_t net_length;
+    memcpy(&net_length, buffer + 1, 4);
+    length = ntohl(net_length);
+}
+
+void Mark1::SetData(char *buffer)
+{
+    delete[] data;
+    if (length == -1)
+    {
+        SetDataLength(buffer);
+    }
+    data = new char[length];
+    memcpy(data, buffer + 5, length);
+}
+
 Mark1 Mark1::deserialize(char *buffer)
 {
     Mark1 result;
-    memcpy(&result.type, buffer, 1);
-
-    uint32_t net_length;
-    memcpy(&net_length, buffer + 1, 4);
-    result.length = ntohl(net_length);
-
-    result.data = new char[result.length];
-    memcpy(result.data, buffer + 5, result.length);
+    result.SetDataType(buffer);
+    result.SetDataLength(buffer);
+    result.SetData(buffer);
     return result;
 }

@@ -7,9 +7,11 @@
 #include <iostream>
 #include <mutex>
 #include <chrono>
+#include <fstream>
 #include "../Protocol/Protocol.hpp"
 #include "Session.hpp"
 #include "../../DataBase/database.hpp"
+#include "../Base64/Base64.hpp"
 #define BACKLOG 128
 
 // Убрать все нижние подчеркивания
