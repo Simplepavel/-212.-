@@ -28,8 +28,8 @@ private:
     uint32_t session_id; // по умолчанию равно 0. Это значит что игрок не в игровой сессии
     bool IsMyTurn;
     FigureColor MyColor; // white - белый, black - черный
-    MyPushButton *FirstPosition;
-    MyPushButton *SecondPosition;
+    CellButton *FirstPosition;
+    CellButton *SecondPosition;
     QTimer LeaderBoardUpdateTimer;
     GameStatus Status; // В игре. Ожидает соперника. Просто онлайн
 
@@ -41,8 +41,10 @@ private slots:
     void FindEnemy();
     void play();
     void profile();
+    void EnemyProfile();
     void main();
     void MakeMove();
+    void CheckEnemyProfile();
     void UpdateLeaderBoard();
     void ChangeUserName();
     void ChangePhoto();

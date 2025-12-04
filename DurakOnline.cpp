@@ -6,6 +6,11 @@ char SERVER_PORT[] = "6666";
 DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr), board(nullptr)
 {
     LeaderBoardUpdateTimer.setInterval(std::chrono::seconds(60));
+    std::vector<ProfileButton *> NewBttns = window.FillLeaderBoard();
+    for (auto i = NewBttns.begin(); i != NewBttns.end(); ++i)
+    {
+        QObject::connect(*i, &ProfileButton::clicked, this, &DurakOnline::CheckEnemyProfile);
+    }
     UpdateLeaderBoard();
     LeaderBoardUpdateTimer.start();
 }
@@ -155,10 +160,14 @@ void DurakOnline::logout()
 void DurakOnline::profile()
 {
     // пользователь не видит свой же статус и приглашение на игру
-    window.get_profile_Status().hide();
-    window.get_profile_Invite().hide();
     window.InsertMessage(PROFILE);
+    std::cout << "Call Profile\n";
     window.profile();
+}
+
+void DurakOnline::EnemyProfile()
+{
+    window.EnemyProfile();
 }
 
 void DurakOnline::FindEnemy()
@@ -251,6 +260,7 @@ void DurakOnline::connect()
     QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
     QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
     QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
+    QObject::connect(&window.get_profile_EnemyBackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
     QObject::connect(&window.get_profile_ChangeUnBttn(), &QPushButton::clicked, this, &DurakOnline::ChangeUserName);
     QObject::connect(&window.get_profile_ChangePhoto(), &QPushButton::clicked, this, &DurakOnline::ChangePhoto);
     QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
@@ -282,10 +292,10 @@ void DurakOnline::play() // Соперник уже найден
 
         delete board;
         board = new Board(MyColor);
-        std::vector<MyPushButton *> NewBttns = window.FillBoard(); // сюда передадим ссылку на Board
+        std::vector<CellButton *> NewBttns = window.FillBoard(); // сюда передадим ссылку на Board
         for (auto i = NewBttns.begin(); i != NewBttns.end(); ++i)
         {
-            QObject::connect(*i, &MyPushButton::clicked, this, &DurakOnline::MakeMove);
+            QObject::connect(*i, &CellButton::clicked, this, &DurakOnline::MakeMove);
         }
         window.UpdateBoard(*board, MyColor);
         window.play(); // передать указатель на Board
@@ -338,7 +348,7 @@ void DurakOnline::MakeMove()
     {
         if (FirstPosition == nullptr)
         {
-            FirstPosition = static_cast<MyPushButton *>(sender()); // просто клетка
+            FirstPosition = static_cast<CellButton *>(sender()); // просто клетка
             if (!FirstPosition->get_figure()->is_valid())
             {
                 FirstPosition = nullptr;
@@ -352,7 +362,7 @@ void DurakOnline::MakeMove()
         }
         else // Первая клетка получена
         {
-            SecondPosition = static_cast<MyPushButton *>(sender());
+            SecondPosition = static_cast<CellButton *>(sender());
             int current_row = FirstPosition->get_row();
             int current_column = FirstPosition->get_column();
 
@@ -404,6 +414,22 @@ void DurakOnline::MakeMove()
     }
 }
 
+void DurakOnline::CheckEnemyProfile()
+{
+    ProfileButton *bttn = static_cast<ProfileButton *>(sender());
+
+    pqxx::connection *session = make_session();
+    pqxx::work tx(*session);
+    pqxx::result response = tx.exec("select username, rating from users where id = $1", pqxx::params{bttn->get_id()});
+    pqxx::row enemy = response[0];
+    // Поменяли значения по доступу из window
+    QString EnemyName = QString::fromStdString(enemy[0].as<std::string>());
+    QString EnemyRating = QString::fromStdString(enemy[1].as<std::string>());
+    window.get_profile_EnemyName().setText(EnemyName);
+    window.get_profile_EnemyRank().setText(EnemyRating);
+    window.EnemyProfile();
+}
+
 void DurakOnline::Disconnect()
 {
     uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
@@ -444,11 +470,11 @@ void DurakOnline::UpdateLeaderBoard()
 {
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
-    pqxx::result response = tx.exec("select username, rating from users order by rating desc limit 50");
+    pqxx::result response = tx.exec("select username, id, rating from users order by rating desc limit 50");
     int idx = 0;
     for (auto i = response.begin(); i != response.end(); ++i)
     {
-        window.UpdateLeaderBoard(i[0].as<std::string>(), i[1].as<std::string>(), idx++);
+        window.UpdateLeaderBoard(i[0].as<std::string>(), i[1].as<uint32_t>(), i[2].as<std::string>(), idx++);
     }
 }
 

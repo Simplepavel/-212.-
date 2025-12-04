@@ -24,7 +24,8 @@
 #include <QScrollArea>
 
 #include "../BackEnd/Game/Board/Board.hpp"
-#include "MyPushButton/MyPushButton.hpp"
+#include "CellButton/CellButton.hpp"
+#include "ProfileButton/ProfileButton.hpp"
 #include "RoundedAvatar/RoundedAvatar.hpp"
 #include "Utilts.hpp"
 
@@ -129,11 +130,27 @@ private:
 
     QPushButton *profile_ChangePhoto;
     QLabel *profile_Rank;
-    QLabel *profile_Status;
     QPushButton *profile_BackBttn;
+    // Профиль
+
+    // Профиль соперника
+    QWidget *ProfileEnemyWidget;
+    QHBoxLayout *ProfileEnemyLayout;
+
+    QPushButton *profile_EnemyBackBttn;
+
+    QWidget *profile_EnemyInfoWidget;
+    QVBoxLayout *profile_EnemyInfoLayout;
+
+    RoundedAvatar *profile_EnemyAvatar;
+    QLabel *profile_EnemyName;
+
+    QLabel *profile_EnemyRank;
+    QLabel *profile_Status;
 
     QPushButton *profile_Invite;
-    // Профиль
+
+    // Профиль соперника
 
 private slots:
     void UpdateWaitLabel();
@@ -147,6 +164,7 @@ public:
     void play();
     void wait();
     void profile();
+    void EnemyProfile();
     void InsertMessage(Owners, bool DeleteOld = true); // Вставка предупрждений
     void AddStateMessage(const Message &);
 
@@ -168,21 +186,18 @@ public:
     // Константный доступ к элементам форма входа
 
     // Константный доступ к элементам формы главного окна
-    // const QLineEdit& get_main_SearchRoom(){return *main_SearchRoom;}
-    // const QPushButton& get_main_FindRoomBttn(){return *main_FindRoomBttn;}
-    // const QPushButton& get_main_CreateRoomBttn(){return *main_CreateRoomBttn;}
     const QPushButton &get_main_LogoutBttn() { return *main_LogoutBttn; }
     const QPushButton &get_main_PlayBttn() { return *main_PlayBttn; }
     const QPushButton &get_main_MyProfile() { return *main_MyProfile; }
-    void FillLeaderBoard(); // заполнение доски лидеров шаблонами для вставки
+    std::vector<ProfileButton *> FillLeaderBoard(); // заполнение доски лидеров шаблонами для вставки
     QVBoxLayout &get_main_LeaderBoardLayout() { return *main_LeaderBoardLayout; }
-    void UpdateLeaderBoard(const std::string &username, const std::string &rating, int idx);
+    void UpdateLeaderBoard(const std::string &username, uint32_t, const std::string &rating, int idx);
     // Константный доступ к элементам формы главного окна
 
     // Метод относящиеся к игровому полю
     void UpdateBoard(Board &NewBoard, FigureColor MyColor);
     QLabel &get_play_EnemyName() { return *play_EnemyName; }
-    std::vector<MyPushButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
+    std::vector<CellButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
     const QPushButton &get_play_StopBttn() { return *play_StopBttn; };
     const QPushButton &get_play_NextBttn() { return *play_NextBttn; };
     // Метод отсносящиеся к игровому полю
@@ -190,13 +205,19 @@ public:
     // Методы относящиеся к профилю
     const QPushButton &get_profile_BackBttn() { return *profile_BackBttn; }
     QLabel &get_profile_Username() { return *profile_Username; }
-    QLabel &get_profile_Status() { return *profile_Status; }
     QLabel &get_profile_Rank() { return *profile_Rank; }
-    QPushButton &get_profile_Invite() { return *profile_Invite; }
     QPushButton &get_profile_ChangeUnBttn() { return *profile_ChangeUsernameBttn; }
     QPushButton &get_profile_ChangePhoto() { return *profile_ChangePhoto; }
-    RoundedAvatar &get_profile_RoundedAvatar() { return *profile_Avatar; }
+    // RoundedAvatar &get_profile_RoundedAvatar() { return *profile_Avatar; }
     // Методы относящиеся к профилю
+
+    // Методы относящиеся к профилю соперника
+    const QPushButton &get_profile_EnemyBackBttn() { return *profile_EnemyBackBttn; }
+    const QPushButton &get_profile_Invite() { return *profile_Invite; }
+    QLabel &get_profile_EnemyName() { return *profile_EnemyName; }
+    QLabel &get_profile_EnemyRank() { return *profile_EnemyRank; }
+    QLabel &get_profile_Status() { return *profile_Status; }
+    // Методы относящиеся к профилю соперника
 
     //  Методы относящиеся к полю ожидания
     QTimer &get_wait_Timer() { return *wait_Timer; }

@@ -221,13 +221,6 @@ Window::Window(QWidget *parent)
 
     profile_Avatar = new RoundedAvatar(screen_Height * 0.3, screen_Height * 0.3);
 
-    // QPalette p;
-    // profile_Avatar->setAutoFillBackground(true);
-    // p.setColor(QPalette::Window, Qt::red);
-    // profile_Avatar->setPalette(p);
-    // profile_Avatar->update();
-    // profile_Avatar->repaint();
-
     profile_UsernameLayout = new QHBoxLayout;
     profile_ChangeUsernameBttn = new QPushButton("...");
     profile_ChangeUsernameBttn->setFixedSize(30, 30);
@@ -235,7 +228,6 @@ Window::Window(QWidget *parent)
     profile_Username->setMaximumWidth(0.3 * screen_Height);
 
     profile_Username->setFont(QFont("Calibri", BIGGEST));
-    // profile_Username->setAlignment(Qt::AlignRight);
 
     profile_UsernameLayout->addWidget(profile_Username);
     profile_UsernameLayout->addWidget(profile_ChangeUsernameBttn);
@@ -250,6 +242,44 @@ Window::Window(QWidget *parent)
     profile_Rank->setPalette(rank_palette);
     profile_Rank->setAlignment(Qt::AlignCenter);
 
+    profile_UserInfoLayout->setSpacing(5);
+    profile_UserInfoLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
+
+    profile_UserInfoLayout->addWidget(profile_Avatar);
+    profile_UserInfoLayout->addWidget(profile_ChangePhoto, 0, Qt::AlignHCenter);
+    profile_UserInfoLayout->addLayout(profile_UsernameLayout);
+    profile_UserInfoLayout->addWidget(profile_Rank);
+
+    profile_Layout->addWidget(profile_BackBttn, Qt::AlignTop);
+    profile_Layout->addWidget(profile_UserInfoWidget);
+
+    // Профиль
+
+    // Профиль соперника
+
+    ProfileEnemyWidget = new QWidget(this);
+    ProfileEnemyLayout = new QHBoxLayout(ProfileEnemyWidget);
+
+    profile_EnemyBackBttn = new QPushButton("<"); // сделал 2, т.к один виджет - один родитель
+    profile_EnemyBackBttn->setFixedWidth(30);
+    profile_EnemyBackBttn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+
+    profile_EnemyInfoWidget = new QWidget(ProfileEnemyWidget);
+    profile_EnemyInfoLayout = new QVBoxLayout(profile_EnemyInfoWidget);
+
+    profile_EnemyAvatar = new RoundedAvatar(screen_Height * 0.3, screen_Height * 0.3);
+
+    profile_EnemyName = new QLabel("EnemyName");
+    profile_EnemyName->setMaximumWidth(0.3 * screen_Height);
+    profile_EnemyName->setFont(QFont("Calibri", BIGGEST));
+    profile_EnemyName->setAlignment(Qt::AlignCenter);
+
+    profile_EnemyRank = new QLabel("BigBoss");
+    profile_EnemyRank->setFont(QFont("Calibri", BIG, 4));
+
+    profile_EnemyRank->setPalette(rank_palette);
+    profile_EnemyRank->setAlignment(Qt::AlignCenter);
+
     profile_Status = new QLabel("online");
     profile_Status->setAlignment(Qt::AlignCenter);
     profile_Status->setFont(QFont("Calibri", SMALLEST));
@@ -258,22 +288,21 @@ Window::Window(QWidget *parent)
     status_palette.setColor(QPalette::WindowText, QColor(0, 255, 0));
     profile_Status->setPalette(status_palette);
 
-    profile_Invite = new QPushButton("Invite to game");
+    profile_Invite = new QPushButton("Invite to the game");
 
-    profile_UserInfoLayout->setSpacing(5);
-    profile_UserInfoLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
+    profile_EnemyInfoLayout->setSpacing(5);
+    profile_EnemyInfoLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
-    profile_UserInfoLayout->addWidget(profile_Avatar);
-    profile_UserInfoLayout->addWidget(profile_Status);
-    profile_UserInfoLayout->addWidget(profile_ChangePhoto, 0, Qt::AlignHCenter);
-    profile_UserInfoLayout->addLayout(profile_UsernameLayout);
-    profile_UserInfoLayout->addWidget(profile_Rank);
-    profile_UserInfoLayout->addWidget(profile_Invite);
+    profile_EnemyInfoLayout->addWidget(profile_EnemyAvatar);
+    profile_EnemyInfoLayout->addWidget(profile_Status);
+    profile_EnemyInfoLayout->addWidget(profile_EnemyName);
+    profile_EnemyInfoLayout->addWidget(profile_EnemyRank);
+    profile_EnemyInfoLayout->addWidget(profile_Invite);
 
-    profile_Layout->addWidget(profile_BackBttn, Qt::AlignTop);
-    profile_Layout->addWidget(profile_UserInfoWidget);
+    ProfileEnemyLayout->addWidget(profile_EnemyBackBttn, Qt::AlignTop);
+    ProfileEnemyLayout->addWidget(profile_EnemyInfoWidget);
 
-    // Профиль
+    // Профиль соперника
 
     listOfLayout->addWidget(login_Widget);
     listOfLayout->addWidget(main_Widget);
@@ -281,13 +310,13 @@ Window::Window(QWidget *parent)
     listOfLayout->addWidget(play_Widget);
     listOfLayout->addWidget(wait_Widget);
     listOfLayout->addWidget(profile_Widget);
+    listOfLayout->addWidget(ProfileEnemyWidget);
     listOfLayout->setAlignment(Qt::AlignCenter);
 
     // Загрузка изображений
-    MyPushButton::LoadChessImages(cell_Size);
+    CellButton::LoadChessImages(cell_Size);
 
     // Загрука LeaderBoard
-    FillLeaderBoard();
 }
 
 void Window::login()
@@ -327,6 +356,11 @@ void Window::wait()
 void Window::profile()
 {
     listOfLayout->setCurrentWidget(profile_Widget);
+}
+
+void Window::EnemyProfile()
+{
+    listOfLayout->setCurrentWidget(ProfileEnemyWidget);
 }
 
 void Window::InsertMessage(Owners own, bool DeleteOld)
@@ -426,7 +460,7 @@ void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполни
             int position = i * 8 + j;
             QLayoutItem *OldBttn = play_BoardLayot->itemAtPosition(i, j);
             QWidget *old = OldBttn->widget();
-            MyPushButton *current_bttn = static_cast<MyPushButton *>(old);
+            CellButton *current_bttn = static_cast<CellButton *>(old);
             current_bttn->SetFigure(&NewBoard[position]);
             current_bttn->repaint();
             current_bttn->update();
@@ -444,9 +478,9 @@ void Window::connect()
     // QObject::connect(main_PlayBttn, &QPushButton::clicked, this, play);
 }
 
-std::vector<MyPushButton *> Window::FillBoard()
+std::vector<CellButton *> Window::FillBoard()
 {
-    std::vector<MyPushButton *> NewBttns;
+    std::vector<CellButton *> NewBttns;
     NewBttns.reserve(64);
     for (int i = 0; i < 8; ++i)
     {
@@ -458,7 +492,7 @@ std::vector<MyPushButton *> Window::FillBoard()
                 play_BoardLayot->removeWidget(old_widget);
                 delete old_widget;
             }
-            MyPushButton *new_bttn = new MyPushButton(i, j);
+            CellButton *new_bttn = new CellButton(i, j);
             NewBttns.push_back(new_bttn);
             new_bttn->setFixedSize(cell_Size, cell_Size);
             play_BoardLayot->addWidget(new_bttn, i, j, Qt::AlignCenter);
@@ -490,12 +524,14 @@ void Window::UpdateWaitLabel()
 }
 // Private slots
 
-void Window::FillLeaderBoard()
+std::vector<ProfileButton *> Window::FillLeaderBoard()
 {
+    std::vector<ProfileButton *> ProfileBttns;
+    ProfileBttns.reserve(50);
     for (int i = 0; i < 50; ++i)
     {
         QHBoxLayout *box = new QHBoxLayout;
-        QPushButton *profile = new QPushButton("profile");
+        ProfileButton *profile = new ProfileButton("profile");
         QLabel *name = new QLabel;
         profile->hide();
         name->hide();
@@ -503,19 +539,22 @@ void Window::FillLeaderBoard()
         box->addStretch(1);
         box->addWidget(profile, 1, Qt::AlignRight);
         main_LeaderBoardLayout->addLayout(box);
+        ProfileBttns.push_back(profile);
     }
+    return ProfileBttns;
 }
 
-void Window::UpdateLeaderBoard(const std::string &username, const std::string &rating, int idx)
+void Window::UpdateLeaderBoard(const std::string &username, uint32_t user_id, const std::string &rating, int idx)
 {
     QLayoutItem *item = main_LeaderBoardLayout->itemAt(idx + 2);
     QHBoxLayout *box = static_cast<QHBoxLayout *>(item->layout());
 
     QLabel *UsernameLabel = static_cast<QLabel *>(box->itemAt(0)->widget());
-    QPushButton *ProfileButton = static_cast<QPushButton *>(box->itemAt(2)->widget());
+    ProfileButton *CheckProfileButton = static_cast<ProfileButton *>(box->itemAt(2)->widget());
 
     UsernameLabel->show();
-    ProfileButton->show();
+    CheckProfileButton->show();
+    CheckProfileButton->set_id(user_id); // На профиль какого игрока ссылка
     std::string result = username + "-" + rating;
     UsernameLabel->setText(QString::fromStdString(result));
 }
@@ -562,8 +601,6 @@ QString Window::GetNewPhoto()
     }
     return "";
 }
-
-
 
 // int Window::DialogWindow(const QString &txt) // сохрнаить заметку а еще удалить заметку и тп?
 // {
