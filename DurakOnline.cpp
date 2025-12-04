@@ -15,6 +15,20 @@ DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0
     LeaderBoardUpdateTimer.start();
 }
 
+void DurakOnline::MakeConnection()
+{
+    if (!client.is_ready())
+    {
+        bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT);
+        if (flag)
+        {
+            client.set_ready(true);
+            std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client)); // ждем команд от сервера
+            listen_thread.detach();
+        }
+    }
+}
+
 void DurakOnline::registration()
 {
 
@@ -161,7 +175,6 @@ void DurakOnline::profile()
 {
     // пользователь не видит свой же статус и приглашение на игру
     window.InsertMessage(PROFILE);
-    std::cout << "Call Profile\n";
     window.profile();
 }
 
@@ -172,16 +185,7 @@ void DurakOnline::EnemyProfile()
 
 void DurakOnline::FindEnemy()
 {
-    if (!client.is_ready())
-    {
-        bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT);
-        if (flag) // удачное подключение, пока только один поток
-        {
-            client.set_ready(true);
-            std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client)); // ждем команд от сервера
-            listen_thread.detach();
-        }
-    }
+    MakeConnection();
     if (client.is_ready())
     {
         Status = LOOKING_FOR;
@@ -228,12 +232,12 @@ void DurakOnline::ChangePhoto()
     std::string NewPhoto = window.GetNewPhoto().toStdString();
     if (NewPhoto != "")
     {
-        bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT); // Подключаемся к серверу
-        if (!flag)
+        if (!client.is_ready())
         {
-            return;
+            MakeConnection();
         }
-        std::ifstream NewImg(NewPhoto, std::ios::binary);
+        
+        return;
     }
 }
 
@@ -257,7 +261,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
     QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
     QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
-    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::play);
+    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::ServerGetData);
     QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
     QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
     QObject::connect(&window.get_profile_EnemyBackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
@@ -266,9 +270,10 @@ void DurakOnline::connect()
     QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
 }
 
-void DurakOnline::play() // Соперник уже найден
+void DurakOnline::ServerGetData() // Сервер отправил информацию
 {
     Mark1 recv_data = Mark1::deserialize(client.GetData());
+
     if (recv_data.type == DataType::START)
     {
         Status = IN_GAME;
@@ -298,7 +303,7 @@ void DurakOnline::play() // Соперник уже найден
             QObject::connect(*i, &CellButton::clicked, this, &DurakOnline::MakeMove);
         }
         window.UpdateBoard(*board, MyColor);
-        window.play(); // передать указатель на Board
+        window.play();
     }
 
     else if (recv_data.type == DataType::MOVE)
@@ -339,6 +344,7 @@ void DurakOnline::play() // Соперник уже найден
         board->replace(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
         window.UpdateBoard(*board, MyColor);
     }
+
     window.InsertMessage(PLAY, false);
 }
 
@@ -432,38 +438,47 @@ void DurakOnline::CheckEnemyProfile()
 
 void DurakOnline::Disconnect()
 {
-    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
-    char *data = new char[4];
-    memcpy(data, &net_session_id, 4);
-    Mark1 to_send;
-    to_send.type = DISCONNECT;
-    to_send.length = 4;
-    to_send.data = data;
-    client.Client_Send(to_send);
+    if (client.is_ready())
+    {
+        uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
+        char *data = new char[4];
+        memcpy(data, &net_session_id, 4);
+        Mark1 to_send;
+        to_send.type = DISCONNECT;
+        to_send.length = 4;
+        to_send.data = data;
+        client.Client_Send(to_send);
+    }
 }
 
 void DurakOnline::Next()
 {
-    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
-    char *data = new char[4];
-    memcpy(data, &net_session_id, 4);
-    Mark1 to_send;
-    to_send.type = DataType::NEXT_ENEMY;
-    to_send.length = 4;
-    to_send.data = data;
-    client.Client_Send(to_send);
+    if (client.is_ready())
+    {
+        uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
+        char *data = new char[4];
+        memcpy(data, &net_session_id, 4);
+        Mark1 to_send;
+        to_send.type = DataType::NEXT_ENEMY;
+        to_send.length = 4;
+        to_send.data = data;
+        client.Client_Send(to_send);
+    }
 }
 
 void DurakOnline::StopFind()
 {
-    uint32_t net_id = htonl(current_user.get_id()); // id сессии чтобы отключиться
-    char *data = new char[4];
-    memcpy(data, &net_id, 4);
-    Mark1 to_send;
-    to_send.type = DataType::STOP_FIND_ENEMY;
-    to_send.length = 4;
-    to_send.data = data;
-    client.Client_Send(to_send);
+    if (client.is_ready())
+    {
+        uint32_t net_id = htonl(current_user.get_id()); // id сессии чтобы отключиться
+        char *data = new char[4];
+        memcpy(data, &net_id, 4);
+        Mark1 to_send;
+        to_send.type = DataType::STOP_FIND_ENEMY;
+        to_send.length = 4;
+        to_send.data = data;
+        client.Client_Send(to_send);
+    }
 }
 
 void DurakOnline::UpdateLeaderBoard()

@@ -39,10 +39,11 @@ private slots:
     void login();
     void logout();
     void FindEnemy();
-    void play();
+    void ServerGetData();
     void profile();
     void EnemyProfile();
     void main();
+    void MakeConnection();
     void MakeMove();
     void CheckEnemyProfile();
     void UpdateLeaderBoard();
@@ -54,6 +55,7 @@ private slots:
     void Disconnect();
     void Next();
     void StopFind();
+
 
 public:
     DurakOnline(int argc, char *argv[]);
