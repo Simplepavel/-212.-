@@ -417,5 +417,26 @@ void DurakOnline::UpdateLeaderBoard()
 }
 
 void DurakOnline::update_user_status(UserStatus status){
-    
+        uint32_t user_id = current_user.get_id(); 
+    if (user_id == 0){
+         return; 
+    }
+    pqxx::connection *cx = make_session();
+    if (cx == nullptr)
+    {
+        std::cerr << "Error: Could not connect to database for status update.\n";
+        return;
+    }
+    try
+    {
+        pqxx::work tx{*cx};
+        std::string sql_query = "UPDATE users SET status = $1 WHERE id = $2";
+        tx.exec(sql_query, pqxx::params{(int)status, user_id});
+        tx.commit();
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Database Error in update_user_status: " << e.what() << '\n';
+    }
+    delete_session(cx);
 }
