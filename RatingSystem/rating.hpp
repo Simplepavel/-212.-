@@ -11,6 +11,7 @@ private:
 
 public:
      Stats() : wins(0), losses(0), draws(0), games(0) {}
+     Stats(int w, int l, int d, int g) : wins(w), losses(l), draws(d), games(g) {} //для загрузки из БД
      void recordWin()
      {
           wins++;
@@ -52,6 +53,7 @@ private:
 
 public:
      Rating(int initial = 1200) : rating(initial) {}
+     Rating(int r, int w, int l, int d, int g) : rating(r), stats(w, l, d, g) {} //для загрузки из БД
      int getRating() const
      {
           return rating;
