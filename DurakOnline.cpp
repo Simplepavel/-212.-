@@ -133,6 +133,9 @@ void DurakOnline::login()
         std::cout << "4\n";
         window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
         std::cout << "5\n";
+
+        update_user_status(UserStatus::online);//обновление статуса
+
         window.main();
         std::cout << "6\n";
     }
@@ -145,6 +148,8 @@ void DurakOnline::login()
 
 void DurakOnline::logout()
 {
+    update_user_status(UserStatus::offline);//обновление статуса
+
     current_user.to_null();
     window.login();
 }
@@ -156,6 +161,8 @@ void DurakOnline::profile()
 
 void DurakOnline::FindEnemy()
 {
+    update_user_status(UserStatus::looking_for_match);//обновление статуса
+
     if (!client.is_ready())
     {
         bool flag = client.Client_Connect(SERVER_IP, SERVER_PORT);
@@ -164,6 +171,11 @@ void DurakOnline::FindEnemy()
             client.set_ready(true);
             std::thread listen_thread(&Durak_Client::Client_Listen, std::ref(client)); // ждем команд от сервера
             listen_thread.detach();
+        }
+        else
+        {
+            update_user_status(UserStatus::online); 
+            return;
         }
     }
     if (client.is_ready())
@@ -226,6 +238,8 @@ void DurakOnline::play() // Соперник уже найден
 
         window.get_play_EnemyName().setText(QString::fromStdString(opp_name));
 
+        update_user_status(UserStatus::in_match);//обновление статуса
+
         delete board;
         board = new Board(MyColor);
         std::vector<MyPushButton *> NewBttns = window.FillBoard(); // сюда передадим ссылку на Board
@@ -256,7 +270,9 @@ void DurakOnline::play() // Соперник уже найден
         IsMyTurn = true;
     }
     else if (recv_data.type == DataType::LEAVE_ENEMY) // Соперник покинул игру. Текущий игрок снова добавляется в очередь!!!!
-    {
+    {   
+        update_user_status(UserStatus::online);//обновление статуса
+
         window.wait();
         window.get_wait_Timer().start();
     }
@@ -272,6 +288,8 @@ void DurakOnline::play() // Соперник уже найден
         const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
         board->replace(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
         window.UpdateBoard(*board, MyColor);
+
+        update_user_status(UserStatus::online);//обновление статуса
     }
     window.InsertMessage(PLAY, false);
 }
@@ -358,6 +376,7 @@ void DurakOnline::Disconnect()
     to_send.length = 4;
     to_send.data = data;
     client.Client_Send(to_send);
+    update_user_status(UserStatus::online);//обновление статуса
 }
 
 void DurakOnline::Next()
@@ -382,6 +401,7 @@ void DurakOnline::StopFind()
     to_send.length = 4;
     to_send.data = data;
     client.Client_Send(to_send);
+    update_user_status(UserStatus::online);//обновление статуса
 }
 
 void DurakOnline::UpdateLeaderBoard()
@@ -394,4 +414,8 @@ void DurakOnline::UpdateLeaderBoard()
     {
         window.UpdateLeaderBoard(i[0].as<std::string>(), i[1].as<std::string>(), idx++);
     }
+}
+
+void DurakOnline::update_user_status(UserStatus status){
+    
 }

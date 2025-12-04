@@ -10,9 +10,9 @@
 enum UserStatus : uint8_t
 {
     online = 0,       // просто в сети(зеленым цветом)
-    offline,          // не в сети(серым цветом)
-    in_match,         // играет(желтым)
-    looking_for_match // поиск соперника(желтым)
+    offline = 1,          // не в сети(серым цветом)
+    in_match = 2,         // играет(желтым)
+    looking_for_match = 3 // поиск соперника(желтым)
 };
 
 class DurakOnline : public QObject
@@ -34,6 +34,8 @@ private:
     QTimer LeaderBoardUpdateTimer;
 
     void connect();
+
+    void update_user_status(UserStatus status); // обновление статуса пользователя на сервере
 private slots:
     void registration();
     void login();
