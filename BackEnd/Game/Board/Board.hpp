@@ -3,7 +3,8 @@
 #include "../Figure/Figure.hpp"
 
 // #define DEBUG
-#define PRODUCATION
+#define TEST
+// #define PRODUCATION
 
 class Board
 {

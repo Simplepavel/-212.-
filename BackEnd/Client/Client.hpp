@@ -12,7 +12,7 @@ private:
     SOCKET client_socket;
     void print(sockaddr *);
     bool ready; // Слушаем ли сервер
-    char buffer[256]{};
+    char *buffer = nullptr;
 signals:
     void ServerSentData();
 

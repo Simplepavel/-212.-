@@ -473,8 +473,7 @@ bool Board::isCheckmate(int current_row, int current_column, int last_row,
 #ifdef TEST
   bool alfa = (rand() % 2 == 0);  // Имитация Мата
   return alfa;
-#endif
-#ifdef DEBUG
+#else
   Board tmpBoard = *this;
   {
     tmpBoard.replace(current_row, current_column, last_row, last_column);

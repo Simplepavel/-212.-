@@ -128,9 +128,16 @@ void Durak_Server::Server_Go()
             {
                 if (FD_ISSET(*i, &master))
                 {
-                    char data[256]{0};
-                    Mark1 recv_data
-                    int bytes = recv(*i, data, sizeof(data), 0);
+                    char NetCapacityBytes[4]{0};
+                    uint32_t NetCapacity;
+                    recv(*i, NetCapacityBytes, 4, 0);
+
+                    memcpy(&NetCapacity, NetCapacityBytes, 4);
+                    uint32_t Capacity = ntohl(NetCapacity);
+
+                    char data[Capacity]{0};
+                    int bytes = recv(*i, data, Capacity, 0);
+
                     if (bytes > 0)
                     {
                         Mark1 recv_data = Mark1::deserialize(data);
@@ -385,7 +392,7 @@ void Durak_Server::Server_Go()
 int Durak_Server::Server_Send(const Mark1 &data, int fd)
 {
     char *mark1_serialize = data.serialize();
-    int result = send(fd, mark1_serialize, data.capacity(), 0);
+    int result = send(fd, mark1_serialize, data.fullsize(), 0);
     delete[] mark1_serialize;
     return result;
 }
@@ -401,13 +408,37 @@ void Durak_Server::Make_Session(Player &pl1, Player &pl2)
     bool Player1White = rand() % 2 == 0;
     Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
 
-    uint32_t alfa;
-    char *ToPlayer1Serialize = ToPlayer1.serialize();
 
     bool Player2White = !Player1White;
     Mark1 ToPlayer2 = MakeStartPacket(tx, pl1, new_session->id, Player2White);
 
-    Server_Send(ToPlayer1, pl1.fd);
+    // // Отступление
+
+    // char *mark1_serialize = ToPlayer2.serialize();
+
+    // Mark1 recv_data = Mark1::deserialize(mark1_serialize + 4);
+
+    // std::cout << (recv_data.type == DataType::START ? "START" : "NONE") << '\n';
+    // std::cout << "Data Length: " << recv_data.length << '\n';
+
+    // uint32_t net_session_id;
+
+    // memcpy(&net_session_id, recv_data.data, 4);
+    // uint32_t session_id = ntohl(net_session_id);
+    // std::cout << "Session id: " << session_id << '\n';
+
+    // bool IsMyTurn;
+    // memcpy(&IsMyTurn, recv_data.data + 4, 1);
+    // FigureColor MyColor = IsMyTurn ? FigureColor::WHITE : FigureColor::BLACK;
+    // std::cout << ((MyColor == BLACK) ? "BLACK" : "WHITE") << '\n';
+
+    // std::string opp_name;
+    // opp_name.resize(recv_data.length - 5);
+    // memcpy(&opp_name[0], recv_data.data + 5, recv_data.length - 5);
+    // std::cout << "OPP NAME: " << opp_name << '\n';
+    // Отступление
+
+    Server_Send(ToPlayer1, pl1.fd); 
     Server_Send(ToPlayer2, pl2.fd);
 }
 
@@ -433,7 +464,9 @@ Mark1 Durak_Server::MakeStartPacket(pqxx::work &tx, const Player &pl, uint32_t s
     Mark1 to_send;
     pqxx::result username = tx.exec("select username from users where id=$1", pqxx::params{pl.id});
     std::string username_value = username[0][0].as<std::string>();
+
     uint32_t net_session_id = htonl(session_id); // 4 байта
+
     char *data = new char[username_value.size() + 5];
 
     memcpy(data, &net_session_id, 4);

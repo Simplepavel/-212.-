@@ -21,18 +21,12 @@ struct Mark1
 {
     DataType type;   // тип данных
     char *data;      // данные
-    int32_t length; // длина данных
+    uint32_t length; // длина полезных данных
 
     char *serialize() const;
-    int32_t capacity() const;
+    uint32_t capacity() const;
+    uint32_t fullsize() const;
     static Mark1 deserialize(char *buffer);
-    
-    
-    
-    void SetDataType(char *buffer);
-    void SetDataLength(char *buffer);
-    void SetData(char *buffer);
-
 
     Mark1();
     Mark1(const Mark1 &);

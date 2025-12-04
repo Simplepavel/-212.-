@@ -138,7 +138,7 @@ void DurakOnline::login()
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
 
-    pqxx::result r = tx.exec("select id, username, email, rating, picture from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
+    pqxx::result r = tx.exec("select id, username, email, rating from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
 
     if (!r.empty())
     {
@@ -398,7 +398,6 @@ void DurakOnline::MakeMove()
             int last_column = SecondPosition->get_column();
 
             bool ans = board->move(current_row, current_column, last_row, last_column);
-            std::cout << "Move: " << ans << '\n';
             if (ans) // вызывать метод move у доски. Вставить в MOVE изменения LastMove
             {
                 Mark1 to_send;

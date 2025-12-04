@@ -26,7 +26,7 @@ bool Durak_Client::Client_Connect(char *IP, char *PORT)
         }
         if (::connect(client_socket, iter->ai_addr, iter->ai_addrlen) != 0)
         {
-            ::closesocket(client_socket);
+            closesocket(client_socket);
             continue;
         }
         break;
@@ -34,7 +34,7 @@ bool Durak_Client::Client_Connect(char *IP, char *PORT)
     if (iter == nullptr)
     {
         std::cout << "Cannot connect to " << IP << ':' << PORT << '\n';
-        ::freeaddrinfo(result);
+        freeaddrinfo(result);
         return false;
     }
     std::cout << "Succesful connect with ";
@@ -46,7 +46,7 @@ bool Durak_Client::Client_Connect(char *IP, char *PORT)
 
 bool Durak_Client::Client_Disconnect()
 {
-    ::shutdown(client_socket, SD_SEND);
+    shutdown(client_socket, SD_SEND);
     char empty_buffer[4096]{0};
     int recived_bytes = 0;
     do
@@ -76,7 +76,7 @@ void Durak_Client::print(sockaddr *addr)
 int Durak_Client::Client_Send(const Mark1 &data)
 {
     char *mark1_serialize = data.serialize();
-    int result = ::send(client_socket, mark1_serialize, data.capacity(), 0);
+    int result = send(client_socket, mark1_serialize, data.fullsize(), 0);
     delete[] mark1_serialize;
     return result;
 }
@@ -85,10 +85,22 @@ void Durak_Client::Client_Listen()
 {
     while (ready)
     {
-        int bytes = ::recv(client_socket, buffer, sizeof(buffer), 0);
-        if (bytes > 0)
+        char NetCapacityBytes[4]{0};
+        uint32_t NetCapacity;
+        recv(client_socket, NetCapacityBytes, 4, 0);
+
+        memcpy(&NetCapacity, NetCapacityBytes, 4);
+
+        uint32_t Capacity = ntohl(NetCapacity);
+        if (Capacity > 0)
         {
-            emit ServerSentData();
+            buffer = new char[Capacity]{0};
+            int bytes = recv(client_socket, buffer, Capacity, 0);
+            if (bytes > 0)
+            {
+                emit ServerSentData();
+            }
+            delete[] buffer;
         }
     }
 }
