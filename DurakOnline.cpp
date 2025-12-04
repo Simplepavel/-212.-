@@ -219,7 +219,6 @@ void DurakOnline::ChangeUserName()
     {
         tx.exec("update users set username = $1 where id = $2", pqxx::params{NewName, current_user.get_id()});
         current_user.set_username(NewName);
-        // Не вижу смысла каждый раз при загрузке профиля обновлять имя соглано current_user
         window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
         tx.commit();
     }
@@ -229,7 +228,7 @@ void DurakOnline::ChangeUserName()
 
 void DurakOnline::ChangePhoto()
 {
-    std::string NewPhoto = window.GetNewPhoto().toStdString();
+    QString NewPhoto = window.GetNewPhoto();
     if (NewPhoto != "")
     {
         if (!client.is_ready())
@@ -238,25 +237,25 @@ void DurakOnline::ChangePhoto()
         }
         if (client.is_ready())
         {
-            std::ifstream file(NewPhoto, std::ios_base::binary);
-            file.seekg(0, std::ios::end);
-            size_t file_size = file.tellg();
-            file.seekg(0, std::ios::beg);
+            QPixmap NewImg(NewPhoto);
+            RoundedAvatar &OldAvatar = window.get_profile_RoundedAvatar();
+            NewImg = CutPixMap(NewImg, OldAvatar.height(), OldAvatar.width());
+            OldAvatar.setPixmap(NewImg);
 
-            char *inStr = new char[file_size]{};
-            char *outStr = new char[file_size * 4 / 3 + 1]{};
-            file.read(inStr, file_size);
-            int outLength = base64Encode(inStr, file_size, outStr);
+            int inSize;
+            char *inStr = pixmapToCharArray(NewImg, inSize);
+            char *outStr = new char[(inSize * 4 / 3) + 5]{};
 
+            uint32_t net_id = htonl(current_user.get_id());
+            memcpy(outStr, &net_id, 4); // записали сверху id
+
+            int outLength = base64Encode(inStr, inSize, outStr + 4);
             Mark1 to_send;
             to_send.type = DOWLOAD_PHOTO;
             to_send.data = outStr; // данные удалятся вместе с диструктором Mark1
-            to_send.length = outLength;
-            std::cout << outLength << '\n';
+            to_send.length = outLength + 4;
 
             client.Client_Send(to_send);
-            // client.Client_Disconnect();
-            // client.set_ready(false);
             delete[] inStr;
         }
         return;

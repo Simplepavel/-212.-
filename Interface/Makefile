@@ -2,9 +2,9 @@ libs = -L C:\msys64\ucrt64\lib  -l Qt6Widgets -l Qt6Core -l Qt6Gui
 includes = -I C:\msys64\ucrt64\include\qt6 -I C:\msys64\ucrt64\include\qt6\QtWidgets \
 			-I C:\msys64\ucrt64\include\qt6\QtCore -I C:\msys64\ucrt64\include\qt6\QtGui
 
-.PHONY: CellButton Utilts ProfileButton
+.PHONY: CellButton Utils ProfileButton
 
-all: CellButton Utilts RoundedAvatar ProfileButton
+all: CellButton Utils RoundedAvatar ProfileButton
 	g++ Window.cpp $(includes) $(libs) -o ../interface.o -c
 
 CellButton:
@@ -16,5 +16,5 @@ ProfileButton:
 RoundedAvatar::
 	g++ RoundedAvatar/RoundedAvatar.cpp $(includes) $(libs) -o ../roundedavatar.o -c
 
-Utilts:
-	g++ Utilts.cpp -o ../utilts.o -c $(includes) $(libs)
+Utils:
+	g++ Utils.cpp -o ../utils.o -c $(includes) $(libs)

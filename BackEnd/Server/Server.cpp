@@ -336,12 +336,33 @@ void Durak_Server::Server_Go()
                         }
                         else if (recv_data.type == DataType::DOWLOAD_PHOTO)
                         {
-                            std::cout << "DOWLOAD PHOTO\n";
-                            std::ofstream outFile("out.jpg", std::ios::binary);
+
+                            uint32_t net_id;
+                            memcpy(&net_id, recv_data.data, 4);
+                            uint32_t user_id = ntohl(net_id);
+                            std::cout << "User id who wanst to update photo " << user_id << '\n';
+                            std::string SavePath = "Static/" + std::to_string(user_id) + ".jpg";
+                            std::cout << "Save to " << SavePath << '\n';
+
+                            std::ofstream outFile(SavePath, std::ios::binary);
                             char *outStr = new char[recv_data.length * 3 / 4 + 1];
-                            int outLength = base64Decode(recv_data.data, recv_data.length, outStr);
+                            int outLength = base64Decode(recv_data.data + 4, recv_data.length - 4, outStr);
                             outFile.write(outStr, outLength);
                             delete[] outStr;
+
+                            // обновляем информацию о пользователе и его фото профиля
+                            pqxx::connection *session = make_session();
+                            pqxx::work tx(*session);
+                            tx.exec("update users set picture = $1 where id = $2", pqxx::params{SavePath, user_id});
+                            tx.commit();
+                            delete_session(session);
+
+                            // отключаем клиента сразу же после успешного сохранения фото
+                            Mark1 to_send;
+                            to_send.type = DataType::SHUTDOWN;
+                            to_send.length = 0;
+                            to_send.data = nullptr;
+                            Server_Send(to_send, *i);
                         }
                     }
                     else if (bytes == 0)
@@ -408,37 +429,10 @@ void Durak_Server::Make_Session(Player &pl1, Player &pl2)
     bool Player1White = rand() % 2 == 0;
     Mark1 ToPlayer1 = MakeStartPacket(tx, pl2, new_session->id, Player1White);
 
-
     bool Player2White = !Player1White;
     Mark1 ToPlayer2 = MakeStartPacket(tx, pl1, new_session->id, Player2White);
 
-    // // Отступление
-
-    // char *mark1_serialize = ToPlayer2.serialize();
-
-    // Mark1 recv_data = Mark1::deserialize(mark1_serialize + 4);
-
-    // std::cout << (recv_data.type == DataType::START ? "START" : "NONE") << '\n';
-    // std::cout << "Data Length: " << recv_data.length << '\n';
-
-    // uint32_t net_session_id;
-
-    // memcpy(&net_session_id, recv_data.data, 4);
-    // uint32_t session_id = ntohl(net_session_id);
-    // std::cout << "Session id: " << session_id << '\n';
-
-    // bool IsMyTurn;
-    // memcpy(&IsMyTurn, recv_data.data + 4, 1);
-    // FigureColor MyColor = IsMyTurn ? FigureColor::WHITE : FigureColor::BLACK;
-    // std::cout << ((MyColor == BLACK) ? "BLACK" : "WHITE") << '\n';
-
-    // std::string opp_name;
-    // opp_name.resize(recv_data.length - 5);
-    // memcpy(&opp_name[0], recv_data.data + 5, recv_data.length - 5);
-    // std::cout << "OPP NAME: " << opp_name << '\n';
-    // Отступление
-
-    Server_Send(ToPlayer1, pl1.fd); 
+    Server_Send(ToPlayer1, pl1.fd);
     Server_Send(ToPlayer2, pl2.fd);
 }
 

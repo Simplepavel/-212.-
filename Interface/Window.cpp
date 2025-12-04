@@ -451,6 +451,7 @@ void Window::AddStateMessage(const Message &value)
     StateMessages.push_back(value);
 }
 
+
 void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполнили согласно новой расстановке
 {
     for (int i = 0; i < 8; ++i)

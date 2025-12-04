@@ -7,9 +7,8 @@ RoundedAvatar::RoundedAvatar(int width, int height, QWidget *parent) : QWidget(p
 
 void RoundedAvatar::setPixmap(const QPixmap &argv)
 {
-    QRect rectcrop(0, 0, img_width, img_height);
-    rectcrop.moveCenter(argv.rect().center());
-    img = argv.copy(rectcrop);
+    img = argv;
+    update();
 }
 
 void RoundedAvatar::paintEvent(QPaintEvent *e)

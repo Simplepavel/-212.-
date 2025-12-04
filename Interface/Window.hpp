@@ -27,7 +27,7 @@
 #include "CellButton/CellButton.hpp"
 #include "ProfileButton/ProfileButton.hpp"
 #include "RoundedAvatar/RoundedAvatar.hpp"
-#include "Utilts.hpp"
+#include "Utils.hpp"
 
 #include <list>
 
@@ -208,7 +208,7 @@ public:
     QLabel &get_profile_Rank() { return *profile_Rank; }
     QPushButton &get_profile_ChangeUnBttn() { return *profile_ChangeUsernameBttn; }
     QPushButton &get_profile_ChangePhoto() { return *profile_ChangePhoto; }
-    // RoundedAvatar &get_profile_RoundedAvatar() { return *profile_Avatar; }
+    RoundedAvatar &get_profile_RoundedAvatar() { return *profile_Avatar; }
     // Методы относящиеся к профилю
 
     // Методы относящиеся к профилю соперника
