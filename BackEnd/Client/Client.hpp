@@ -3,6 +3,8 @@
 #include <ws2tcpip.h>
 #include <iostream>
 #include <QObject>
+#include <thread>
+#include <chrono>
 #include "../Protocol/Protocol.hpp"
 #include <cstring>
 class Durak_Client : public QObject
@@ -25,4 +27,5 @@ public:
     void set_ready(bool new_value) { ready = new_value; };
     bool is_ready() { return ready; }
     char *GetData();
+    void ClearData();
 };

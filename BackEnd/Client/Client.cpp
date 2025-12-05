@@ -100,7 +100,6 @@ void Durak_Client::Client_Listen()
             {
                 emit ServerSentData();
             }
-            delete[] buffer;
         }
     }
 }
@@ -108,4 +107,9 @@ void Durak_Client::Client_Listen()
 char *Durak_Client::GetData()
 {
     return buffer;
+}
+
+void Durak_Client::ClearData()
+{
+    delete[] buffer;
 }
