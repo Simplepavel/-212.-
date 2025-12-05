@@ -304,6 +304,17 @@ Window::Window(QWidget *parent)
 
     // Профиль соперника
 
+    // Плохое соединени
+    bad_ConnectionWidget = new QWidget(this);
+    bad_ConnectionLayout = new QVBoxLayout(bad_ConnectionWidget);
+
+    bad_Retry = new QPushButton("Retry");
+    bad_ConnectionLayout->addWidget(bad_Retry);
+
+    bad_ConnectionLayout->setAlignment(Qt::AlignCenter);
+
+    // Плохое соединени
+
     listOfLayout->addWidget(login_Widget);
     listOfLayout->addWidget(main_Widget);
     listOfLayout->addWidget(reg_Widget);
@@ -311,6 +322,7 @@ Window::Window(QWidget *parent)
     listOfLayout->addWidget(wait_Widget);
     listOfLayout->addWidget(profile_Widget);
     listOfLayout->addWidget(ProfileEnemyWidget);
+    listOfLayout->addWidget(bad_ConnectionWidget);
     listOfLayout->setAlignment(Qt::AlignCenter);
 
     // Загрузка изображений
@@ -319,6 +331,11 @@ Window::Window(QWidget *parent)
     // Загрука LeaderBoard
 }
 
+void Window::BadConnection()
+{
+    InsertMessage(BAD_CONNECTION);
+    listOfLayout->setCurrentWidget(bad_ConnectionWidget);
+}
 void Window::login()
 {
     InsertMessage(LOGIN);
@@ -388,6 +405,11 @@ void Window::InsertMessage(Owners own, bool DeleteOld)
     case (PROFILE):
         layout = profile_UserInfoLayout;
         k = 4;
+        break;
+    case (BAD_CONNECTION):
+        layout = bad_ConnectionLayout;
+        k = 1;
+        break;
     default:
         return;
     }

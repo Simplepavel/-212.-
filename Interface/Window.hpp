@@ -152,6 +152,14 @@ private:
 
     // Профиль соперника
 
+    // Плохое соединение.
+    QWidget *bad_ConnectionWidget;
+    QVBoxLayout *bad_ConnectionLayout;
+
+    QPushButton *bad_Retry;
+
+    // Плохое соединение.
+
 private slots:
     void UpdateWaitLabel();
 
@@ -166,6 +174,7 @@ public:
     void wait();
     void profile();
     void EnemyProfile();
+    void BadConnection();
     void InsertMessage(Owners, bool DeleteOld = true); // Вставка предупрждений
     void AddStateMessage(const Message &);
 
@@ -225,4 +234,8 @@ public:
     QTimer &get_wait_Timer() { return *wait_Timer; }
     const QPushButton &get_wait_StopBttn() { return *wait_StopBttn; }
     // Методы относящиеся к полю ожидания
+
+    // Методы плохого соединения
+    const QPushButton &get_RetryBttn() { return *bad_Retry; }
+    // Методы плохого соединения
 };

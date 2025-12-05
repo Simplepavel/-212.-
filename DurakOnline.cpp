@@ -140,10 +140,6 @@ void DurakOnline::login()
 
     if (!r.empty())
     {
-        if (!client.is_ready())
-        {
-            MakeConnection();
-        }
         pqxx::row user = r[0];
         CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>(), user[3].as<uint32_t>());
         current_user = std::move(NewUser);
@@ -153,6 +149,7 @@ void DurakOnline::login()
         window.get_profile_Rank().setText(QString::number(current_user.get_rating()));
         UpdateLeaderBoard();
         window.main();
+        UpdateUserStatus(online);
 
         // Запрос фото по id(Вынести в функцию)
         DownloadPhoto(current_user.get_id()); // Ответ обработать в GetServerData
@@ -170,7 +167,7 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
     Mark1 recv_data = Mark1::deserialize(client.GetData());
     if (recv_data.type == DataType::START)
     {
-        Status = IN_GAME;
+        UpdateUserStatus(in_match);
 
         window.InsertMessage(PLAY); // удаляем старые записи если есть
         window.get_wait_Timer().stop();
@@ -221,7 +218,7 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
     {
         window.wait();
         window.get_wait_Timer().start();
-        Status = LOOKING_FOR;
+        Status = looking_for;
     }
     else if (recv_data.type == DataType::CHECKMATE)
     {
@@ -333,25 +330,6 @@ void DurakOnline::ChangePhoto()
     }
 }
 
-void DurakOnline::connect()
-{
-    QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
-    QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
-    QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
-    QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
-    QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::GameOver);
-    QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
-    QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
-    QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
-    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::ServerGetData);
-    QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
-    QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
-    QObject::connect(&window.get_profile_EnemyBackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
-    QObject::connect(&window.get_profile_ChangeUnBttn(), &QPushButton::clicked, this, &DurakOnline::ChangeUserName);
-    QObject::connect(&window.get_profile_ChangePhoto(), &QPushButton::clicked, this, &DurakOnline::ChangePhoto);
-    QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
-}
-
 void DurakOnline::MakeMove()
 {
     if (IsMyTurn) // Сейчас мой ход
@@ -425,6 +403,7 @@ void DurakOnline::MakeMove()
 
 void DurakOnline::GameOver()
 {
+    UpdateUserStatus(online);
     uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
     char *data = new char[4];
     memcpy(data, &net_session_id, 4);
@@ -434,11 +413,11 @@ void DurakOnline::GameOver()
     to_send.data = data;
     client.Client_Send(to_send);
     window.main();
-    Status = ONLINE;
 }
 
 void DurakOnline::Next()
 {
+    UpdateUserStatus(looking_for);
     uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
     char *data = new char[4];
     memcpy(data, &net_session_id, 4);
@@ -451,6 +430,7 @@ void DurakOnline::Next()
 
 void DurakOnline::StopFind()
 {
+    UpdateUserStatus(online);
     uint32_t net_id = htonl(current_user.get_id()); // id сессии чтобы отключиться
     char *data = new char[4];
     memcpy(data, &net_id, 4);
@@ -460,7 +440,6 @@ void DurakOnline::StopFind()
     to_send.data = data;
     client.Client_Send(to_send);
     window.main();
-    Status = ONLINE;
 }
 
 void DurakOnline::DownloadPhoto(uint32_t id)
@@ -477,6 +456,7 @@ void DurakOnline::DownloadPhoto(uint32_t id)
 
 void DurakOnline::FindEnemy()
 {
+    UpdateUserStatus(looking_for);
     Mark1 to_send;
     to_send.data = new char[4];
     uint32_t net_id = htonl(current_user.get_id());
@@ -486,7 +466,6 @@ void DurakOnline::FindEnemy()
     int bytes = client.Client_Send(to_send);
     window.wait();
     window.get_wait_Timer().start();
-    Status = LOOKING_FOR;
 }
 
 void DurakOnline::CheckEnemyProfile()
@@ -532,11 +511,11 @@ void DurakOnline::OnCloseWindow()
 {
     if (client.is_ready())
     {
-        if (Status == IN_GAME)
+        if (Status == in_match)
         {
             GameOver();
         }
-        else if (Status == LOOKING_FOR)
+        else if (Status == looking_for)
         {
             StopFind();
         }
@@ -546,9 +525,77 @@ void DurakOnline::OnCloseWindow()
     }
 }
 
+void DurakOnline::UpdateUserStatus(UserStatus status)
+{
+    uint32_t user_id = current_user.get_id();
+    if (user_id == 0)
+    {
+        return;
+    }
+    pqxx::connection *cx = make_session();
+    if (cx == nullptr)
+    {
+        std::cerr << "Error: Could not connect to database for status update.\n";
+        return;
+    }
+    try
+    {
+        pqxx::work tx{*cx};
+        std::string sql_query = "UPDATE users SET status = $1 WHERE id = $2";
+        tx.exec(sql_query, pqxx::params{(int)status, user_id});
+        tx.commit();
+        Status = status;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Database Error in update_user_status: " << e.what() << '\n';
+    }
+    delete_session(cx);
+}
+
+void DurakOnline::BadConnection()
+{
+    MakeConnection();
+    if (client.is_ready())
+    {
+        window.login();
+    }
+    else
+    {
+        window.AddStateMessage(CreateMessage("Cannot to connect to play Server", BAD_CONNECTION, ERR, SMALLEST));
+        window.BadConnection();
+    }
+}
+void DurakOnline::connect()
+{
+    QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
+    QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
+    QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
+    QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
+    QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::GameOver);
+    QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
+    QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
+    QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
+    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::ServerGetData);
+    QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
+    QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
+    QObject::connect(&window.get_profile_EnemyBackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
+    QObject::connect(&window.get_profile_ChangeUnBttn(), &QPushButton::clicked, this, &DurakOnline::ChangeUserName);
+    QObject::connect(&window.get_profile_ChangePhoto(), &QPushButton::clicked, this, &DurakOnline::ChangePhoto);
+    QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
+    QObject::connect(&window.get_RetryBttn(), &QPushButton::clicked, this, &DurakOnline::BadConnection);
+}
+
 int DurakOnline::start()
 {
+
     connect();
+    MakeConnection();
+    if (!client.is_ready())
+    {
+        window.AddStateMessage(CreateMessage("Cannot to connect to play Server", BAD_CONNECTION, ERR, SMALLEST));
+        window.BadConnection();
+    }
     window.setWindowTitle("Chess");
     window.connect();
     window.showMaximized();

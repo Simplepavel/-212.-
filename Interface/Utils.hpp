@@ -11,7 +11,8 @@ enum Owners : uint8_t // кому предназначена ифномарци�
     MAIN,  // полю main
     PLAY,  // полю play
     CHECKIN,
-    PROFILE
+    PROFILE,
+    BAD_CONNECTION
 
 };
 

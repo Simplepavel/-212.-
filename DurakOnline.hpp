@@ -9,11 +9,12 @@
 #include <thread>
 #include <fstream>
 
-enum GameStatus : uint8_t
+enum UserStatus : uint8_t
 {
-    ONLINE,
-    LOOKING_FOR,
-    IN_GAME
+    offline,
+    online,
+    looking_for,
+    in_match
 };
 
 class DurakOnline : public QObject
@@ -31,7 +32,7 @@ private:
     CellButton *FirstPosition;
     CellButton *SecondPosition;
     QTimer LeaderBoardUpdateTimer;
-    GameStatus Status; // В игре. Ожидает соперника. Просто онлайн
+    UserStatus Status; // В игре. Ожидает соперника. Просто онлайн
 
     void connect();
 private slots:
@@ -49,6 +50,7 @@ private slots:
     void ChangeUserName();
     void ChangePhoto();
     void OnCloseWindow();
+    void BadConnection();
 
     // Возможно объединить это в одну фунцию
     void GameOver();
@@ -56,6 +58,7 @@ private slots:
     void StopFind();
     void DownloadPhoto(uint32_t id); // Загрузка фото с сервера
     void FindEnemy();
+    void UpdateUserStatus(UserStatus status);
 
 public:
     DurakOnline(int argc, char *argv[]);
