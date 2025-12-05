@@ -264,8 +264,6 @@ void DurakOnline::main()
 
 void DurakOnline::logout()
 {
-    client.Client_Disconnect();
-    client.set_ready(false); // Больше не слушаем сервер
     current_user.to_null();
     window.login();
 }
@@ -345,7 +343,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
     QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
     QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
-    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::ServerGetData, Qt::DirectConnection);
+    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::ServerGetData);
     QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
     QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
     QObject::connect(&window.get_profile_EnemyBackBttn(), &QPushButton::clicked, this, &DurakOnline::main);

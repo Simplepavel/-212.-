@@ -555,6 +555,10 @@ void Window::UpdateLeaderBoard(const std::string &username, uint32_t user_id, co
     {
         CheckProfileButton->show();
     }
+    else
+    {
+        CheckProfileButton->hide();
+    }
     UsernameLabel->show();
     CheckProfileButton->set_id(user_id); // На профиль какого игрока ссылка
     std::string result = username + "-" + rating;
