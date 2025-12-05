@@ -212,6 +212,11 @@ Window::Window(QWidget *parent)
     profile_Widget = new QWidget(this);
     profile_Layout = new QHBoxLayout(profile_Widget);
 
+    profile_id = new QLabel("ID#");
+    profile_id->setFont(QFont("Calibri", BIG));
+    profile_id->setAlignment(Qt::AlignCenter);
+    profile_id->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
     profile_BackBttn = new QPushButton("<");
     profile_BackBttn->setFixedWidth(30);
     profile_BackBttn->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
@@ -249,6 +254,7 @@ Window::Window(QWidget *parent)
     profile_UserInfoLayout->addWidget(profile_ChangePhoto, 0, Qt::AlignHCenter);
     profile_UserInfoLayout->addLayout(profile_UsernameLayout);
     profile_UserInfoLayout->addWidget(profile_Rank);
+    profile_UserInfoLayout->addWidget(profile_id);
 
     profile_Layout->addWidget(profile_BackBttn, Qt::AlignTop);
     profile_Layout->addWidget(profile_UserInfoWidget);
@@ -266,6 +272,11 @@ Window::Window(QWidget *parent)
 
     profile_EnemyInfoWidget = new QWidget(ProfileEnemyWidget);
     profile_EnemyInfoLayout = new QVBoxLayout(profile_EnemyInfoWidget);
+
+    profile_EnemyId = new QLabel("#ID");
+    profile_EnemyId->setFont(QFont("Calibri", BIG));
+    profile_EnemyId->setAlignment(Qt::AlignCenter);
+    profile_EnemyId->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     profile_EnemyAvatar = new RoundedAvatar(screen_Height * 0.3, screen_Height * 0.3);
 
@@ -297,6 +308,7 @@ Window::Window(QWidget *parent)
     profile_EnemyInfoLayout->addWidget(profile_Status);
     profile_EnemyInfoLayout->addWidget(profile_EnemyName);
     profile_EnemyInfoLayout->addWidget(profile_EnemyRank);
+    profile_EnemyInfoLayout->addWidget(profile_EnemyId);
     profile_EnemyInfoLayout->addWidget(profile_Invite);
 
     ProfileEnemyLayout->addWidget(profile_EnemyBackBttn, Qt::AlignTop);

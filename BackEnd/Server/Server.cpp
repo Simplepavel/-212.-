@@ -120,7 +120,6 @@ void Durak_Server::Server_Go()
         timeval time;
         time.tv_sec = 0;
         time.tv_usec = 500000;
-
         int ready_read = select(max_socket + 1, &master, nullptr, nullptr, &time);
         if (ready_read > 0)
         {
@@ -374,6 +373,7 @@ void Durak_Server::Server_Go()
                             }
                             std::cout << "1\n";
                         }
+                        std::cout << "2\n";
                     }
                     else if (bytes == 0)
                     {
@@ -385,7 +385,6 @@ void Durak_Server::Server_Go()
                         std::cout << " has disconnected\n";
                         closesocket(*i);
                         delete_clients.push_back(*i);
-
                     } // клиент отключился
                     else
                     {
@@ -400,18 +399,13 @@ void Durak_Server::Server_Go()
                     } // что то пошло не так
                 }
             }
-            std::cout << "2\n";
             mtx.lock();
-            std::cout << "3\n";
             for (auto i = delete_clients.begin(); i != delete_clients.end(); ++i)
             {
                 clients.remove(*i);
             }
-            std::cout << "4\n";
             delete_clients.clear();
-            std::cout << "5\n";
             mtx.unlock();
-            std::cout << "6\n";
         }
         else if (ready_read == 0)
         {

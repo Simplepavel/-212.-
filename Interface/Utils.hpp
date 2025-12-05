@@ -39,7 +39,16 @@ struct Message
     TextSize size;
 };
 
+enum UserStatus : uint8_t
+{
+    offline,
+    online,
+    looking_for,
+    in_match
+};
+
 bool isValidEmail(const std::string &email);
 Message CreateMessage(const QString mess, Owners ow, MessageType type, TextSize size);
 QPixmap CutPixMap(const QPixmap &argv, int height, int width);
 char *pixmapToCharArray(const QPixmap &pixmap, int &outSize);
+QString UserStatusToString(UserStatus);

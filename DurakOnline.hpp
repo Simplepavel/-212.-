@@ -9,13 +9,6 @@
 #include <thread>
 #include <fstream>
 
-enum UserStatus : uint8_t
-{
-    offline,
-    online,
-    looking_for,
-    in_match
-};
 
 class DurakOnline : public QObject
 {

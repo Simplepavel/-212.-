@@ -136,23 +136,32 @@ void DurakOnline::login()
 
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
-    pqxx::result r = tx.exec("select id, username, email, rating from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
+    pqxx::result r = tx.exec("select id, username, email, rating, status from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
 
     if (!r.empty())
     {
         pqxx::row user = r[0];
-        CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>(), user[3].as<uint32_t>());
-        current_user = std::move(NewUser);
-        window.SetUserId(current_user.get_id());
-        window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
-        window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
-        window.get_profile_Rank().setText(QString::number(current_user.get_rating()));
-        UpdateLeaderBoard();
-        window.main();
-        UpdateUserStatus(online);
+        if (user[4].as<uint32_t>() == online)
+        {
+            window.AddStateMessage(CreateMessage("This account is busy. Try another one", LOGIN, ERR, SMALLEST));
+            window.login();
+        }
+        else
+        {
+            CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>(), user[3].as<uint32_t>());
+            current_user = std::move(NewUser);
+            window.SetUserId(current_user.get_id());
+            window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
+            window.get_profile_id().setText("ID#" + QString::number(current_user.get_id()));
+            window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
+            window.get_profile_Rank().setText(QString::number(current_user.get_rating()));
+            UpdateLeaderBoard();
+            window.main();
+            UpdateUserStatus(online);
+        }
 
         // Запрос фото по id(Вынести в функцию)
-        DownloadPhoto(current_user.get_id()); // Ответ обработать в GetServerData
+        // DownloadPhoto(current_user.get_id()); // Ответ обработать в GetServerData
         // Запрос фото по id(Вынести в функцию)
     }
     else
@@ -216,9 +225,9 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
     }
     else if (recv_data.type == DataType::LEAVE_ENEMY) // Соперник покинул игру. Текущий игрок снова добавляется в очередь!!!!
     {
+        UpdateUserStatus(looking_for);
         window.wait();
         window.get_wait_Timer().start();
-        Status = looking_for;
     }
     else if (recv_data.type == DataType::CHECKMATE)
     {
@@ -262,6 +271,7 @@ void DurakOnline::main()
 
 void DurakOnline::logout()
 {
+    UpdateUserStatus(offline);
     current_user.to_null();
     window.login();
 }
@@ -476,17 +486,23 @@ void DurakOnline::CheckEnemyProfile()
     uint32_t enemy_id = bttn->get_id();
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
-    pqxx::result response = tx.exec("select username, rating from users where id = $1", pqxx::params{enemy_id});
+    pqxx::result response = tx.exec("select username, rating, status from users where id = $1", pqxx::params{enemy_id});
     pqxx::row enemy = response[0];
     // Поменяли значения по доступу из window
     RoundedAvatar &EnemyImage = window.get_profile_EnemyAvatar();
-
     EnemyImage.setPixmap(QPixmap());
     QString EnemyName = QString::fromStdString(enemy[0].as<std::string>());
     QString EnemyRating = QString::fromStdString(enemy[1].as<std::string>());
+    QString EnemyStatus = UserStatusToString((UserStatus)enemy[2].as<uint32_t>());
+    QPalette PaletteStatus;
+    QColor Colors[4] = {QColor(200, 200, 200), QColor(0, 255, 0), QColor(255, 255, 255), QColor(255, 215, 0)};
+    PaletteStatus.setColor(QPalette::WindowText, Colors[enemy[2].as<uint32_t>()]);
+    window.get_profile_Status().setText(EnemyStatus);
+    window.get_profile_Status().setPalette(PaletteStatus);
+    window.get_profile_EnemyId().setText("ID#" + QString::number(enemy_id));
     window.get_profile_EnemyName().setText(EnemyName);
     window.get_profile_EnemyRank().setText(EnemyRating);
-    DownloadPhoto(enemy_id); // возможно фотка будет подгружаться после отображения профиля. Все зависит от параметров сети
+    // DownloadPhoto(enemy_id); // возможно фотка будет подгружаться после отображения профиля. Все зависит от параметров сети
     window.EnemyProfile();
 }
 
@@ -520,6 +536,7 @@ void DurakOnline::OnCloseWindow()
         {
             StopFind();
         }
+        UpdateUserStatus(offline);
         std::this_thread::sleep_for(std::chrono::milliseconds(100)); // Сервер должен успеть сработать
         client.Client_Disconnect();
         client.set_ready(false); // Больше не слушаем сервер
@@ -567,6 +584,7 @@ void DurakOnline::BadConnection()
         window.BadConnection();
     }
 }
+
 void DurakOnline::connect()
 {
     QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);

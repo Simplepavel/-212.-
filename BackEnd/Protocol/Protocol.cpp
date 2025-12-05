@@ -49,7 +49,9 @@ Mark1 &Mark1::operator=(Mark1 &&argv)
 
 Mark1::~Mark1()
 {
+    std::cout << "Delete Protocol data\n";
     delete[] data;
+    std::cout << "Succes delete Protocol data\n";
 }
 
 uint32_t Mark1::capacity() const { return length + 5; } // data.length + data.type + data.data

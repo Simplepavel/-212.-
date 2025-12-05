@@ -122,6 +122,7 @@ private:
     QWidget *profile_UserInfoWidget;
     QVBoxLayout *profile_UserInfoLayout;
 
+    QLabel *profile_id;
     RoundedAvatar *profile_Avatar;
 
     QHBoxLayout *profile_UsernameLayout;
@@ -141,6 +142,8 @@ private:
 
     QWidget *profile_EnemyInfoWidget;
     QVBoxLayout *profile_EnemyInfoLayout;
+
+    QLabel *profile_EnemyId;
 
     RoundedAvatar *profile_EnemyAvatar;
     QLabel *profile_EnemyName;
@@ -214,6 +217,7 @@ public:
 
     // Методы относящиеся к профилю
     const QPushButton &get_profile_BackBttn() { return *profile_BackBttn; }
+    QLabel &get_profile_id() { return *profile_id; }
     QLabel &get_profile_Username() { return *profile_Username; }
     QLabel &get_profile_Rank() { return *profile_Rank; }
     QPushButton &get_profile_ChangeUnBttn() { return *profile_ChangeUsernameBttn; }
@@ -228,6 +232,7 @@ public:
     QLabel &get_profile_EnemyRank() { return *profile_EnemyRank; }
     QLabel &get_profile_Status() { return *profile_Status; }
     RoundedAvatar &get_profile_EnemyAvatar() { return *profile_EnemyAvatar; }
+    QLabel &get_profile_EnemyId() { return *profile_EnemyId; }
     // Методы относящиеся к профилю соперника
 
     //  Методы относящиеся к полю ожидания

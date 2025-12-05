@@ -64,3 +64,19 @@ char *pixmapToCharArray(const QPixmap &pixmap, int &outSize)
     memcpy(charArray, byteArray.constData(), outSize);
     return charArray;
 }
+
+QString UserStatusToString(UserStatus vl)
+{
+    switch (vl)
+    {
+    case (offline):
+        return "offline";
+    case (online):
+        return "online";
+    case (in_match):
+        return "in match";
+    case (looking_for):
+        return "looking for enemy";
+    }
+    return "";
+}
