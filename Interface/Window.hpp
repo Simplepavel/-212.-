@@ -150,15 +150,13 @@ private:
 
     QLabel *profile_EnemyRank;
     QLabel *profile_Status;
-
-    QPushButton *profile_Invite;
+    ProfileButton *profile_Invite; // кнопка способная содержать некоторый id
 
     // Профиль соперника
 
     // Плохое соединение.
     QWidget *bad_ConnectionWidget;
     QVBoxLayout *bad_ConnectionLayout;
-
     QPushButton *bad_Retry;
 
     // Плохое соединение.
@@ -227,7 +225,7 @@ public:
 
     // Методы относящиеся к профилю соперника
     const QPushButton &get_profile_EnemyBackBttn() { return *profile_EnemyBackBttn; }
-    const QPushButton &get_profile_Invite() { return *profile_Invite; }
+    ProfileButton &get_profile_Invite() { return *profile_Invite; }
     QLabel &get_profile_EnemyName() { return *profile_EnemyName; }
     QLabel &get_profile_EnemyRank() { return *profile_EnemyRank; }
     QLabel &get_profile_Status() { return *profile_Status; }

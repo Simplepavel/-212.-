@@ -162,6 +162,7 @@ void DurakOnline::login()
 
         // Запрос фото по id(Вынести в функцию)
         // DownloadPhoto(current_user.get_id()); // Ответ обработать в GetServerData
+        SendID();
         // Запрос фото по id(Вынести в функцию)
     }
     else
@@ -479,6 +480,39 @@ void DurakOnline::FindEnemy()
     window.get_wait_Timer().start();
 }
 
+void DurakOnline::InviteToGame()
+{
+
+    ProfileButton *SenderId = static_cast<ProfileButton *>(sender()); // просто клетка
+
+    Mark1 to_send;
+    to_send.data = new char[8];
+
+    uint32_t net_id = htonl(current_user.get_id());
+    uint32_t net_enemy_id = htonl(SenderId->get_id());
+
+    memcpy(to_send.data, &net_id, 4);           // мой id
+    memcpy(to_send.data + 4, &net_enemy_id, 4); // id соперника
+
+    to_send.length = 8;
+    to_send.type = DataType::INVITE;
+    int bytes = client.Client_Send(to_send);
+}
+
+void DurakOnline::SendID()
+{
+    Mark1 to_send;
+    to_send.data = new char[4];
+
+    uint32_t net_id = htonl(current_user.get_id());
+
+    memcpy(to_send.data, &net_id, 4); // мой id
+
+    to_send.length = 4;
+    to_send.type = DataType::ID;
+    int bytes = client.Client_Send(to_send);
+}
+
 void DurakOnline::CheckEnemyProfile()
 {
     ProfileButton *bttn = static_cast<ProfileButton *>(sender());
@@ -502,6 +536,7 @@ void DurakOnline::CheckEnemyProfile()
     window.get_profile_EnemyId().setText("ID#" + QString::number(enemy_id));
     window.get_profile_EnemyName().setText(EnemyName);
     window.get_profile_EnemyRank().setText(EnemyRating);
+    window.get_profile_Invite().set_id(enemy_id);
     // DownloadPhoto(enemy_id); // возможно фотка будет подгружаться после отображения профиля. Все зависит от параметров сети
     window.EnemyProfile();
 }
@@ -603,6 +638,7 @@ void DurakOnline::connect()
     QObject::connect(&window.get_profile_ChangePhoto(), &QPushButton::clicked, this, &DurakOnline::ChangePhoto);
     QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
     QObject::connect(&window.get_RetryBttn(), &QPushButton::clicked, this, &DurakOnline::BadConnection);
+    QObject::connect(&window.get_profile_Invite(), &QPushButton::clicked, this, &DurakOnline::InviteToGame);
 }
 
 int DurakOnline::start()

@@ -15,6 +15,8 @@ enum DataType : uint8_t // что передали какой тип данны�
     CLASTING,
     GAMEOVER,
 
+    ID,
+    INVITE,
     UPLOAD_PHOTO,
     DOWNLOAD_PHOTO
 

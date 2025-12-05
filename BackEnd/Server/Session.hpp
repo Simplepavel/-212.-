@@ -2,6 +2,15 @@
 #include "../Game/Board/Board.hpp"
 #include <stack>
 #include <winsock2.h>
+
+enum UserStatus : uint8_t
+{
+    offline,
+    online,
+    looking_for,
+    in_match
+};
+
 struct Player
 {
     uint32_t id;

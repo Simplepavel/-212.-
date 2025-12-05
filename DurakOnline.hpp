@@ -9,7 +9,6 @@
 #include <thread>
 #include <fstream>
 
-
 class DurakOnline : public QObject
 {
     Q_OBJECT
@@ -52,6 +51,8 @@ private slots:
     void DownloadPhoto(uint32_t id); // Загрузка фото с сервера
     void FindEnemy();
     void UpdateUserStatus(UserStatus status);
+    void InviteToGame();
+    void SendID();
 
 public:
     DurakOnline(int argc, char *argv[]);

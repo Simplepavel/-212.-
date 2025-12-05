@@ -299,7 +299,7 @@ Window::Window(QWidget *parent)
     status_palette.setColor(QPalette::WindowText, QColor(0, 255, 0));
     profile_Status->setPalette(status_palette);
 
-    profile_Invite = new QPushButton("Invite to the game");
+    profile_Invite = new ProfileButton("Invite to the game");
 
     profile_EnemyInfoLayout->setSpacing(5);
     profile_EnemyInfoLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
