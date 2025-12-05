@@ -11,7 +11,6 @@ DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0
     {
         QObject::connect(*i, &ProfileButton::clicked, this, &DurakOnline::CheckEnemyProfile);
     }
-    UpdateLeaderBoard();
     LeaderBoardUpdateTimer.start();
 }
 
@@ -137,21 +136,27 @@ void DurakOnline::login()
 
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
-
     pqxx::result r = tx.exec("select id, username, email, rating from users where email=$1 and password=$2 limit 1", pqxx::params{email, password});
 
     if (!r.empty())
     {
+        if (!client.is_ready())
+        {
+            MakeConnection();
+        }
         pqxx::row user = r[0];
-
         CurrentUser NewUser(user[0].as<unsigned long>(), user[1].as<std::string>(), user[2].as<std::string>(), user[3].as<uint32_t>());
         current_user = std::move(NewUser);
+        window.SetUserId(current_user.get_id());
         window.AddStateMessage(CreateMessage("Succesful authentication", MAIN, SUCCES, SMALLEST));
-
         window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
         window.get_profile_Rank().setText(QString::number(current_user.get_rating()));
-
+        UpdateLeaderBoard();
         window.main();
+
+        // Запрос фото по id(Вынести в функцию)
+        DownloadPhoto(current_user.get_id()); // Ответ обработать в GetServerData
+        // Запрос фото по id(Вынести в функцию)
     }
     else
     {
@@ -160,141 +165,9 @@ void DurakOnline::login()
     }
 }
 
-void DurakOnline::main()
-{
-    window.main();
-}
-
-void DurakOnline::logout()
-{
-    current_user.to_null();
-    window.login();
-}
-
-void DurakOnline::profile()
-{
-    // пользователь не видит свой же статус и приглашение на игру
-    window.InsertMessage(PROFILE);
-    window.profile();
-}
-
-void DurakOnline::EnemyProfile()
-{
-    window.EnemyProfile();
-}
-
-void DurakOnline::FindEnemy()
-{
-    MakeConnection();
-    if (client.is_ready())
-    {
-        Status = LOOKING_FOR;
-        Mark1 to_send;
-        to_send.data = new char[4];
-        uint32_t net_id = htonl(current_user.get_id());
-        memcpy(to_send.data, &net_id, 4);
-        to_send.length = 4;
-        to_send.type = DataType::FIND_ENEMY;
-        int bytes = client.Client_Send(to_send);
-        window.wait();
-        window.get_wait_Timer().start();
-    }
-}
-
-void DurakOnline::ChangeUserName()
-{
-    std::string NewName = window.GetNewName().toStdString();
-    if (NewName == "")
-    {
-        return;
-    }
-    pqxx::connection *session = make_session();
-    pqxx::work tx(*session);
-    pqxx::result username_check = tx.exec("select * from users where username = $1 limit 1", pqxx::params{NewName});
-    if (!username_check.empty())
-    {
-        window.AddStateMessage(CreateMessage("User with this username is already exists. Try another one", PROFILE, ERR, SMALLEST));
-    }
-    else
-    {
-        tx.exec("update users set username = $1 where id = $2", pqxx::params{NewName, current_user.get_id()});
-        current_user.set_username(NewName);
-        window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
-        tx.commit();
-    }
-
-    delete_session(session);
-}
-
-void DurakOnline::ChangePhoto()
-{
-    QString NewPhoto = window.GetNewPhoto();
-    if (NewPhoto != "")
-    {
-        if (!client.is_ready())
-        {
-            MakeConnection();
-        }
-        if (client.is_ready())
-        {
-            QPixmap NewImg(NewPhoto);
-            RoundedAvatar &OldAvatar = window.get_profile_RoundedAvatar();
-            NewImg = CutPixMap(NewImg, OldAvatar.height(), OldAvatar.width());
-            OldAvatar.setPixmap(NewImg);
-
-            int inSize;
-            char *inStr = pixmapToCharArray(NewImg, inSize);
-            char *outStr = new char[(inSize * 4 / 3) + 5]{};
-
-            uint32_t net_id = htonl(current_user.get_id());
-            memcpy(outStr, &net_id, 4); // записали сверху id
-
-            int outLength = base64Encode(inStr, inSize, outStr + 4);
-            Mark1 to_send;
-            to_send.type = DOWLOAD_PHOTO;
-            to_send.data = outStr; // данные удалятся вместе с диструктором Mark1
-            to_send.length = outLength + 4;
-
-            client.Client_Send(to_send);
-            delete[] inStr;
-        }
-        return;
-    }
-}
-
-int DurakOnline::start()
-{
-    connect();
-    window.setWindowTitle("Chess");
-    window.connect();
-    window.showMaximized();
-    int answer = app.exec();
-    return answer;
-}
-
-void DurakOnline::connect()
-{
-    QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
-    QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
-    QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
-    QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
-    QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::Disconnect);
-    QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
-    QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
-    QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
-    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::ServerGetData);
-    QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
-    QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
-    QObject::connect(&window.get_profile_EnemyBackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
-    QObject::connect(&window.get_profile_ChangeUnBttn(), &QPushButton::clicked, this, &DurakOnline::ChangeUserName);
-    QObject::connect(&window.get_profile_ChangePhoto(), &QPushButton::clicked, this, &DurakOnline::ChangePhoto);
-    QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
-}
-
 void DurakOnline::ServerGetData() // Сервер отправил информацию
 {
     Mark1 recv_data = Mark1::deserialize(client.GetData());
-
     if (recv_data.type == DataType::START)
     {
         Status = IN_GAME;
@@ -326,7 +199,6 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
         window.UpdateBoard(*board, MyColor);
         window.play();
     }
-
     else if (recv_data.type == DataType::MOVE)
     {
         const std::vector<uint8_t> &LastMoves = board->DeserializeMove(recv_data.data + 4);
@@ -351,13 +223,6 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
         window.get_wait_Timer().start();
         Status = LOOKING_FOR;
     }
-    else if (recv_data.type == DataType::SHUTDOWN)
-    {
-        client.Client_Disconnect();
-        client.set_ready(false); // Больше не слушаем сервер
-        Status = ONLINE;
-        window.main();
-    }
     else if (recv_data.type == DataType::CHECKMATE)
     {
         window.AddStateMessage(CreateMessage("You are lose!", PLAY, ERR, BIG));
@@ -365,8 +230,128 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
         board->replace(7 - LastMoves[0], 7 - LastMoves[1], 7 - LastMoves[2], 7 - LastMoves[3]);
         window.UpdateBoard(*board, MyColor);
     }
+    else if (recv_data.type == DataType::UPLOAD_PHOTO)
+    {
+        uint32_t net_id;
+        memcpy(&net_id, recv_data.data, 4);
+        uint32_t id = ntohl(net_id);
 
+        char *outStr = new char[(recv_data.length - 4) * 3 / 4 + 1];
+        int outSize = base64Decode(recv_data.data + 4, recv_data.length - 4, outStr);
+
+        QPixmap Image;
+        QByteArray byteArray = QByteArray::fromRawData(outStr, outSize);
+        Image.loadFromData(byteArray);
+
+        if (id == current_user.get_id()) // Наше фото
+        {
+            RoundedAvatar &OwnPhotoProfile = window.get_profile_RoundedAvatar();
+            OwnPhotoProfile.setPixmap(Image);
+        }
+        else
+        {
+            RoundedAvatar &EnemyPhotoProfile = window.get_profile_EnemyAvatar();
+            EnemyPhotoProfile.setPixmap(Image);
+        }
+    }
     window.InsertMessage(PLAY, false);
+}
+
+void DurakOnline::main()
+{
+    window.main();
+}
+
+void DurakOnline::logout()
+{
+    client.Client_Disconnect();
+    client.set_ready(false); // Больше не слушаем сервер
+    current_user.to_null();
+    window.login();
+}
+
+void DurakOnline::profile()
+{
+    // пользователь не видит свой же статус и приглашение на игру
+    window.InsertMessage(PROFILE);
+    window.profile();
+}
+
+void DurakOnline::EnemyProfile()
+{
+    window.EnemyProfile();
+}
+
+void DurakOnline::ChangeUserName()
+{
+    std::string NewName = window.GetNewName().toStdString();
+    if (NewName == "")
+    {
+        return;
+    }
+    pqxx::connection *session = make_session();
+    pqxx::work tx(*session);
+    pqxx::result username_check = tx.exec("select * from users where username = $1 limit 1", pqxx::params{NewName});
+    if (!username_check.empty())
+    {
+        window.AddStateMessage(CreateMessage("User with this username is already exists. Try another one", PROFILE, ERR, SMALLEST));
+    }
+    else
+    {
+        tx.exec("update users set username = $1 where id = $2", pqxx::params{NewName, current_user.get_id()});
+        current_user.set_username(NewName);
+        window.get_profile_Username().setText(QString::fromStdString(current_user.get_username()));
+        tx.commit();
+    }
+    delete_session(session);
+}
+
+void DurakOnline::ChangePhoto()
+{
+    QString NewPhoto = window.GetNewPhoto();
+    if (NewPhoto != "")
+    {
+        QPixmap NewImg(NewPhoto);
+        RoundedAvatar &OldAvatar = window.get_profile_RoundedAvatar();
+        NewImg = CutPixMap(NewImg, OldAvatar.height(), OldAvatar.width());
+        OldAvatar.setPixmap(NewImg);
+
+        int inSize;
+        char *inStr = pixmapToCharArray(NewImg, inSize);
+        char *outStr = new char[(inSize * 4 / 3) + 5]{};
+
+        uint32_t net_id = htonl(current_user.get_id());
+        memcpy(outStr, &net_id, 4); // записали сверху id
+
+        int outLength = base64Encode(inStr, inSize, outStr + 4);
+        Mark1 to_send;
+        to_send.type = UPLOAD_PHOTO;
+        to_send.data = outStr; // данные удалятся вместе с диструктором Mark1
+        to_send.length = outLength + 4;
+
+        client.Client_Send(to_send);
+        delete[] inStr;
+        return;
+    }
+}
+
+void DurakOnline::connect()
+{
+    QObject::connect(&window.get_reg_SubmitBttn(), &QPushButton::clicked, this, &DurakOnline::registration);
+    QObject::connect(&window.get_login_LoginBttn(), &QPushButton::clicked, this, &DurakOnline::login);
+    QObject::connect(&window.get_main_LogoutBttn(), &QPushButton::clicked, this, &DurakOnline::logout);
+    QObject::connect(&window.get_main_PlayBttn(), &QPushButton::clicked, this, &DurakOnline::FindEnemy);
+    QObject::connect(&window.get_play_StopBttn(), &QPushButton::clicked, this, &DurakOnline::GameOver);
+    QObject::connect(&window.get_play_NextBttn(), &QPushButton::clicked, this, &DurakOnline::Next);
+    QObject::connect(&window.get_wait_StopBttn(), &QPushButton::clicked, this, &DurakOnline::StopFind);
+    QObject::connect(&window.get_main_MyProfile(), &QPushButton::clicked, this, &DurakOnline::profile);
+    QObject::connect(&client, &Durak_Client::ServerSentData, this, &DurakOnline::ServerGetData, Qt::DirectConnection);
+    QObject::connect(&LeaderBoardUpdateTimer, &QTimer::timeout, this, &DurakOnline::UpdateLeaderBoard);
+    QObject::connect(&window.get_profile_BackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
+    QObject::connect(&window.get_profile_EnemyBackBttn(), &QPushButton::clicked, this, &DurakOnline::main);
+    QObject::connect(&window.get_profile_ChangeUnBttn(), &QPushButton::clicked, this, &DurakOnline::ChangeUserName);
+    QObject::connect(&window.get_profile_ChangePhoto(), &QPushButton::clicked, this, &DurakOnline::ChangePhoto);
+    QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
 }
 
 void DurakOnline::MakeMove()
@@ -440,65 +425,91 @@ void DurakOnline::MakeMove()
     }
 }
 
-void DurakOnline::CheckEnemyProfile()
+void DurakOnline::GameOver()
 {
-    ProfileButton *bttn = static_cast<ProfileButton *>(sender());
-
-    pqxx::connection *session = make_session();
-    pqxx::work tx(*session);
-    pqxx::result response = tx.exec("select username, rating from users where id = $1", pqxx::params{bttn->get_id()});
-    pqxx::row enemy = response[0];
-    // Поменяли значения по доступу из window
-    QString EnemyName = QString::fromStdString(enemy[0].as<std::string>());
-    QString EnemyRating = QString::fromStdString(enemy[1].as<std::string>());
-    window.get_profile_EnemyName().setText(EnemyName);
-    window.get_profile_EnemyRank().setText(EnemyRating);
-    window.EnemyProfile();
-}
-
-void DurakOnline::Disconnect()
-{
-    if (client.is_ready())
-    {
-        uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
-        char *data = new char[4];
-        memcpy(data, &net_session_id, 4);
-        Mark1 to_send;
-        to_send.type = DISCONNECT;
-        to_send.length = 4;
-        to_send.data = data;
-        client.Client_Send(to_send);
-    }
+    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
+    char *data = new char[4];
+    memcpy(data, &net_session_id, 4);
+    Mark1 to_send;
+    to_send.type = GAMEOVER;
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
+    window.main();
+    Status = ONLINE;
 }
 
 void DurakOnline::Next()
 {
-    if (client.is_ready())
-    {
-        uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
-        char *data = new char[4];
-        memcpy(data, &net_session_id, 4);
-        Mark1 to_send;
-        to_send.type = DataType::NEXT_ENEMY;
-        to_send.length = 4;
-        to_send.data = data;
-        client.Client_Send(to_send);
-    }
+    uint32_t net_session_id = htonl(session_id); // id сессии чтобы отключиться
+    char *data = new char[4];
+    memcpy(data, &net_session_id, 4);
+    Mark1 to_send;
+    to_send.type = DataType::NEXT_ENEMY;
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
 }
 
 void DurakOnline::StopFind()
 {
-    if (client.is_ready())
-    {
-        uint32_t net_id = htonl(current_user.get_id()); // id сессии чтобы отключиться
-        char *data = new char[4];
-        memcpy(data, &net_id, 4);
-        Mark1 to_send;
-        to_send.type = DataType::STOP_FIND_ENEMY;
-        to_send.length = 4;
-        to_send.data = data;
-        client.Client_Send(to_send);
-    }
+    uint32_t net_id = htonl(current_user.get_id()); // id сессии чтобы отключиться
+    char *data = new char[4];
+    memcpy(data, &net_id, 4);
+    Mark1 to_send;
+    to_send.type = DataType::STOP_FIND_ENEMY;
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
+    window.main();
+    Status = ONLINE;
+}
+
+void DurakOnline::DownloadPhoto(uint32_t id)
+{
+    uint32_t net_id = htonl(id);
+    char *data = new char[4];
+    memcpy(data, &net_id, 4);
+    Mark1 to_send;
+    to_send.type = DataType::DOWNLOAD_PHOTO;
+    to_send.length = 4;
+    to_send.data = data;
+    client.Client_Send(to_send);
+}
+
+void DurakOnline::FindEnemy()
+{
+    Mark1 to_send;
+    to_send.data = new char[4];
+    uint32_t net_id = htonl(current_user.get_id());
+    memcpy(to_send.data, &net_id, 4);
+    to_send.length = 4;
+    to_send.type = DataType::FIND_ENEMY;
+    int bytes = client.Client_Send(to_send);
+    window.wait();
+    window.get_wait_Timer().start();
+    Status = LOOKING_FOR;
+}
+
+void DurakOnline::CheckEnemyProfile()
+{
+    ProfileButton *bttn = static_cast<ProfileButton *>(sender());
+
+    uint32_t enemy_id = bttn->get_id();
+    pqxx::connection *session = make_session();
+    pqxx::work tx(*session);
+    pqxx::result response = tx.exec("select username, rating from users where id = $1", pqxx::params{enemy_id});
+    pqxx::row enemy = response[0];
+    // Поменяли значения по доступу из window
+    RoundedAvatar &EnemyImage = window.get_profile_EnemyAvatar();
+
+    EnemyImage.setPixmap(QPixmap());
+    QString EnemyName = QString::fromStdString(enemy[0].as<std::string>());
+    QString EnemyRating = QString::fromStdString(enemy[1].as<std::string>());
+    window.get_profile_EnemyName().setText(EnemyName);
+    window.get_profile_EnemyRank().setText(EnemyRating);
+    DownloadPhoto(enemy_id); // возможно фотка будет подгружаться после отображения профиля. Все зависит от параметров сети
+    window.EnemyProfile();
 }
 
 void DurakOnline::UpdateLeaderBoard()
@@ -509,7 +520,13 @@ void DurakOnline::UpdateLeaderBoard()
     int idx = 0;
     for (auto i = response.begin(); i != response.end(); ++i)
     {
-        window.UpdateLeaderBoard(i[0].as<std::string>(), i[1].as<uint32_t>(), i[2].as<std::string>(), idx++);
+        std::string username = i[0].as<std::string>();
+        uint32_t _id = i[1].as<uint32_t>();
+        if (_id == current_user.get_id())
+        {
+            username = "You";
+        }
+        window.UpdateLeaderBoard(username, _id, i[2].as<std::string>(), idx++);
     }
 }
 
@@ -519,7 +536,7 @@ void DurakOnline::OnCloseWindow()
     {
         if (Status == IN_GAME)
         {
-            Disconnect();
+            GameOver();
         }
         else if (Status == LOOKING_FOR)
         {
@@ -529,4 +546,14 @@ void DurakOnline::OnCloseWindow()
         client.Client_Disconnect();
         client.set_ready(false); // Больше не слушаем сервер
     }
+}
+
+int DurakOnline::start()
+{
+    connect();
+    window.setWindowTitle("Chess");
+    window.connect();
+    window.showMaximized();
+    int answer = app.exec();
+    return answer;
 }

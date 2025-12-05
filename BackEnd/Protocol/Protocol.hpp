@@ -4,17 +4,20 @@
 enum DataType : uint8_t // что передали какой тип данный содержится в данных
 {
     NONE,
+    // Игровые команды
+    START,
     FIND_ENEMY,
-    LEAVE_ENEMY,     // Соперник покинул матч
-    NEXT_ENEMY,      // Найти нового соперника
-    STOP_FIND_ENEMY, // Прекратить поиск соперника
-    MOVE,            // ХОД
+    LEAVE_ENEMY,
+    NEXT_ENEMY,
+    STOP_FIND_ENEMY,
+    MOVE,
     CHECKMATE,
     CLASTING,
-    START,
-    DISCONNECT,
-    SHUTDOWN, // Разрешение выполнить отключение от сервера
-    DOWLOAD_PHOTO
+    GAMEOVER,
+
+    UPLOAD_PHOTO,
+    DOWNLOAD_PHOTO
+
 };
 
 struct Mark1

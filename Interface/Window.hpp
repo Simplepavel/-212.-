@@ -36,10 +36,10 @@ class Window : public QWidget
 private:
     // Неигровые параметры
     QScreen *screen_Objc;
-    int screen_Width;  // Ширина экрана
-    int screen_Height; // Высота экрана
-
-    int cell_Size; // Высота X Ширина игровой клетки
+    int screen_Width;       // Ширина экрана
+    int screen_Height;      // Высота экрана
+    uint32_t CurrentUserId; // id текущего пользователя
+    int cell_Size;          // Высота X Ширина игровой клетки
     std::list<Message> StateMessages;
 
     // Неигровые параметры
@@ -157,6 +157,7 @@ private slots:
 
 public:
     Window(QWidget *parent = nullptr);
+    void SetUserId(int new_id) { CurrentUserId = new_id; }
     void login();
     void main();
     void connect();
@@ -217,6 +218,7 @@ public:
     QLabel &get_profile_EnemyName() { return *profile_EnemyName; }
     QLabel &get_profile_EnemyRank() { return *profile_EnemyRank; }
     QLabel &get_profile_Status() { return *profile_Status; }
+    RoundedAvatar &get_profile_EnemyAvatar() { return *profile_EnemyAvatar; }
     // Методы относящиеся к профилю соперника
 
     //  Методы относящиеся к полю ожидания

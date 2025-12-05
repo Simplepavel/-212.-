@@ -38,7 +38,6 @@ private slots:
     void registration();
     void login();
     void logout();
-    void FindEnemy();
     void ServerGetData();
     void profile();
     void EnemyProfile();
@@ -52,9 +51,11 @@ private slots:
     void OnCloseWindow();
 
     // Возможно объединить это в одну фунцию
-    void Disconnect();
+    void GameOver();
     void Next();
     void StopFind();
+    void DownloadPhoto(uint32_t id); // Загрузка фото с сервера
+    void FindEnemy();
 
 public:
     DurakOnline(int argc, char *argv[]);

@@ -451,7 +451,6 @@ void Window::AddStateMessage(const Message &value)
     StateMessages.push_back(value);
 }
 
-
 void Window::UpdateBoard(Board &NewBoard, FigureColor MyColor) // заполнили согласно новой расстановке
 {
     for (int i = 0; i < 8; ++i)
@@ -552,9 +551,11 @@ void Window::UpdateLeaderBoard(const std::string &username, uint32_t user_id, co
 
     QLabel *UsernameLabel = static_cast<QLabel *>(box->itemAt(0)->widget());
     ProfileButton *CheckProfileButton = static_cast<ProfileButton *>(box->itemAt(2)->widget());
-
+    if (user_id != CurrentUserId)
+    {
+        CheckProfileButton->show();
+    }
     UsernameLabel->show();
-    CheckProfileButton->show();
     CheckProfileButton->set_id(user_id); // На профиль какого игрока ссылка
     std::string result = username + "-" + rating;
     UsernameLabel->setText(QString::fromStdString(result));
@@ -594,7 +595,7 @@ QString Window::GetNewPhoto()
 {
     QFileDialog FileDialog(this);
     FileDialog.setFileMode(QFileDialog::ExistingFile);
-    FileDialog.setNameFilter("Images (*.png *.jpg)");
+    FileDialog.setNameFilter("Images (*.jpg)");
     if (FileDialog.exec() == QDialog::Accepted)
     {
         QString file = FileDialog.selectedFiles()[0];
@@ -602,27 +603,3 @@ QString Window::GetNewPhoto()
     }
     return "";
 }
-
-// int Window::DialogWindow(const QString &txt) // сохрнаить заметку а еще удалить заметку и тп?
-// {
-//     QDialog *dialog = new QDialog(this);
-//     dialog->setModal(true);
-//     QLabel *lbl = new QLabel(txt, dialog);
-//     QPushButton *ok = new QPushButton("Ок", dialog);
-//     QPushButton *cancel = new QPushButton("Отмена", dialog);
-//     QHBoxLayout *inner = new QHBoxLayout;
-//     inner->addWidget(ok);
-//     inner->addWidget(cancel);
-
-//     QVBoxLayout *outer = new QVBoxLayout;
-
-//     outer->addWidget(lbl);
-//     outer->addLayout(inner);
-
-//     dialog->setLayout(outer);
-
-//     QObject::connect(ok, &QPushButton::clicked, dialog, &QDialog::accept);
-//     QObject::connect(cancel, &QPushButton::clicked, dialog, &QDialog::reject);
-
-//     return dialog->exec();
-// }

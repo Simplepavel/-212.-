@@ -189,7 +189,7 @@ void Durak_Server::Server_Go()
 
                             int send_data = Server_Send(recv_data, opp_socket);
                         }
-                        else if (recv_data.type == DataType::DISCONNECT)
+                        else if (recv_data.type == DataType::GAMEOVER)
                         {
                             uint32_t net_session_id;
                             memcpy(&net_session_id, recv_data.data, 4);
@@ -205,13 +205,6 @@ void Durak_Server::Server_Go()
                             to_send1.data = nullptr;
 
                             Server_Send(to_send1, opp_socket);
-
-                            Mark1 to_send2;
-                            to_send2.type = DataType::SHUTDOWN;
-                            to_send2.length = 0; // вроде никаких данных передавать не следует
-                            to_send2.data = nullptr;
-
-                            Server_Send(to_send2, *i);
 
                             // игрок, снова нуждающийся в противнике
                             Player Alone = play_session->Reciver(*i);
@@ -315,12 +308,6 @@ void Durak_Server::Server_Go()
                                     break;
                                 }
                             }
-                            Mark1 to_send;
-                            to_send.type = DataType::SHUTDOWN;
-                            to_send.length = 0;
-                            to_send.data = nullptr;
-                            Server_Send(to_send, *i);
-
                             pqxx::connection *database_session = make_session();
                             pqxx::work tx(*database_session);
                             if (rating[id] >= 0) // нельзя отнимать от отрицательного индекса
@@ -334,18 +321,14 @@ void Durak_Server::Server_Go()
                             tx.commit();
                             delete_session(database_session);
                         }
-                        else if (recv_data.type == DataType::DOWLOAD_PHOTO)
+                        else if (recv_data.type == DataType::UPLOAD_PHOTO)
                         {
-
                             uint32_t net_id;
                             memcpy(&net_id, recv_data.data, 4);
                             uint32_t user_id = ntohl(net_id);
-                            std::cout << "User id who wanst to update photo " << user_id << '\n';
                             std::string SavePath = "Static/" + std::to_string(user_id) + ".jpg";
-                            std::cout << "Save to " << SavePath << '\n';
-
                             std::ofstream outFile(SavePath, std::ios::binary);
-                            char *outStr = new char[recv_data.length * 3 / 4 + 1];
+                            char *outStr = new char[(recv_data.length - 4) * 3 / 4 + 1];
                             int outLength = base64Decode(recv_data.data + 4, recv_data.length - 4, outStr);
                             outFile.write(outStr, outLength);
                             delete[] outStr;
@@ -356,13 +339,43 @@ void Durak_Server::Server_Go()
                             tx.exec("update users set picture = $1 where id = $2", pqxx::params{SavePath, user_id});
                             tx.commit();
                             delete_session(session);
+                        }
+                        else if (recv_data.type == DataType::DOWNLOAD_PHOTO)
+                        {
+                            uint32_t net_id;
+                            memcpy(&net_id, recv_data.data, 4);
+                            uint32_t user_id = ntohl(net_id);
 
-                            // отключаем клиента сразу же после успешного сохранения фото
-                            Mark1 to_send;
-                            to_send.type = DataType::SHUTDOWN;
-                            to_send.length = 0;
-                            to_send.data = nullptr;
-                            Server_Send(to_send, *i);
+                            pqxx::connection *session = make_session();
+                            pqxx::work tx(*session);
+                            pqxx::result response = tx.exec("select picture from users where id = $1", pqxx::params{user_id});
+                            delete_session(session);
+
+                            std::string FilePath = response[0][0].as<std::string>();
+
+                            std::ifstream Image(FilePath, std::ios::binary);
+
+                            if (Image.is_open()) // удалось открыть файл
+                            {
+                                Mark1 to_send;
+                                Image.seekg(0, std::ios::end);
+                                int FileLength = Image.tellg();
+                                Image.seekg(0, std::ios::beg);
+
+                                char *inStr = new char[FileLength]{};
+                                char *outStr = new char[(FileLength * 4 / 3) + 5]{};
+
+                                Image.read(inStr, FileLength);
+
+                                memcpy(outStr, &net_id, 4); // записали сверху id
+
+                                int outLength = base64Encode(inStr, FileLength, outStr + 4);
+                                to_send.type = UPLOAD_PHOTO;
+                                to_send.length = outLength + 4;
+                                to_send.data = outStr; // данные удалятся вместе с диструктором Mark1
+                                Server_Send(to_send, *i);
+                                delete[] inStr;
+                            }
                         }
                     }
                     else if (bytes == 0)
