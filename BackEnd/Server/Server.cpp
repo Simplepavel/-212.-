@@ -345,16 +345,12 @@ void Durak_Server::Server_Go()
                             uint32_t net_id;
                             memcpy(&net_id, recv_data.data, 4);
                             uint32_t user_id = ntohl(net_id);
-
                             pqxx::connection *session = make_session();
                             pqxx::work tx(*session);
                             pqxx::result response = tx.exec("select picture from users where id = $1", pqxx::params{user_id});
-                            delete_session(session);
-
                             std::string FilePath = response[0][0].as<std::string>();
-
+                            delete_session(session);
                             std::ifstream Image(FilePath, std::ios::binary);
-
                             if (Image.is_open()) // удалось открыть файл
                             {
                                 Mark1 to_send;
@@ -366,16 +362,17 @@ void Durak_Server::Server_Go()
                                 char *outStr = new char[(FileLength * 4 / 3) + 5]{};
 
                                 Image.read(inStr, FileLength);
-
                                 memcpy(outStr, &net_id, 4); // записали сверху id
 
                                 int outLength = base64Encode(inStr, FileLength, outStr + 4);
+
                                 to_send.type = UPLOAD_PHOTO;
                                 to_send.length = outLength + 4;
                                 to_send.data = outStr; // данные удалятся вместе с диструктором Mark1
                                 Server_Send(to_send, *i);
                                 delete[] inStr;
                             }
+                            std::cout << "1\n";
                         }
                     }
                     else if (bytes == 0)
@@ -403,13 +400,18 @@ void Durak_Server::Server_Go()
                     } // что то пошло не так
                 }
             }
+            std::cout << "2\n";
             mtx.lock();
+            std::cout << "3\n";
             for (auto i = delete_clients.begin(); i != delete_clients.end(); ++i)
             {
                 clients.remove(*i);
             }
+            std::cout << "4\n";
             delete_clients.clear();
+            std::cout << "5\n";
             mtx.unlock();
+            std::cout << "6\n";
         }
         else if (ready_read == 0)
         {

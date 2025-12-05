@@ -251,6 +251,7 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
             EnemyPhotoProfile.setPixmap(Image);
         }
     }
+    client.ClearData();
     window.InsertMessage(PLAY, false);
 }
 
