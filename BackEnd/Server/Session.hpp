@@ -9,8 +9,9 @@ struct Player
     uint32_t id;
     uint32_t fd;
     Rating player_rating;
-    Player(SOCKET i, SOCKET f) : id(i), fd(f) {}
-    Player() : id(0), fd(0) {}
+    Player(SOCKET i, SOCKET f, int init_rating) : id(i), fd(f), player_rating(init_rating) {}
+    Player() : id(0), fd(0), player_rating(1200) {}
+    Player(SOCKET i, SOCKET f) : id(i), fd(f), player_rating(1200) {}
     bool operator==(const Player &);
 };
 
@@ -24,6 +25,6 @@ struct Session
     bool IsFinished = false; // Закончена ли эта партия победой или ничьей(пат)
     Session(const Player &p1, const Player &p2);
     ~Session();
-    const Player &Sender(int fd);
-    const Player &Reciver(int fd);
+    Player &Sender(int fd);
+    Player &Reciver(int fd);
 };

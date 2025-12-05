@@ -22,10 +22,8 @@ class Durak_Server // основной поток слушает подключ�
 private:
     SOCKET server_socket;
     std::list<SOCKET> clients;
-    std::list<Player> line;
-    // std::map<int32_t, int32_t> rating; удаляю чтобы использовать рейтинг из класса
+    std::list<Player> line; // очередь игроков ожидающих матч
     Matchmaker matchmaker;
-    // Система подсчета рейнтинга
 
     std::map<uint32_t, Session *> play_sessions;
     void print(sockaddr *);

@@ -145,18 +145,37 @@ void Durak_Server::Server_Go()
                         {
                             uint32_t net_id;
                             memcpy(&net_id, recv_data.data, 4);
-                            Player pl1(ntohl(net_id), *i);
-                            if (!line.empty())
-                            {
-                                Player pl2 = line.front();
-                                line.erase(line.begin());
-                                Make_Session(pl2, pl1);
+                            uint32_t player_id = ntohl(net_id);
+                            pqxx::connection *database_session= make_session();
+                            pqxx::work tx(*database_session);
+                            pqxx::result res = tx.exec("select rating from users where id = $1", pqxx::params{player_id});
+                            int curr_rating;
+                            if (res.empty() || res[0][0].is_null()){
+                                curr_rating = 1200;
                             }
-                            else
-                            {
-                                line.push_back(pl1);
+                            else{
+                                curr_rating = res[0][0].as(<int>);
                             }
-                            rating[pl1.id] = 0;
+                            delete_session(database_session);
+
+                            Player pl1(player_id, *i, curr_rating);
+
+                            bool flag = false;
+                            for (auto j = line.begin(); j!= line.end();++j)
+                            {
+                                if (matchmaker.arePlayersCompatible(pl1.player_rating.getRating(), j->player_rating.getRating()))
+                                {
+                                    Player pl2 = *j;
+                                    line.erase(j);
+                                    Make_Session(pl1, pl2);
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                            if (!flag)
+                            {
+                                line.push_back(pl1);//если не нашли противника, добавляем в очередь
+                            }
                         }
                         else if (recv_data.type == DataType::CHECKMATE)
                         {
