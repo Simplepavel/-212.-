@@ -171,7 +171,7 @@ void Durak_Server::Server_Go()
                             Player winner = play_session->Sender(*i);
                             Player loser = play_session->Reciver(*i);
 
-                            rating[winner.id] += (30 + rand() % 2);
+                            rating[winner.id] += (30 + rand() % 2); 
                             rating[loser.id] -= (15 + rand() % 2);
                             play_session->IsFinished = true; // Сессия закочена победой одного из игроков
 

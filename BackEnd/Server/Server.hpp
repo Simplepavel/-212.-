@@ -12,6 +12,7 @@
 #include "Session.hpp"
 #include "../../DataBase/database.hpp"
 #include "../Base64/Base64.hpp"
+#include <RatingSystem/rating.hpp>
 #define BACKLOG 128
 
 // Убрать все нижние подчеркивания
@@ -22,7 +23,8 @@ private:
     SOCKET server_socket;
     std::list<SOCKET> clients;
     std::list<Player> line;
-    std::map<int32_t, int32_t> rating;
+    // std::map<int32_t, int32_t> rating; удаляю чтобы использовать рейтинг из класса
+    Matchmaker matchmaker;
     // Система подсчета рейнтинга
 
     std::map<uint32_t, Session *> play_sessions;

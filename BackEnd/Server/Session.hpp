@@ -2,10 +2,13 @@
 #include "../Game/Board/Board.hpp"
 #include <stack>
 #include <winsock2.h>
+#include <RatingSystem/rating.hpp>
+
 struct Player
 {
     uint32_t id;
     uint32_t fd;
+    Rating player_rating;
     Player(SOCKET i, SOCKET f) : id(i), fd(f) {}
     Player() : id(0), fd(0) {}
     bool operator==(const Player &);
