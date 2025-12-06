@@ -1,5 +1,7 @@
-#include <pqxx/pqxx>
 #include <iostream>
+#include <pqxx/pqxx>
 #include <string>
-pqxx::connection *make_session();
-bool delete_session(pqxx::connection *);
+pqxx::connection* make_session();
+bool delete_session(pqxx::connection*);
+
+void InitializeDatabase();
