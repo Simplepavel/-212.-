@@ -1,8 +1,8 @@
 #include "database.hpp"
 
-std::string db_user = "postgres";
-std::string db_pass = "gfhjkm123";
-std::string db_host = "localhost";
+std::string db_user = "layne";
+std::string db_pass = "chess123";
+std::string db_host = "172.20.10.2";
 std::string db_port = "5432";
 std::string db_name = "chess";
 
