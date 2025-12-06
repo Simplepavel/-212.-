@@ -261,6 +261,34 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
             EnemyPhotoProfile.setPixmap(Image);
         }
     }
+    else if (recv_data.type == DataType::INVITE)
+    {
+        uint32_t net_enemy_id;
+        memcpy(&net_enemy_id, recv_data.data, 4);
+        uint32_t enemy_id = ntohl(net_enemy_id);
+        pqxx::connection *session = make_session();
+        pqxx::work tx(*session);
+        pqxx::result response = tx.exec("select username from users where id = $1", pqxx::params{enemy_id});
+        if (!response.empty())
+        {
+            pqxx::row row = response[0];
+            std::string username = row[0].as<std::string>();
+            int answer = window.DialogWindow(QString::fromStdString(username + " wants to play with you!"));
+            if (answer == QDialog::Accepted) // Мы хотим играть с enemy
+            {
+                uint32_t net_id = htonl(current_user.get_id());
+
+                Mark1 to_send;
+                to_send.data = new char[8];
+                to_send.length = 8;
+                to_send.type = CREATE_GAME;
+
+                memcpy(to_send.data, &net_id, 4);
+                memcpy(to_send.data + 4, &net_enemy_id, 4);
+                client.Client_Send(to_send);
+            }
+        }
+    }
     client.ClearData();
     window.InsertMessage(PLAY, false);
 }

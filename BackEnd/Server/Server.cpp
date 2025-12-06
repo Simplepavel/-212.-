@@ -219,6 +219,23 @@ void Durak_Server::Server_Go()
                             uint32_t id = ntohl(net_id);
                             ties[id] = *i;
                         }
+                        else if (recv_data.type == DataType::CREATE_GAME)
+                        {
+                            uint32_t net_id;
+                            uint32_t net_enemy_id;
+                            memcpy(&net_id, recv_data.data, 4); // мой id
+                            memcpy(&net_enemy_id, recv_data.data + 4, 4);
+
+                            uint32_t id = ntohl(net_id);
+                            uint32_t enemy_id = ntohl(net_enemy_id);
+
+                            SOCKET pl1_socket = ties[id];
+                            SOCKET pl2_socket = ties[enemy_id];
+
+                            Player pl1(id, pl1_socket);
+                            Player pl2(enemy_id, pl2_socket);
+                            Make_Session(pl1, pl2);
+                        }
                         else if (recv_data.type == DataType::FIND_ENEMY)
                         {
                             uint32_t net_id;
@@ -439,7 +456,12 @@ void Durak_Server::Server_Go()
                             if (result == online)
                             {
                                 SOCKET enemy_socket = ties[enemy_id];
-                                std::cout << *i << " has invited to play " << enemy_socket << '\n';
+                                Mark1 to_send;
+                                to_send.data = new char[4];
+                                to_send.length = 4;
+                                to_send.type = INVITE;
+                                memcpy(to_send.data, &net_id, 4); // отправляет id инициатора
+                                Server_Send(to_send, enemy_socket);
                             }
                             // Узнаем статус соперника
                         }

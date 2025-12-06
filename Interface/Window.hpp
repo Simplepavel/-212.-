@@ -181,6 +181,8 @@ public:
 
     QString GetNewName();
     QString GetNewPhoto();
+    int DialogWindow(const QString &txt); // принять приглашение на игру
+
 
     // Констатнтный доступ к элементам формы регистрации
     const QLineEdit &get_reg_Username() { return *reg_Username; }
