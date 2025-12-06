@@ -2,13 +2,11 @@
 #include "Interface/Window.hpp"
 #include "CurrentUser/CurrentUser.hpp"
 #include "BackEnd/Client/Client.hpp"
-#include "RatingSystem/rating.hpp"
 #include "Backend/Base64/Base64.hpp"
 #include <string>
 #include <iostream>
 #include <thread>
 #include <fstream>
-
 
 class DurakOnline : public QObject
 {
@@ -52,6 +50,10 @@ private slots:
     void DownloadPhoto(uint32_t id); // Загрузка фото с сервера
     void FindEnemy();
     void UpdateUserStatus(UserStatus status);
+    void InviteToGame();
+    void SendID();
+    void SearchEnemyProfile();
+    void FillEnemyProfile(uint32_t id);
 
 public:
     DurakOnline(int argc, char *argv[]);

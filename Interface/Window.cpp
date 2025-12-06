@@ -299,7 +299,7 @@ Window::Window(QWidget *parent)
     status_palette.setColor(QPalette::WindowText, QColor(0, 255, 0));
     profile_Status->setPalette(status_palette);
 
-    profile_Invite = new QPushButton("Invite to the game");
+    profile_Invite = new ProfileButton("Invite to the game");
 
     profile_EnemyInfoLayout->setSpacing(5);
     profile_EnemyInfoLayout->setAlignment(Qt::AlignCenter | Qt::AlignTop);
@@ -627,6 +627,30 @@ QString Window::GetNewName()
         return line->text();
     else
         return "";
+}
+
+int Window::DialogWindow(const QString &txt) // принять приглашение на игру
+{
+    QDialog *dialog = new QDialog(this);
+    dialog->setModal(true);
+    QLabel *lbl = new QLabel(txt, dialog);
+    QPushButton *ok = new QPushButton("OK", dialog);
+    QPushButton *cancel = new QPushButton("Cancel", dialog);
+    QHBoxLayout *inner = new QHBoxLayout;
+    inner->addWidget(ok);
+    inner->addWidget(cancel);
+
+    QVBoxLayout *outer = new QVBoxLayout;
+
+    outer->addWidget(lbl);
+    outer->addLayout(inner);
+
+    dialog->setLayout(outer);
+
+    QObject::connect(ok, &QPushButton::clicked, dialog, &QDialog::accept);
+    QObject::connect(cancel, &QPushButton::clicked, dialog, &QDialog::reject);
+
+    return dialog->exec();
 }
 
 QString Window::GetNewPhoto()

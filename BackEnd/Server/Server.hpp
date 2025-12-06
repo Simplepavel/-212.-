@@ -20,9 +20,11 @@ class Durak_Server // основной поток слушает подключ�
 {
 private:
     SOCKET server_socket;
+    std::map<uint32_t, SOCKET> ties; // пары id - сокет
     std::list<SOCKET> clients;
     std::list<Player> line;
     std::map<int32_t, int32_t> rating;
+
     // Система подсчета рейнтинга
 
     std::map<uint32_t, Session *> play_sessions;

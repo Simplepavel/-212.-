@@ -15,8 +15,11 @@ enum DataType : uint8_t // что передали какой тип данны�
     CLASTING,
     GAMEOVER,
 
+    ID,
+    INVITE,
+    CREATE_GAME, // создать игровую сессия со мной и с отпралвенным id(мой id и id соперника)
     UPLOAD_PHOTO,
-    DOWNLOAD_PHOTO
+    DOWNLOAD_PHOTO,
 
 };
 
