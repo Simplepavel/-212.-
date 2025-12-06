@@ -542,32 +542,45 @@ void DurakOnline::SendID()
     int bytes = client.Client_Send(to_send);
 }
 
-void DurakOnline::CheckEnemyProfile()
+void DurakOnline::FillEnemyProfile(uint32_t enemy_id)
 {
-    ProfileButton *bttn = static_cast<ProfileButton *>(sender());
-
-    uint32_t enemy_id = bttn->get_id();
     pqxx::connection *session = make_session();
     pqxx::work tx(*session);
     pqxx::result response = tx.exec("select username, rating, status from users where id = $1", pqxx::params{enemy_id});
-    pqxx::row enemy = response[0];
-    // Поменяли значения по доступу из window
-    RoundedAvatar &EnemyImage = window.get_profile_EnemyAvatar();
-    EnemyImage.setPixmap(QPixmap());
-    QString EnemyName = QString::fromStdString(enemy[0].as<std::string>());
-    QString EnemyRating = QString::fromStdString(enemy[1].as<std::string>());
-    QString EnemyStatus = UserStatusToString((UserStatus)enemy[2].as<uint32_t>());
-    QPalette PaletteStatus;
-    QColor Colors[4] = {QColor(200, 200, 200), QColor(0, 255, 0), QColor(255, 255, 255), QColor(255, 215, 0)};
-    PaletteStatus.setColor(QPalette::WindowText, Colors[enemy[2].as<uint32_t>()]);
-    window.get_profile_Status().setText(EnemyStatus);
-    window.get_profile_Status().setPalette(PaletteStatus);
-    window.get_profile_EnemyId().setText("ID#" + QString::number(enemy_id));
-    window.get_profile_EnemyName().setText(EnemyName);
-    window.get_profile_EnemyRank().setText(EnemyRating);
-    window.get_profile_Invite().set_id(enemy_id);
-    // DownloadPhoto(enemy_id); // возможно фотка будет подгружаться после отображения профиля. Все зависит от параметров сети
-    window.EnemyProfile();
+    if (response.empty())
+    {
+        window.AddStateMessage(CreateMessage("Nothing to find", MAIN, ERR, SMALLEST));
+        window.InsertMessage(MAIN);
+    }
+    else
+    {
+        pqxx::row enemy = response[0];
+        // Поменяли значения по доступу из window
+        RoundedAvatar &EnemyImage = window.get_profile_EnemyAvatar();
+        EnemyImage.setPixmap(QPixmap());
+        QString EnemyName = QString::fromStdString(enemy[0].as<std::string>());
+        QString EnemyRating = QString::fromStdString(enemy[1].as<std::string>());
+        QString EnemyStatus = UserStatusToString((UserStatus)enemy[2].as<uint32_t>());
+        QPalette PaletteStatus;
+        QColor Colors[4] = {QColor(200, 200, 200), QColor(0, 255, 0), QColor(255, 255, 255), QColor(255, 215, 0)};
+        PaletteStatus.setColor(QPalette::WindowText, Colors[enemy[2].as<uint32_t>()]);
+        window.get_profile_Status().setText(EnemyStatus);
+        window.get_profile_Status().setPalette(PaletteStatus);
+        window.get_profile_EnemyId().setText("ID#" + QString::number(enemy_id));
+        window.get_profile_EnemyName().setText(EnemyName);
+        window.get_profile_EnemyRank().setText(EnemyRating);
+        window.get_profile_Invite().set_id(enemy_id);
+        // DownloadPhoto(enemy_id); // возможно фотка будет подгружаться после отображения профиля. Все зависит от параметров сети
+        window.EnemyProfile();
+    }
+    delete_session(session);
+}
+
+void DurakOnline::CheckEnemyProfile()
+{
+    ProfileButton *bttn = static_cast<ProfileButton *>(sender());
+    uint32_t enemy_id = bttn->get_id();
+    FillEnemyProfile(enemy_id);
 }
 
 void DurakOnline::UpdateLeaderBoard()
@@ -635,6 +648,36 @@ void DurakOnline::UpdateUserStatus(UserStatus status)
     delete_session(cx);
 }
 
+void DurakOnline::SearchEnemyProfile()
+{
+    QString SearchLineText = window.get_main_SearchLine().text();
+    if (SearchLineText.isEmpty())
+    {
+        window.AddStateMessage(CreateMessage("Nothing to find", MAIN, ERR, SMALLEST));
+        window.InsertMessage(MAIN);
+        return;
+    }
+    bool ok;
+    uint32_t _id = SearchLineText.toULong(&ok);
+    if (ok)
+    {
+        if (_id != current_user.get_id())
+        {
+            FillEnemyProfile(_id);
+        }
+        else
+        {
+            window.profile();
+        }
+    }
+    else
+    {
+        window.AddStateMessage(CreateMessage("Incorrect id! Try again", MAIN, ERR, SMALLEST));
+        window.InsertMessage(MAIN);
+        return;
+    }
+}
+
 void DurakOnline::BadConnection()
 {
     MakeConnection();
@@ -668,6 +711,7 @@ void DurakOnline::connect()
     QObject::connect(&window, &QWidget::destroyed, this, &DurakOnline::OnCloseWindow);
     QObject::connect(&window.get_RetryBttn(), &QPushButton::clicked, this, &DurakOnline::BadConnection);
     QObject::connect(&window.get_profile_Invite(), &QPushButton::clicked, this, &DurakOnline::InviteToGame);
+    QObject::connect(&window.get_main_SearchButton(), &QPushButton::clicked, this, &DurakOnline::SearchEnemyProfile);
 }
 
 int DurakOnline::start()

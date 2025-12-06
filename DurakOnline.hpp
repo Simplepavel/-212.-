@@ -2,7 +2,6 @@
 #include "Interface/Window.hpp"
 #include "CurrentUser/CurrentUser.hpp"
 #include "BackEnd/Client/Client.hpp"
-#include "RatingSystem/rating.hpp"
 #include "Backend/Base64/Base64.hpp"
 #include <string>
 #include <iostream>
@@ -53,6 +52,8 @@ private slots:
     void UpdateUserStatus(UserStatus status);
     void InviteToGame();
     void SendID();
+    void SearchEnemyProfile();
+    void FillEnemyProfile(uint32_t id);
 
 public:
     DurakOnline(int argc, char *argv[]);

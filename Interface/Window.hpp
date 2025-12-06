@@ -183,7 +183,6 @@ public:
     QString GetNewPhoto();
     int DialogWindow(const QString &txt); // принять приглашение на игру
 
-
     // Констатнтный доступ к элементам формы регистрации
     const QLineEdit &get_reg_Username() { return *reg_Username; }
     const QLineEdit &get_reg_Email() { return *reg_Email; }
@@ -213,6 +212,8 @@ public:
     std::vector<CellButton *> FillBoard(); // вызывать при START и получать список кнопок для connect
     const QPushButton &get_play_StopBttn() { return *play_StopBttn; };
     const QPushButton &get_play_NextBttn() { return *play_NextBttn; };
+    const QPushButton &get_main_SearchButton() { return *main_SearchButton; }
+    const QLineEdit &get_main_SearchLine() { return *main_SearchLine; }
     // Метод отсносящиеся к игровому полю
 
     // Методы относящиеся к профилю
