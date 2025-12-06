@@ -234,7 +234,20 @@ void Durak_Server::Server_Go()
 
                             Player pl1(id, pl1_socket);
                             Player pl2(enemy_id, pl2_socket);
-                            Make_Session(pl1, pl2);
+
+                            // Проверка, что enemy_id все еще онлайн а не в игре
+                            pqxx::connection *session = make_session();
+                            pqxx::work tx(*session);
+                            pqxx::result r = tx.exec("select status from users where id = $1", pqxx::params{enemy_id});
+                            if (!r.empty())
+                            {
+                                int status = r[0][0].as<int>();
+                                if (status == online) // все еще ожидает
+                                {
+                                    Make_Session(pl1, pl2);
+                                }
+                            }
+                            delete_session(session);
                         }
                         else if (recv_data.type == DataType::FIND_ENEMY)
                         {
@@ -446,24 +459,38 @@ void Durak_Server::Server_Go()
                             uint32_t enemy_id = ntohl(net_enemy_id);
 
                             // Узнаем статус соперника
-                            std::cout << enemy_id << '\n';
                             pqxx::connection *session = make_session();
                             pqxx::work tx(*session);
                             pqxx::result response = tx.exec("select status from users where id = $1", pqxx::params{enemy_id});
-
-                            pqxx::row row = response[0];
-                            uint32_t result = row[0].as<uint32_t>();
-                            if (result == online)
+                            if (!response.empty())
                             {
-                                SOCKET enemy_socket = ties[enemy_id];
-                                Mark1 to_send;
-                                to_send.data = new char[4];
-                                to_send.length = 4;
-                                to_send.type = INVITE;
-                                memcpy(to_send.data, &net_id, 4); // отправляет id инициатора
-                                Server_Send(to_send, enemy_socket);
+                                pqxx::row row = response[0];
+                                uint32_t result = row[0].as<uint32_t>();
+                                if (result == online)
+                                {
+                                    SOCKET enemy_socket = ties[enemy_id];
+                                    Mark1 to_send;
+                                    to_send.data = new char[4];
+                                    to_send.length = 4;
+                                    to_send.type = INVITE;
+                                    memcpy(to_send.data, &net_id, 4); // отправляет id инициатора
+                                    Server_Send(to_send, enemy_socket);
+                                }
+                                else if (result == looking_for) // соперник уже ищет игру -> он есть в line
+                                {
+                                    for (auto j = line.begin(); j != line.end(); ++j) // ищем его в очереди
+                                    {
+                                        if (j->id == enemy_id) // Нашлиии
+                                        {
+                                            Player pl2(id, *i);
+                                            Make_Session(*j, pl2);
+                                            line.erase(j); // убераем из очередииии
+                                            break;
+                                        }
+                                    }
+                                }
                             }
-                            // Узнаем статус соперника
+                            delete_session(session);
                         }
                         else if (recv_data.type == DataType::DOWNLOAD_PHOTO)
                         {

@@ -288,6 +288,7 @@ void DurakOnline::ServerGetData() // Сервер отправил информ�
                 client.Client_Send(to_send);
             }
         }
+        delete_session(session);
     }
     client.ClearData();
     window.InsertMessage(PLAY, false);
