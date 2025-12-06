@@ -1,6 +1,6 @@
 #include "DurakOnline.hpp"
 
-char SERVER_IP[] = "127.0.0.1";
+char SERVER_IP[] = "172.20.10.3";
 char SERVER_PORT[] = "6666";
 
 DurakOnline::DurakOnline(int argc, char *argv[]) : app(argc, argv), session_id(0), FirstPosition(nullptr), SecondPosition(nullptr), board(nullptr)

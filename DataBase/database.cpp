@@ -1,6 +1,7 @@
 #include "database.hpp"
 
-std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhost:5432/chess";
+// std::string url_base = "postgresql://postgres:NiPWYEfWWdhjhkATtEeg-g7ZD@localhost:5432/chess";
+std::string url_base = "postgresql://layne:chess123@172.20.10.2:5432/chess";
 
 pqxx::connection* make_session() {
   pqxx::connection* cx = nullptr;
